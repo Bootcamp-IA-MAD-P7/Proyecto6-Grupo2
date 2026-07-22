@@ -16,7 +16,7 @@ La aplicación también tiene una utilidad social para entidades sociales e inst
 
 ## Árbol de carpetas
 
-
+```
 |   .dockerignore
 |   .env.example
 |   .gitignore
@@ -126,6 +126,8 @@ La aplicación también tiene una utilidad social para entidades sociales e inst
         test_inference.py
         test_training.py
         
+```
+
 ## Equipo AGIL SCRUM
 
 - Karina: Developer
