@@ -220,18 +220,31 @@ No forma parte del MVP la incorporación de asistentes conversacionales, aunque 
 
 # 13. Datos y Dominios de Aplicación
 
-El producto ha sido concebido para trabajar con múltiples dominios de información.
+La plataforma ha sido concebida para trabajar con múltiples dominios de información mediante una arquitectura modular y escalable.
 
-Durante el MVP se utilizarán principalmente:
+El objetivo del MVP es validar la solución utilizando conjuntos de datos públicos y abiertos representativos de los dominios seleccionados.
 
-- datos académicos relacionados con permanencia y abandono;
-- datos organizacionales relacionados con rotación y permanencia del talento femenino;
-- variables demográficas necesarias para el análisis de indicadores de equidad.
+La selección definitiva de los datasets se realizará durante la fase de **Análisis Exploratorio de Datos (EDA)**, aplicando criterios objetivos que garanticen la calidad y viabilidad del proyecto.
 
-No se presupone que todos los dominios compartan un único modelo predictivo.
+Entre los criterios de evaluación se considerarán:
 
-La plataforma deberá permitir incorporar múltiples modelos especializados bajo una arquitectura común.
+- Calidad e integridad de los datos.
+- Disponibilidad y licencia de uso.
+- Relevancia de las variables.
+- Definición de la variable objetivo.
+- Balance entre clases.
+- Adecuación para modelos supervisados de Machine Learning.
+- Consideraciones éticas y legales sobre el tratamiento de los datos.
 
+De forma preliminar, el proyecto contempla evaluar conjuntos de datos pertenecientes a los siguientes dominios:
+
+- Permanencia y abandono académico.
+- Retención y rotación del talento en organizaciones.
+- Diversidad, inclusión y participación de mujeres en disciplinas STEAM.
+
+La selección final de los datasets, así como la justificación técnica de dicha elección, se documentará durante la fase de EDA y pasará a formar parte de la documentación técnica del proyecto.
+
+Esta aproximación permite desacoplar la definición estratégica del producto de una fuente de datos concreta, garantizando la flexibilidad necesaria para incorporar nuevos conjuntos de datos conforme evolucione la plataforma.
 ---
 
 # 14. Gobernanza del Dato
