@@ -10,9 +10,10 @@ La aplicación también tiene una utilidad social para entidades sociales e inst
 
 
  
-![Diagrama de propuesta stack](C:\Users\vdcm1\Downloads/1_propuesta.png)
 
-![Diagrama de otra propuesta stack](C:\Users\vdcm1\Downloads2_propuesta_stack.png)
+![Diagrama de propuesta stack](1_propuesta.png)
+![Diagrama de otra propuesta stackDiagrama de propuesta stack](2_propuesta_stack.png)
+
 
 ## Árbol de carpetas
 
