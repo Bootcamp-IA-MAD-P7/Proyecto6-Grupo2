@@ -1,6 +1,7 @@
 ### Desarrollo sobre Modelos Ensemble
 
 ## Descripción
+
 TalentCare AI es una plataforma de inteligencia de talento que utiliza modelos de ensemble machine learning para predecir patrones relacionados con la satisfacción laboral y el desarrollo profesional en el sector tecnológico. Mediante el análisis de miles de perfiles de desarrolladores, identifica diferencias en representación, progresión de carrera y bienestar entre hombres y mujeres, proporcionando a las empresas información basada en datos para impulsar estrategias de retención e inclusión más efectivas.
 
 La aplicación también tiene una utilidad social para entidades sociales e instituciones públicas que deseen instaurar mejoras en el área de orientación sociolaboral que pueden ser de utilidad en acompañamientos en el sector social para mejorar esta realidad, como por ejemplo mejorando programas de sensibilización en diversas áreas y proyectos. 
@@ -13,115 +14,127 @@ La aplicación también tiene una utilidad social para entidades sociales e inst
 
 ![Diagrama de otra propuesta stack](C:\Users\vdcm1\Downloads2_propuesta_stack.png)
 
-## Estructura del código
+## Árbol de carpetas
 
 
-tree -a -L 6 -I "venv|.venv|node_modules|__pycache__|*.pyc" > estructura.md
+|   .dockerignore
+|   .env.example
+|   .gitignore
+|   .python-version
+|   ANEXOS.md
+|   docker-compose.yml
+|   main.py
+|   pyproject.toml
+|   README.md
+|   __init__.py
+|   
++---.github
+|   \---workflows
+|           ci.yml
+|           proyecto6-grupo2.yml
+|           
++---backend
+|   |   Dockerfile
+|   |   
+|   \---app
+|           inference.py
+|           main.py
+|           routes.py
+|           schemas.py
+|           __init__.py
+|           
++---data
+|   +---processed
+|   \---raw
++---docs
+|   \---SDD
+|           00_scope.md
+|           01_requirements.md
+|           02_architecture.md
+|           03_implementation_structure.md
+|           04_data_pipeline.md
+|           05_modeling.md
+|           06_frontend.md
+|           07_api.md
+|           08_testing.md
+|           09_deployment
+|           
++---frontend
+|   |   Dockerfile
+|   |   package.json
+|   |   vite.config.ts
+|   |   
+|   \---src
+|           app.tsx
+|           main.tsx
+|           
++---models
+|   +---metrics
+|   |       .gitkeep
+|   |       
+|   +---pipelines
+|   |       .gitkeep
+|   |       
+|   \---trained
+|           .gitkeep
+|           
++---notebooks
+|       eda.py
+|       
++---scripts
+|       evaluate.py
+|       predict.py
+|       preprocess.py
+|       train.py
+|       
++---src
+|   |   __init__.py
+|   |   
+|   +---data
+|   |       loader.py
+|   |       preprocessing.py
+|   |       split.py
+|   |       validation.py
+|   |       
+|   +---evaluation
+|   |       compare.py
+|   |       evaluate.py
+|   |       metrics.py
+|   |       plots.py
+|   |       
+|   +---features
+|   |       engineering.py
+|   |       selection.py
+|   |       
+|   +---inference
+|   |       load_pipeline.py
+|   |       predict.py
+|   |       
+|   \---training
+|           baseline.py
+|           common.py
+|           ensemble.py
+|           random_forest.py
+|           train.py
+|           tuning.py
+|           xgboost.py
+|           
+\---tests
+        test_backend.py
+        test_data.py
+        test_evaluation.py
+        test_inference.py
+        test_training.py
+        
+## Equipo AGIL SCRUM
 
+- Karina: Developer
+- Gabriela: Developer
+- Anahí: Product owner y developer
+- Veru: Scrum Master y developer
 
-|github
-|__workflows
-|__backend
-|__backend
-| |__app
-|    |__ __init__
-|    |__inference 
-|    |__main.py
-|    |__routes.oy
-|    |__schemas.py
-|__Dockerfile
-|__data
-|  |__processed
-|  |__raw
-|__docs
-|  |__SDD
-|  |__00_scope.md
-|  |__01_requirements.md
-|  |__02_architecture.md
-|  |__03_implementation_structure.md
-|  |__04_data_pipeline.md
-|  |__05_modeling.md
-|  |__06_frontend.md
-|  |__07_api.md
-|  |__08_testing.md
-|  |__09_deployment
-|__frontend
-|  |__src
-|  |  |__app.tsx
-|  |  |__main.tsx
-|  |__Dockerfile
-|  |__package.json
-|  |__vite.config.ts
-|__models
-./models/metrics
-./models/pipelines
-./models/trained
-|  |__notebooks
-|  |__scripts
-|  |__src
-|  |__tests
-|  |__env.example
-|  |__/ANEXOS.md
+## Estructura del trabajo
 
-
-./backend/app/inference.py
-./backend/app/main.py
-./backend/app/routes.py
-./backend/app/schemas.py
-./backend/app/__init__.py
-./backend/Dockerfile
-./data/processed/.gitkeep
-./data/raw/.gitkeep
-./docker-compose.yml
-./docs/SDD/00_scope.md
-./docs/SDD/01_requirements.md
-./docs/SDD/02_architecture.md
-./docs/SDD/03_implementation_structure.md
-./docs/SDD/04_data_pipeline.md
-./docs/SDD/05_modeling.md
-./docs/SDD/06_frontend.md
-./docs/SDD/07_api.md
-./docs/SDD/08_testing.md
-./docs/SDD/09_deployment
-./frontend/Dockerfile
-./frontend/package.json
-./frontend/src/app.tsx
-./frontend/src/main.tsx
-./frontend/vite.config.ts
-./main.py
-./models/metrics/.gitkeep
-./models/pipelines/.gitkeep
-./models/trained/.gitkeep
-./notebooks/eda.py
-./pyproject.toml
-./README.md
-./scripts/evaluate.py
-./scripts/predict.py
-./scripts/preprocess.py
-./scripts/train.py
-./src/data/loader.py
-./src/data/preprocessing.py
-./src/data/split.py
-./src/data/validation.py
-./src/evaluation/compare.py
-./src/evaluation/evaluate.py
-./src/evaluation/metrics.py
-./src/evaluation/plots.py
-./src/features/engineering.py
-./src/features/selection.py
-./src/inference/load_pipeline.py
-./src/inference/predict.py
-./src/training/baseline.py
-./src/training/common.py
-./src/training/ensemble.py
-./src/training/random_forest.py
-./src/training/train.py
-./src/training/tuning.py
-./src/training/xgboost.py
-./src/__init__.py
-./tests/test_backend.py
-./tests/test_data.py
-./tests/test_evaluation.py
-./tests/test_inference.py
-./tests/test_training.py
-./__init__.py
+- Todo centralizado en GitHub
+- Projects: Contiene el backlog del proyecto con un roadmap candelarizado
+- Wiki: contiene sprints y dailies 
