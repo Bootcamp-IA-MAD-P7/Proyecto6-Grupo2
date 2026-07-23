@@ -26,24 +26,6 @@ class RawData:
             print(f"Reason: {e}")
             raise
 
-    def load(self):
-
-        try:
-            print(f"Loading DataFrame {self.year}")
-            df = load_dataset(
-                "Anahia/stackoverflow_survey",
-                data_files=f"stackoverflow_survey_{self.year}.csv",
-                streaming=True,
-            ).with_format("polars")
-            print("DataFrame loaded")
-
-            return df
-
-        except Exception as e:
-            print(f"Failed to load DataFrame {self.year}")
-            print(f"Reason: {e}")
-            raise
-
 
 class Schema:
     def __init__(

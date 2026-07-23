@@ -70,26 +70,9 @@ raw = RawData(2023)
 df = raw.download()
 ```
 
-### Streaming Mode
+### Load Mode (Schema only)
 
-The `load()` method streams the dataset using the Hugging Face `datasets` library.
-
-```python
-raw = RawData(2023)
-dataset = raw.load()
-```
-
-Internally it uses:
-
-```python
-load_dataset(
-    "Anahia/stackoverflow_survey",
-    data_files="stackoverflow_survey_2023.csv",
-    streaming=True,
-).with_format("polars")
-```
-
-Streaming avoids downloading the complete dataset into memory and is recommended for large datasets.
+The `Schema.load()` method uses Hugging Face `datasets` to stream schema metadata (small files). This was attempted for survey data as well, but the row-by-row iteration of streaming datasets is too slow for datasets with tens of thousands of rows. Downloading the full CSV with `pl.read_csv()` is faster and simpler.
 
 ## Schema
 
@@ -102,14 +85,14 @@ schema = Schema(2023)
 schema_df = schema.download()
 ```
 
-### Streaming Mode
+### Load Mode
 
 ```python
 schema = Schema(2023)
 schema_stream = schema.load()
 ```
 
-The implementation is identical to `RawData`, but targets the schema repository instead of the survey responses.
+The schema files are small, so streaming is practical here. The implementation is identical to `RawData` (before removal), but targets the schema repository instead of the survey responses.
 
 ## Error Handling
 
@@ -122,14 +105,41 @@ If an error occurs:
 
 This allows the pipeline to fail gracefully while preserving the original error for debugging.
 
-## Download vs Streaming
+## Download vs Load
 
-| Download | Streaming |
+| Download (`RawData` / `Schema`) | Load (`Schema` only) |
 |----------|-----------|
 | Loads the complete CSV into memory | Reads data incrementally |
 | Returns a Polars `DataFrame` | Returns a Hugging Face streaming dataset |
 | Faster for local analysis | More memory-efficient |
-| Best for small and medium datasets | Best for large datasets |
+| Best for all dataset sizes | Best for small metadata files |
+
+> `RawData.load()` was removed because the row-by-row iteration of streaming datasets is too slow for survey data.
+
+## Uploading Data to Hugging Face
+
+### CSV Format Issue
+
+The original CSV files stored on Hugging Face had each line wrapped in double quotes and internal quotes escaped as `""`. This caused Polars to read the entire row as a single column. The fix is to:
+
+1. Strip the outer `"` from each line.
+2. Unescape `""` → `"` inside quoted fields.
+
+### Upload Script
+
+The `scripts/upload_to_hf.py` script automates this process:
+
+```python
+uv run scripts/upload_to_hf.py path/to/stackoverflow_survey_2022.txt
+```
+
+It will:
+1. Read the broken file
+2. Strip line-level quotes and unescape internal quotes
+3. Save as a proper `.csv`
+4. Upload to the Hugging Face dataset repository
+
+Make sure `HUGGINGFACE_TOKEN` is set in `.env` or as an environment variable.
 
 ## Pipeline Position
 
