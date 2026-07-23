@@ -1,14 +1,12 @@
-import numpy as np
-import pandas as pd
+import polars as pl
 import seaborn as sns
 import matplotlib.pyplot as plt
-from utils import RawData, Schema, load
-import polars 
-
-TARGET_COL = "job_satisfaction"
 
 
-def _labels_for_job_satisfaction(series: pd.Series) -> pd.Series:
+
+TARGET_COL = "JobSat"
+
+def _labels_for_job_satisfaction(series: pl.Series) -> pl.Series:
     # Si viene como 0/1 -> No/Yes
     if series.dtype.kind in "iu":
         return series.map({0: "No", 1: "Yes"}).fillna(series.astype(str))
@@ -22,7 +20,7 @@ def _labels_for_job_satisfaction(series: pd.Series) -> pd.Series:
     return s
 
 
-def plot_numerical_feature(data: pd.DataFrame, col: str, target_col: str = TARGET_COL):
+def plot_numerical_feature(data: pl.DataFrame, col: str, target_col: str = TARGET_COL):
     if col == target_col:
         return
 
@@ -52,7 +50,7 @@ def plot_numerical_feature(data: pd.DataFrame, col: str, target_col: str = TARGE
     )
 
 
-def plot_categorical_feature(data: pd.DataFrame, col: str, target_col: str = TARGET_COL):
+def plot_categorical_feature(data: pl.DataFrame, col: str, target_col: str = TARGET_COL):
     if col == target_col:
         return
 
@@ -72,7 +70,7 @@ def plot_categorical_feature(data: pd.DataFrame, col: str, target_col: str = TAR
     target_labels = _labels_for_job_satisfaction(data[target_col])
 
     # Distribución del target por categoría del feature (stacked %)
-    crosstab = pd.crosstab(data[col], target_labels, normalize="index") * 100
+    crosstab = pl.crosstab(data[col], target_labels, normalize="index") * 100
     crosstab.plot(
         kind="bar",
         stacked=True,
@@ -93,7 +91,7 @@ def plot_categorical_feature(data: pd.DataFrame, col: str, target_col: str = TAR
 # Cleaning helpers
 # ----------------------------
 
-def remove_identifier_columns(df: pd.DataFrame) -> pd.DataFrame:
+def remove_identifier_columns(df: pl.DataFrame) -> pl.DataFrame:
     id_cols = ["Unnamed: 0", "id", "Id", "ID"]
     df = df.copy()
     drop_cols = [c for c in id_cols if c in df.columns]
@@ -102,14 +100,14 @@ def remove_identifier_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def remove_constant_columns(df: pd.DataFrame) -> pd.DataFrame:
+def remove_constant_columns(df: pl.DataFrame) -> pl.DataFrame:
     constant_cols = [c for c in df.columns if df[c].nunique(dropna=False) == 1]
     if constant_cols:
         df = df.drop(columns=constant_cols)
     return df
 
 
-def remove_geographic_columns(df: pd.DataFrame) -> pd.DataFrame:
+def remove_geographic_columns(df: pl.DataFrame) -> pl.DataFrame:
     # Por si decides eliminarlas en EDA; si no, pon drop_geo=False en clean_raw_data
     geo_cols = [c for c in ["country", "un_subregion", "so_region"] if c in df.columns]
     if geo_cols:
@@ -117,7 +115,7 @@ def remove_geographic_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def remove_redundant_target_columns(df: pd.DataFrame, target_col: str = TARGET_COL) -> pd.DataFrame:
+def remove_redundant_target_columns(df: pl.DataFrame, target_col: str = TARGET_COL) -> pl.DataFrame:
     redundant = ["Churn Label", "target", "Target"]
     df = df.copy()
     for c in redundant:
@@ -126,17 +124,17 @@ def remove_redundant_target_columns(df: pd.DataFrame, target_col: str = TARGET_C
     return df
 
 
-def convert_midpoint_columns(df: pd.DataFrame, cols=None) -> pd.DataFrame:
+def convert_midpoint_columns(df: pl.DataFrame, cols=None) -> pl.DataFrame:
     df = df.copy()
     if cols is None:
         cols = [c for c in df.columns if c.lower().endswith("_midpoint")]
     for c in cols:
         if c in df.columns:
-            df[c] = pd.to_numeric(df[c], errors="coerce")
+            df[c] = pl.to_numeric(df[c], errors="coerce")
     return df
 
 
-def convert_numeric_like_columns(df: pd.DataFrame, cols=None) -> pd.DataFrame:
+def convert_numeric_like_columns(df: pl.DataFrame, cols=None) -> pl.DataFrame:
     df = df.copy()
     if cols is None:
         cols = [
@@ -147,7 +145,7 @@ def convert_numeric_like_columns(df: pd.DataFrame, cols=None) -> pd.DataFrame:
         # comenta aquí o dime y lo afinamos.
     for c in cols:
         if c in df.columns:
-            df[c] = pd.to_numeric(df[c], errors="coerce")
+            df[c] = pl.to_numeric(df[c], errors="coerce")
     return df
 
 
