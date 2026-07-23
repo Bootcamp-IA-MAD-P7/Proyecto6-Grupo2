@@ -23,6 +23,7 @@ Propuesta inicial (sujeta a validación en EDA):
 **Variable objetivo:** `job_satisfaction`
 **Dataset:** Stack Overflow Developer Survey
 **Fuente:** `https://huggingface.co/datasets/Anahia/stackoverflow_survey`
+**Librería de datos:** Polars
 
 > El pipeline soporta cualquier año disponible en el repositorio.
 
