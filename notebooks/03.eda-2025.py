@@ -1,37 +1,25 @@
-# %% [markdown]
-# # Exploratory Data Analysis
-
-# %% [markdown]
-# ## Objectives
-#
-# - Understand the dataset
-# - Inspect data quality
-# - Explore feature distributions
-# - Identify potential preprocessing steps
-
-# %%
-#Importaciones
-
-
-# %% para que sea compatible en linux y windows
-import sys
-
-print(sys.executable)
-print(sys.version)
-
 
 
 # %% 
-from datasets import load_dataset
+
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from utils.load_raw_data import RawData, Schema
+
 import polars as pl
-df = load_dataset
+import seaborn as sns
+import matplotlib.pyplot as plt
+import altair as alt
+
+data_raw = RawData(year=2024)
+df = data_raw.download()
 df.head()
 
 # %%
 import seaborn as sns
 sns.set_theme(style="whitegrid")
-
-
 
 
 
