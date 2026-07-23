@@ -1,87 +1,73 @@
 # Frontend Design
 
-**Versión:** 1.0
-**Estado:** Draft
+## 1. Purpose
+
+This document describes the design and implementation of the frontend application.
+
+It explains:
+
+- Frontend architecture
+- Component organization
+- User interface structure
+- Communication with the backend API
+- State management approach
+- User interaction flows
+
+This document focuses specifically on the frontend application and complements the overall system architecture document.
 
 ---
 
-# 1. Descripción
+# 2. Frontend Overview
 
-El frontend es la interfaz que permite al Profesional de Talento Humano interactuar con la plataforma. Cubre el ciclo completo de interacción definido en el SDD-00A: desde el acceso inicial hasta la visualización de resultados y recomendaciones.
+## Description
 
----
+Describe the role of the frontend application.
 
-# 2. Stack Tecnológico
+Example:
 
-| Tecnología | Decisión |
-|---|---|
-| Framework | React |
-| Lenguaje | TypeScript |
-| Build tool | Vite |
-| Comunicación | REST API (fetch) |
+The frontend provides a user interface that allows users to interact with the multiclass classification system by submitting input data and viewing prediction results.
 
 ---
 
-# 3. Estructura de la Interfaz
+# 3. Technology Stack
 
-La interfaz se organiza en una única pantalla principal dividida en bloques secuenciales, sin navegación compleja ni autenticación (fuera del alcance del MVP).
+Document the technologies used.
 
-## Bloque 1 — Información de la plataforma (UC2)
-Descripción breve del propósito del análisis para contextualizar al usuario antes de introducir datos.
+Example:
 
-## Bloque 2 — Formulario de entrada (UC3, UC4)
-Formulario limpio con los campos clave del entorno profesional del empleado:
+## Framework
 
-| Campo | Variable del dataset | Tipo de input |
-|---|---|---|
-| Años de experiencia | `YearsCodePro` | Numérico |
-| Nivel educativo | `EdLevel` | Desplegable |
-| Modalidad de trabajo | `RemoteWork` | Desplegable |
-| Lenguaje principal | `LanguageHaveWorkedWith` | Desplegable |
-| Salario anual | `ConvertedCompYearly` | Numérico |
+React
 
-El formulario incluye validación de datos antes de enviar la petición (UC4, UC10).
+## Language
 
-## Bloque 3 — Resultado de la predicción (UC5, UC6)
-Muestra la clasificación obtenida de forma visual y clara:
-- Indicador de satisfacción (Satisfecho / No satisfecho)
-- Probabilidad asociada a la predicción
+TypeScript
 
-## Bloque 4 — Explicación (UC7)
-Visualización de los factores del entorno profesional que más han influido en la predicción.
+## Build Tool
 
-## Bloque 5 — Recomendaciones (UC8)
-Recomendaciones accionables para el profesional de Talento Humano basadas en el resultado obtenido.
+Vite
 
-## Bloque 6 — Nuevo análisis (UC9)
-Botón para reiniciar el formulario y comenzar un nuevo análisis.
+## Styling
 
----
+Document the styling approach:
 
-# 4. Comunicación con el Backend
+- CSS
+- Tailwind CSS
+- CSS Modules
+- Other
 
-- Protocolo: REST
-- Endpoint principal: `POST /predict`
-- Formato: JSON
-- Implementación: `frontend/src/services/`
+## Communication
+
+Document how the frontend communicates with the backend API.
+
+Example:
+
+- REST API
+- HTTP client library
+- Request/response format
 
 ---
 
-# 5. Estructura de Ficheros
+# 4. Frontend Structure
 
-```
-frontend/
-└── src/
-    ├── components/   — piezas reutilizables de UI
-    ├── pages/        — vistas completas
-    ├── services/     — llamadas a la API
-    └── assets/       — imágenes e iconos
-```
-
----
-
-# 6. Decisiones Pendientes
-
-- Librería de estilos: pendiente de decidir (Tailwind CSS, CSS Modules u otra).
-- Diseño visual detallado: pendiente de wireframes definitivos.
-- Formato exacto de visualización de la explicación (UC7): pendiente de decisión del equipo.
+Repository location:
