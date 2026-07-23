@@ -19,19 +19,12 @@ import sys
 print(sys.executable)
 print(sys.version)
 
-# %% para que las rutas funcionen
 
-from pathlib import Path
-
-root = Path.cwd()
-if not (root / "src").exists():
-    root = root.parent
-
-sys.path.insert(0, str(root))
 
 # %% 
-from src.data import load_clean_data
-df = load_clean_data
+from datasets import load_dataset
+import polars as pl
+df = load_dataset
 df.head()
 
 # %%

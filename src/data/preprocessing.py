@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+from utils import RawData, Schema, load
+import polars 
 
 TARGET_COL = "job_satisfaction"
 
@@ -150,16 +151,3 @@ def convert_numeric_like_columns(df: pd.DataFrame, cols=None) -> pd.DataFrame:
     return df
 
 
-def clean_raw_data(df: pd.DataFrame, drop_geo: bool = False, target_col: str = TARGET_COL) -> pd.DataFrame:
-    df = df.copy()
-    df = remove_identifier_columns(df)
-    df = convert_midpoint_columns(df)
-    df = convert_numeric_like_columns(df)
-
-    df = remove_redundant_target_columns(df, target_col=target_col)
-
-    if drop_geo:
-        df = remove_geographic_columns(df)
-
-    df = remove_constant_columns(df)
-    return df
