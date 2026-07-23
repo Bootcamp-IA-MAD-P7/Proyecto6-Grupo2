@@ -1,203 +1,139 @@
-# Data Pipeline Design
+# Software Design Document (SDD)
 
-## Purpose
+# SDD-04 · Data Pipeline
 
-Describe how raw data becomes usable model input.
+| Campo | Valor |
+|---|---|
+| Proyecto | TalentCare *(nombre provisional)* |
+| Documento | Data Pipeline |
+| Código | SDD-04 |
+| Versión | 1.1 |
+| Estado | Draft |
+| Última actualización | Julio 2026 |
+| Documentos de origen | SDD-00 a SDD-03 |
+| Documentos relacionados | SDD-05; SDD-08; SDD-09 |
 
----
+## 1. Propósito y límites
 
-# 1. Data Sources
+Define el pipeline multianual de ingesta, validación, armonización, transformación y artefactos. No documenta EDA, modelado, API, pruebas ni despliegue.
 
-Explain:
+La selección de datos y la variable objetivo permanecen pendientes. El pipeline no dependerá de un periodo concreto.
 
-- Dataset origin
-- Format
-- Size
-- Features
-- Target variable
+## 2. Flujo general
 
+```mermaid
+flowchart LR
+    S[Fuentes por periodo] --> I[Ingesta y esquema]
+    I --> V[Perfilado y validación]
+    V --> H[Armonización canónica]
+    H --> D[Dataset compatible]
+    D --> E[EDA] --> DEC[Decisiones aprobadas]
+    DEC --> SPLIT[Train / Validation / Test]
+    SPLIT --> FIT[Ajuste solo en Train]
+    FIT --> ART[(Transformadores y modelo versionados)]
+    N[Datos nuevos] --> IV[Validación de inferencia]
+    IV --> ART --> OUT[Features y estimación]
+    OUT --> META[Metadatos de trazabilidad]
+```
 
----
+EDA produce evidencia; no es una dependencia productiva. Solo las transformaciones aprobadas se incorporan a `src/`.
 
-# 2. Data Schema
+## 3. Etapas y estado
 
-Document:
+| Etapa | Entrada → salida | Implementación actual | Estado |
+|---|---|---|---|
+| Ingesta y esquema | Periodo → datos y metadatos | `RawData.download()` y `Schema.download()` | Implementado |
+| Perfilado y comparación | Ediciones → inventario de diferencias | Análisis disperso; sin comparador | Parcial |
+| Validación | Datos crudos → datos aceptados o errores | `src/data/validation.py` vacío | Pendiente |
+| Limpieza y normalización | Datos válidos → datos normalizados | `src/data/preprocessing.py` | Parcial |
+| Armonización | Ediciones normalizadas → esquema canónico | Sin implementación | Pendiente |
+| Features | Dataset compatible → features candidatas | `src/features/engineering.py` | Parcial |
+| Partición y ajuste | Dataset → splits y transformador | `split.py` vacío; transformador incompleto | Pendiente |
+| Artefactos e inferencia | Pipeline aprobado → salida compatible | `models/` y `src/inference/` vacíos | Pendiente |
 
-| Feature | Type | Description |
+`RawData.load()` y `Schema.load()` existen, pero streaming no es el flujo aprobado; su continuidad sigue pendiente.
+
+## 4. Armonización multianual
+
+Cada edición deberá inventariarse y mapearse a un esquema canónico versionado. El mapeo registrará origen, destino, transformación, compatibilidad semántica y periodos aplicables.
+
+| Categoría | Función | Tratamiento |
 |---|---|---|
-| feature_1 | numeric | Description |
+| Identificadores | Control técnico | Excluir de features salvo justificación |
+| Procedencia | Trazar fuente y periodo | Conservar como metadato |
+| Variables comunes | Base comparable | Normalizar tipo, dominio y significado |
+| Variables exclusivas | Diferencias entre ediciones | Excluir, mantener o derivar según decisión |
+| Variables derivadas | Representación reutilizable | Generar con transformación versionada |
+| Variables sensibles | Auditoría y fairness | Inventariar; uso sujeto a aprobación |
+| Target candidato | Posible fenómeno de modelado | Validar disponibilidad, calidad y semántica |
+| Metadatos | Linaje y reproducibilidad | Separar de las features |
 
+Una coincidencia de nombre no implica equivalencia semántica.
 
----
+## 5. Entrenamiento, inferencia y leakage
 
-# 3. Data Processing Steps
+| Flujo | Ajuste permitido | Artefacto |
+|---|---|---|
+| EDA | Solo exploratorio | Ninguno productivo |
+| Entrenamiento | Únicamente con train | Pipeline candidato |
+| Validation/Test | No | Pipeline ajustado en train |
+| Inferencia | Nunca | Pipeline y modelo persistidos |
 
-## Data Ingestion
+- Separar train, validation y test antes de cualquier ajuste dependiente de datos.
+- Ajustar imputación, codificación, escalado y selección solo con train.
+- Aplicar el transformador persistido, sin `fit`, a validation, test e inferencia.
+- Excluir target, derivados del target y datos no disponibles al inferir.
+- Versionar conjuntamente esquema, transformador y modelo.
 
-The `utils/load_raw_data.py` module is responsible for the **data ingestion** stage of the pipeline. It provides helper classes to retrieve the Stack Overflow Survey datasets and their corresponding schemas from Hugging Face.
+## 6. Artefactos y reproducibilidad
 
-### Data Sources
-Survey responses:
+| Ruta o artefacto | Contenido | Estado |
+|---|---|---|
+| `data/processed/` | Dataset preparado | Vacío |
+| `models/pipelines/` | Transformadores persistidos | Vacío |
+| `models/trained/` | Modelos aprobados | Vacío |
+| `models/metrics/` | Resultados de evaluación | Vacío |
+| Metadatos de dataset | Fuente, periodos, versión, huella y esquema | Pendiente |
+| Metadatos de ejecución | Código, configuración, semilla y timestamp | Pendiente |
+| Metadatos de inferencia | Versiones de esquema, pipeline y modelo | Pendiente |
 
-```text
-https://huggingface.co/datasets/Anahia/stackoverflow_survey
-```
-Survey schemas:
+Formato, nomenclatura y almacenamiento permanecen pendientes. No se define aquí un sistema MLOps.
 
-```text
-https://huggingface.co/datasets/Anahia/stackoverflow_survey_schemas
-```
-### Imports
+## 7. Riesgos y decisiones pendientes
 
-from utils.load_raw_data import RawData, Schema
+### 7.1 Riesgos
 
-### RawData
+| ID | Riesgo | Mitigación | Estado |
+|---|---|---|---|
+| DP-R01 | Cambios de esquema o significado | Inventario, mapeo y validación semántica | Abierto |
+| DP-R02 | Polars y Pandas sin frontera aprobada | Definir formato canónico y conversión única | Abierto |
+| DP-R03 | Periodo, rutas y target fijados en código | Sustituir por configuración aprobada | Abierto |
+| DP-R04 | EDA y transformación reutilizable mezclados | Visualización en notebooks; lógica en `src/` | Parcial |
+| DP-R05 | Validación, split, artefactos e inferencia son placeholders | Implementar con contratos versionados | Abierto |
+| DP-R06 | Leakage o uso inadecuado de variables sensibles | Encapsular ajuste y auditar features | Abierto |
+| DP-R07 | Dependencias e imports no reproducibles | Alinear paquetes, exports y lockfile | Abierto |
 
-The `RawData` class loads the Stack Overflow survey responses for a given year.
+### 7.2 Decisiones
 
-### Download Mode
+| ID | Decisión pendiente | Responsable |
+|---|---|---|
+| DP-01 | Edición o combinación de ediciones | SDD-04 / SDD-05 |
+| DP-02 | Esquema canónico y compatibilidad | SDD-04 |
+| DP-03 | Variable objetivo y cobertura | SDD-05 |
+| DP-04 | Frontera Polars/Pandas | SDD-03 / SDD-04 |
+| DP-05 | Transformaciones aprobadas y tratamiento de nulos/categorías | SDD-04 / SDD-05 |
+| DP-06 | Estrategia de partición temporal | SDD-04 / SDD-05 |
+| DP-07 | Formato, versión y almacenamiento de artefactos | SDD-04 / SDD-05 / SDD-09 |
+| DP-08 | Tratamiento de variables sensibles y proxies | SDD-04 / SDD-05 |
+| DP-09 | Mantener o retirar streaming | SDD-04 |
+| DP-10 | Consolidar `utils/load_raw_data.py` y `src/data/loader.py` | SDD-03 / SDD-04 |
 
-The `download()` method:
+## 8. Trazabilidad
 
-1. Builds the dataset URL.
-2. Downloads the CSV using `pl.read_csv()`.
-3. Returns a Polars `DataFrame`.
+| Fuente | Referencias | Aplicación |
+|---|---|---|
+| SDD-01 · Requirements | DR-001 a DR-011; MLR-007 a MLR-015; FAIR-003; FAIR-004 | Calidad, leakage, partición y reproducibilidad |
+| SDD-02 · Architecture | AD-003 a AD-005; AD-008 | Separación, versionado y persistencia |
+| SDD-03 · Implementation Structure | `src/data/`; `src/features/`; `src/inference/`; `models/`; IS-006; IS-009 | Ubicación y consolidación |
 
-Example:
-
-```python
-raw = RawData(2023)
-df = raw.download()
-```
-
-### Streaming Mode
-
-The `load()` method streams the dataset using the Hugging Face `datasets` library.
-
-```python
-raw = RawData(2023)
-dataset = raw.load()
-```
-
-Internally it uses:
-
-```python
-load_dataset(
-    "Anahia/stackoverflow_survey",
-    data_files="stackoverflow_survey_2023.csv",
-    streaming=True,
-).with_format("polars")
-```
-
-Streaming avoids downloading the complete dataset into memory and is recommended for large datasets.
-
-## Schema
-
-The `Schema` class loads the survey metadata (question descriptions and column definitions).
-
-### Download Mode
-
-```python
-schema = Schema(2023)
-schema_df = schema.download()
-```
-
-### Streaming Mode
-
-```python
-schema = Schema(2023)
-schema_stream = schema.load()
-```
-
-The implementation is identical to `RawData`, but targets the schema repository instead of the survey responses.
-
-## Error Handling
-
-Both classes wrap data access inside `try/except` blocks.
-
-If an error occurs:
-
-- an informative message is printed,
-- the original exception is re-raised using `raise`.
-
-This allows the pipeline to fail gracefully while preserving the original error for debugging.
-
-## Download vs Streaming
-
-| Download | Streaming |
-|----------|-----------|
-| Loads the complete CSV into memory | Reads data incrementally |
-| Returns a Polars `DataFrame` | Returns a Hugging Face streaming dataset |
-| Faster for local analysis | More memory-efficient |
-| Best for small and medium datasets | Best for large datasets |
-
-## Pipeline Position
-
-```text
-Hugging Face Repositories
-          │
-          ▼
-utils/load_raw_data.py
-    (RawData, Schema)
-          │
-          ▼
-Polars DataFrame / Streaming Dataset
-          │
-          ▼
-Data Cleaning
-          │
-          ▼
-Feature Engineering
-          │
-          ▼
-Model Training
-```
-
-This module is the entry point of the data pipeline. It retrieves the raw survey data and schema, making them available for all subsequent preprocessing and machine learning stages.
-
-Checks performed before processing.
-
-## Cleaning
-
-Handling:
-
-- Missing values
-- Duplicates
-- Invalid values
-
-
-## Transformation
-
-Examples:
-
-- Encoding
-- Scaling
-- Normalization
-
-
----
-
-# 4. Dataset Splitting
-
-Explain:
-
-- Training set
-- Validation set
-- Test set
-
-Include strategy:
-
-- Random split
-- Stratified split
-- Cross-validation
-
-
----
-
-# 5. Pipeline Implementation
-
-Reference:
-
-- src/data/
-- preprocessing modules
-- validation functions
+Modelado, pruebas y operación se detallan en SDD-05, SDD-08 y SDD-09.
