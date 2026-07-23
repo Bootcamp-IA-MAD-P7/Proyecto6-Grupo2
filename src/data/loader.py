@@ -12,11 +12,8 @@ def _find_root() -> Path:
             return parent
     return current
 
-
-
-
 # --- Model constants ---
-TARGET = "job_satisfaction"
+TARGET = "JobSat"
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
 OPTUNA_TRIALS = 30
