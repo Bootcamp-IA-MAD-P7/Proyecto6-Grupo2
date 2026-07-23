@@ -88,7 +88,7 @@ Implementación: `src/evaluation/metrics.py`
 
 # 6. Explicabilidad (XAI)
 
-Para cumplir con los principios de IA Responsable, el modelo final incorporará:
+Para cumplir con los principios de IA Responsable, el modelo seleccionado incorporará:
 
 - Importancia de variables (feature importance nativa de Random Forest y XGBoost).
 - Análisis de los factores que más influyen en cada predicción individual.
