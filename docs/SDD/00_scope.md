@@ -1,258 +1,312 @@
-# Scope del Producto (v2)
+# Software Design Document (SDD)
 
-## Plataforma SaaS de Inteligencia Artificial Responsable para la Predicción de la Rotación de Empleados
+# SDD-00 · Project Scope
 
-**Versión:** 2.0  
-**Estado:** Draft  
-**Metodología:** Specification-Driven Development (SDD)
-
----
-
-# 1. Introducción
-
-Este documento define el alcance estratégico (Scope) del Producto Mínimo Viable (MVP) de una plataforma SaaS basada en Inteligencia Artificial Responsable, cuyo propósito es predecir el riesgo de rotación de empleados mediante técnicas de Machine Learning.
-
-El Scope establece el problema de negocio que aborda el proyecto, el valor que aporta la solución, el alcance funcional del MVP, el objetivo del modelo de Machine Learning y la visión de evolución del producto.
-
-Este documento constituye el punto de partida del proceso de Specification-Driven Development (SDD) y servirá como referencia para el desarrollo del resto de especificaciones funcionales y técnicas.
+| Campo | Valor |
+|--------|-------|
+| Proyecto | TalentCare AI *(nombre provisional)* |
+| Documento | Project Scope |
+| Código | SDD-00 |
+| Versión | 1.0 |
+| Estado | Draft |
+| Última actualización | Julio 2026 |
+| Documento padre | Project Charter |
+| Documentos relacionados | Todos los documentos del Software Design Document (SDD) |
 
 ---
 
-# 2. Contexto y Problema de Negocio
+# 1. Propósito
 
-La retención del talento se ha convertido en uno de los principales desafíos para las organizaciones. La salida de empleados supone importantes costes económicos y operativos derivados de los procesos de selección, incorporación, formación, pérdida de conocimiento y disminución de la productividad.
+Este documento define el alcance funcional y estratégico del proyecto.
 
-Aunque las organizaciones generan una gran cantidad de información relacionada con sus empleados, gran parte de las decisiones continúan siendo reactivas, actuando cuando el proceso de desvinculación ya está avanzado o resulta irreversible.
+Su objetivo es establecer una visión común del producto, delimitando el problema que se pretende resolver, la solución propuesta, los objetivos, el alcance del Producto Mínimo Viable (MVP), las restricciones del proyecto y los principios que guiarán el diseño y desarrollo del sistema.
 
-La Inteligencia Artificial ofrece la posibilidad de transformar esos datos en información predictiva capaz de identificar patrones de riesgo y apoyar estrategias preventivas que contribuyan a mejorar la retención del talento.
-
----
-
-# 3. Oportunidad
-
-La creciente disponibilidad de datos organizacionales y el avance de las técnicas de Machine Learning permiten desarrollar herramientas capaces de apoyar la toma de decisiones basada en evidencia.
-
-Este proyecto busca demostrar que una plataforma SaaS basada en modelos predictivos explicables puede ayudar a las organizaciones a identificar tempranamente situaciones de riesgo, facilitando intervenciones más oportunas y mejor fundamentadas.
-
-Además, la arquitectura propuesta permitirá incorporar nuevos modelos predictivos en el futuro, ampliando progresivamente las capacidades de la plataforma.
+Este documento constituye la referencia principal del Software Design Document (SDD) y actúa como la fuente oficial para la definición del alcance del proyecto. Todos los documentos posteriores desarrollarán las especificaciones aquí definidas sin modificar el alcance establecido.
 
 ---
 
-# 4. Visión
+# 2. Alcance del documento
 
-Desarrollar una plataforma SaaS de Inteligencia Artificial Responsable capaz de apoyar la toma de decisiones mediante modelos predictivos explicables, evolucionando hacia una solución integral para el análisis del ciclo de vida del talento.
+Este documento describe:
 
----
+- El contexto del proyecto.
+- El problema que se pretende resolver.
+- La solución propuesta.
+- La visión del producto.
+- Los objetivos generales.
+- El alcance funcional del MVP.
+- La estrategia de datos.
+- La estrategia general de Inteligencia Artificial.
+- Los principios de diseño.
+- La visión de evolución del producto.
 
-# 5. Misión
-
-Ayudar a las organizaciones a mejorar la retención del talento mediante modelos de Machine Learning transparentes, explicables y desarrollados bajo principios de Inteligencia Artificial Responsable.
-
----
-
-# 6. Objetivos Estratégicos
-
-El MVP persigue los siguientes objetivos:
-
-- Desarrollar un modelo predictivo capaz de estimar el riesgo de rotación de empleados.
-- Comparar diferentes algoritmos de clasificación supervisada.
-- Evaluar técnicas de Ensemble Learning para mejorar el rendimiento predictivo.
-- Incorporar mecanismos de explicabilidad que permitan interpretar las predicciones.
-- Integrar el modelo dentro de una plataforma SaaS funcional.
-- Aplicar principios de Inteligencia Artificial Responsable durante todo el ciclo de desarrollo.
+Este documento no describe aspectos de implementación, arquitectura, tecnologías específicas o detalles técnicos, los cuales serán desarrollados en los documentos posteriores del SDD.
 
 ---
 
-# 7. Usuarios Objetivo
+# 3. Contexto
 
-La plataforma está orientada a organizaciones interesadas en utilizar analítica predictiva como apoyo a la gestión del talento.
+La Inteligencia Artificial está transformando la forma en que las organizaciones analizan información y toman decisiones.
 
-Los principales usuarios serán:
+En el ámbito de la gestión del talento tecnológico existe una gran disponibilidad de datos relacionados con profesionales del desarrollo de software, incluyendo experiencia laboral, tecnologías utilizadas, formación, modalidades de trabajo, satisfacción profesional, adopción de herramientas basadas en Inteligencia Artificial y evolución de sus carreras.
 
-- Departamentos de Recursos Humanos.
-- Responsables de Personas (People Managers).
-- Directivos y responsables de negocio.
-- Equipos de People Analytics.
-- Analistas de datos.
+Sin embargo, disponer de grandes volúmenes de información no implica disponer de conocimiento útil.
 
----
+Las organizaciones necesitan herramientas capaces de transformar esos datos en información interpretable que permita comprender patrones, identificar tendencias y apoyar la toma de decisiones mediante modelos transparentes y explicables.
 
-# 8. Definición del Producto
-
-El producto consiste en una plataforma SaaS cuyo núcleo funcional es un modelo predictivo basado en técnicas de Ensemble Learning para estimar el riesgo de rotación de empleados.
-
-La plataforma permitirá ejecutar predicciones, visualizar resultados, interpretar los factores que influyen en cada estimación y facilitar la toma de decisiones mediante información objetiva y explicable.
-
-El propósito del sistema no es automatizar decisiones relacionadas con la gestión de personas, sino proporcionar un mecanismo de apoyo basado en datos que ayude a identificar situaciones de riesgo de forma anticipada.
-
-La arquitectura del producto será modular para facilitar la incorporación de nuevos modelos predictivos y nuevos dominios de negocio conforme evolucione la plataforma.
+Este proyecto surge como una demostración práctica de cómo la Inteligencia Artificial Responsable puede convertir datos reales en conocimiento útil mediante técnicas modernas de Machine Learning.
 
 ---
 
-# 9. Modelo de Machine Learning
+# 4. Problema
 
-El núcleo tecnológico del MVP será un modelo supervisado de clasificación desarrollado mediante técnicas de Ensemble Learning.
+Actualmente resulta complejo identificar qué factores influyen en la satisfacción profesional de los desarrolladores utilizando modelos predictivos que sean comprensibles para los usuarios y suficientemente transparentes para justificar sus resultados.
 
-El objetivo del modelo será aprender patrones presentes en datos históricos para estimar el riesgo de rotación de empleados y generar una predicción sobre la probabilidad de que un empleado abandone la organización.
+La mayoría de soluciones existentes se limitan a ofrecer estadísticas descriptivas o cuadros de mando históricos, proporcionando escasa capacidad predictiva y poca información sobre las razones que justifican una determinada predicción.
 
-Durante el desarrollo del proyecto se entrenarán y evaluarán diferentes algoritmos de clasificación como modelos base, que posteriormente serán comparados con distintas estrategias de Ensemble Learning para identificar la solución con mejor capacidad predictiva y mayor robustez.
-
-La definición del conjunto de datos, de la variable objetivo y de las variables predictoras se realizará durante la fase de Análisis Exploratorio de Datos (EDA), siguiendo criterios técnicos y de calidad de los datos.
-
-Como resultado, el modelo generará para cada registro analizado:
-
-- Una estimación del riesgo de rotación.
-- Una probabilidad asociada a la predicción.
-- Un nivel de riesgo interpretable para el usuario.
-- Una explicación de los principales factores que han influido en el resultado mediante técnicas de Inteligencia Artificial Explicable (XAI).
-
-Las predicciones generadas constituirán un mecanismo de apoyo a la decisión y no sustituirán el criterio profesional de los responsables de Recursos Humanos.
+El proyecto pretende demostrar que es posible combinar técnicas de Machine Learning, Inteligencia Artificial Responsable y análisis explicable para construir una solución capaz de generar predicciones útiles, transparentes y orientadas al apoyo de la toma de decisiones.
 
 ---
 
-# 10. Arquitectura Conceptual
+# 5. Visión del producto
 
-La solución seguirá un flujo lógico compuesto por las siguientes etapas:
+Desarrollar una plataforma Software as a Service (SaaS) basada en Inteligencia Artificial Responsable capaz de transformar información profesional en conocimiento accionable mediante modelos predictivos explicables.
 
-```text
-Datos
-   │
-Preparación de datos
-   │
-Análisis Exploratorio (EDA)
-   │
-Ingeniería de Características
-   │
-Modelos Base
-   │
-Ensemble Learning
-   │
-Explicabilidad (XAI)
-   │
-API de Inferencia
-   │
-Plataforma SaaS
-   │
-Visualización y Apoyo a la Decisión
-```
-
-Esta arquitectura permitirá desacoplar el modelo predictivo de la aplicación, facilitando futuras mejoras, el mantenimiento y la incorporación de nuevos modelos.
+La plataforma estará diseñada desde su origen para evolucionar de forma modular, permitiendo incorporar nuevos modelos predictivos, nuevas fuentes de información y nuevos casos de uso sin modificar la estructura general del sistema.
 
 ---
 
-# 11. Alcance del MVP
+# 6. Descripción de la solución
+
+TalentCare AI (nombre provisional) es una plataforma SaaS basada en Inteligencia Artificial Responsable diseñada para transformar datos profesionales en conocimiento útil que apoye la toma de decisiones relacionadas con la gestión del talento.
+
+La solución combina análisis de datos, técnicas de Machine Learning y modelos explicables para identificar patrones presentes en información profesional y generar predicciones comprensibles para el usuario.
+
+En su primera versión (MVP), la plataforma permitirá estimar el nivel de satisfacción laboral de profesionales del desarrollo de software utilizando información procedente de la Stack Overflow Annual Developer Survey. Además de generar la predicción, el sistema ofrecerá una explicación de los factores que han influido en el resultado y recomendaciones derivadas del análisis realizado.
+
+La solución ha sido concebida como una plataforma modular donde el modelo predictivo representa únicamente uno de sus componentes. Su arquitectura permitirá incorporar nuevos modelos de Machine Learning, nuevas variables objetivo y nuevas fuentes de datos sin modificar la estructura general del sistema.
+
+De este modo, el proyecto no se limita al desarrollo de un único modelo predictivo, sino que establece las bases para una plataforma escalable de Inteligencia Artificial aplicada a la analítica del talento y a la toma de decisiones basada en datos.
+
+---
+
+# 7. Objetivos
+
+Los objetivos generales del proyecto son:
+
+- Desarrollar una solución funcional basada en clasificación multiclase.
+- Aplicar técnicas de Ensemble Learning sobre datos reales.
+- Incorporar mecanismos de Inteligencia Artificial Explicable (XAI).
+- Diseñar una plataforma modular preparada para evolucionar mediante nuevos modelos predictivos.
+- Aplicar buenas prácticas de ingeniería de software utilizando Specification-Driven Development (SDD).
+- Desarrollar un MVP siguiendo un enfoque profesional de diseño y desarrollo de productos software.
+
+---
+
+# 8. Alcance del proyecto
+
+## Incluido en el MVP
 
 El Producto Mínimo Viable incluirá:
 
-- Selección y validación del conjunto de datos.
-- Análisis Exploratorio de Datos (EDA).
-- Preparación y transformación de los datos.
-- Ingeniería de características.
-- Entrenamiento de modelos de clasificación supervisada.
-- Comparación de modelos individuales.
-- Desarrollo y evaluación de modelos Ensemble.
-- Selección del modelo con mejor rendimiento.
-- Implementación de técnicas de IA Explicable (XAI).
-- Exposición del modelo mediante una API.
-- Desarrollo de una plataforma SaaS para la consulta de predicciones.
-- Visualización de resultados e indicadores principales.
+- Una aplicación web.
+- Un servicio de predicción basado en Machine Learning.
+- Visualización de resultados.
+- Explicación de las predicciones generadas.
+- Recomendaciones derivadas del análisis realizado.
+- Una arquitectura preparada para futuras ampliaciones funcionales.
+
+## Fuera del alcance del MVP
+
+No forman parte del alcance inicial:
+
+- Aplicaciones móviles.
+- Agentes conversacionales o asistentes de voz.
+- Integraciones con plataformas corporativas.
+- Entrenamiento continuo del modelo.
+- Automatización completa del ciclo MLOps.
+- Gestión simultánea de múltiples modelos predictivos.
+
+Estas capacidades forman parte de la evolución prevista del producto.
 
 ---
 
-# 12. Dominio de Datos
+# 9. Usuarios y Stakeholders
 
-Durante el MVP se trabajará exclusivamente con información procedente del ámbito organizacional relacionada con la rotación de empleados.
+La plataforma está orientada principalmente a:
 
-La selección del dataset definitivo se realizará durante la fase de EDA, priorizando conjuntos de datos representativos, documentados y adecuados para el problema de negocio planteado.
+- Departamentos de Recursos Humanos.
+- Equipos de Talent Acquisition.
+- Engineering Managers.
+- Responsables tecnológicos.
+- Consultoras especializadas en talento.
+- Investigadores.
+- Organizaciones interesadas en la gestión del talento basada en datos.
 
-La arquitectura permitirá incorporar nuevos dominios de datos en futuras versiones sin necesidad de rediseñar la plataforma.
+Durante el desarrollo del proyecto también forman parte de los stakeholders:
+
+- Equipo de desarrollo.
+- Equipo de Machine Learning.
+- Equipo docente.
+- Tribunal evaluador.
 
 ---
 
-# 13. Principios de Inteligencia Artificial Responsable
+# 10. Descripción funcional del MVP
 
-El desarrollo del proyecto seguirá los siguientes principios:
+Desde la perspectiva del usuario, el funcionamiento general del sistema será el siguiente:
 
-- Transparencia en el funcionamiento del sistema.
+1. El usuario proporciona información profesional.
+2. El sistema procesa la información recibida.
+3. El modelo predictivo estima la categoría objetivo.
+4. El sistema explica los factores que han influido en la predicción.
+5. El usuario recibe recomendaciones derivadas del análisis realizado.
+
+Los requisitos funcionales detallados serán definidos en el documento **SDD-01 · Requirements**.
+
+---
+
+# 11. Estrategia de datos
+
+La fuente principal de información será la **Stack Overflow Annual Developer Survey**, una de las mayores encuestas internacionales dirigidas a profesionales del desarrollo de software.
+
+La edición 2025 recopila más de **49.000 respuestas procedentes de 177 países**, distribuidas en **62 preguntas** relacionadas con **314 tecnologías, herramientas y plataformas**, incluyendo nuevas preguntas sobre agentes de IA, modelos de lenguaje y herramientas basadas en Inteligencia Artificial.
+
+La versión definitiva del conjunto de datos será seleccionada durante la fase de Análisis Exploratorio de Datos (EDA).
+
+Las alternativas actualmente consideradas son:
+
+- Stack Overflow Developer Survey 2025.
+- Stack Overflow Developer Survey 2024–2025.
+- Serie histórica de múltiples ediciones.
+
+La decisión final dependerá de la calidad de los datos, la consistencia de las variables y su adecuación al problema de clasificación definido.
+
+La plataforma se diseñará desacoplada de la fuente de datos utilizada, permitiendo incorporar nuevos conjuntos de datos procedentes de organizaciones, instituciones educativas o sistemas corporativos sin modificar la arquitectura conceptual de la solución.
+
+---
+
+# 12. Estrategia de Inteligencia Artificial
+
+El MVP implementará un problema supervisado de clasificación multiclase.
+
+Como primer caso de uso, la variable objetivo seleccionada será:
+
+**Job Satisfaction (JobSat)**
+
+Esta selección se fundamenta en:
+
+- Su relevancia para la gestión del talento.
+- Su adecuación a un problema de clasificación multiclase.
+- Su potencial para generar explicaciones interpretables mediante técnicas de Inteligencia Artificial Responsable.
+
+Durante la fase de diseño también fueron evaluadas otras variables disponibles en el conjunto de datos, entre ellas:
+
+- NewRole.
+- DevType.
+- Nivel de experiencia profesional.
+- Otras variables relacionadas con la evolución profesional.
+
+La plataforma ha sido diseñada para incorporar nuevos modelos predictivos sin modificar la estructura general del sistema.
+
+---
+
+# 13. Principios de diseño
+
+El proyecto se desarrollará siguiendo los siguientes principios:
+
+- Arquitectura modular y escalable.
+- Diseño orientado a la evolución.
+- Inteligencia Artificial Responsable.
 - Explicabilidad de las predicciones.
-- Calidad y gobernanza de los datos.
-- Mitigación de sesgos cuando sea técnicamente posible.
-- Supervisión humana en la toma de decisiones.
-- Reproducibilidad del proceso de desarrollo.
-- Documentación del ciclo de vida del modelo.
+- Separación entre lógica de negocio, datos y modelos predictivos.
+- Reutilización de componentes.
+- Mantenibilidad del software.
+- Specification-Driven Development (SDD) como fuente única de verdad para el desarrollo del sistema.
 
 ---
 
-# 14. Roadmap del Producto
+# 14. Roadmap
 
-## Fase 1 — MVP
+## MVP
 
-- Predicción de rotación de empleados.
-- Modelos Ensemble.
-- Plataforma SaaS funcional.
-- Explicabilidad de las predicciones.
+La primera versión del producto incluirá:
 
-## Fase 2
+- Aplicación web.
+- Predicción mediante Machine Learning.
+- Explicación de las predicciones.
+- Generación de recomendaciones.
+- Arquitectura modular preparada para crecer.
 
-- Incorporación de nuevos dominios relacionados con el ciclo de vida del talento.
-- Nuevos modelos predictivos especializados.
-- Dashboards analíticos avanzados.
+## Evolución futura
 
-## Fase 3
+La visión a medio y largo plazo contempla la incorporación de nuevas capacidades como:
 
-- Plataforma integral para el análisis del talento.
-- Monitorización continua del rendimiento de los modelos.
-- Capacidades avanzadas de MLOps y gobierno de modelos.
-
----
-
-# 15. Fuera del Alcance
-
-No forman parte del MVP:
-
-- Predicción del abandono académico.
-- Integración con sistemas corporativos externos.
-- Reentrenamiento automático del modelo.
-- Aprendizaje en tiempo real.
-- Automatización de decisiones de Recursos Humanos.
-- Arquitecturas multiempresa completamente personalizadas.
+- Aplicación móvil.
+- Agentes conversacionales o de voz.
+- Integración con plataformas de Recursos Humanos.
+- Gestión de múltiples modelos predictivos.
+- Automatización del ciclo MLOps.
+- Incorporación de nuevas fuentes de datos.
+- Nuevos casos de uso relacionados con la analítica del talento.
 
 ---
 
-# 16. Criterios de Éxito
+# 15. Restricciones
 
-El MVP se considerará satisfactorio si consigue:
+Las principales restricciones identificadas son:
 
-- Desarrollar un modelo Ensemble con mejor rendimiento que los modelos individuales evaluados.
-- Obtener resultados consistentes y reproducibles durante la fase de validación.
-- Integrar correctamente el modelo dentro de una plataforma SaaS funcional.
-- Proporcionar predicciones explicables y comprensibles para el usuario.
-- Demostrar la viabilidad técnica de una solución de Inteligencia Artificial Responsable aplicada a la retención del talento.
+- Tiempo limitado de desarrollo.
+- Equipo reducido.
+- Desarrollo orientado a un MVP.
+- Utilización inicial de conjuntos de datos públicos.
+- Calendario académico del proyecto.
 
 ---
 
-# 17. Riesgos y Dependencias
+# 16. Riesgos
 
-Los principales factores que pueden afectar al éxito del proyecto son:
+Los principales riesgos identificados son:
 
-- Calidad y representatividad del conjunto de datos seleccionado.
-- Disponibilidad de información suficiente para entrenar modelos robustos.
-- Capacidad de generalización del modelo sobre datos no vistos.
-- Correcta integración entre los distintos componentes del sistema.
-- Interpretación adecuada de las predicciones por parte de los usuarios finales.
+- Calidad insuficiente del conjunto de datos.
+- Distribución desequilibrada de clases.
+- Valores ausentes o inconsistentes.
+- Limitaciones temporales del proyecto.
+- Incremento no controlado del alcance.
+- Complejidad del entrenamiento y validación del modelo.
+
+Estos riesgos serán mitigados mediante un desarrollo iterativo, validación continua y priorización de las funcionalidades esenciales del MVP.
+
+---
+
+# 17. Criterios de éxito
+
+El proyecto se considerará satisfactorio si consigue:
+
+- Desarrollar un MVP completamente funcional.
+- Implementar un modelo de clasificación multiclase sobre datos reales.
+- Proporcionar predicciones explicables.
+- Generar recomendaciones basadas en evidencia.
+- Mantener una arquitectura preparada para evolucionar.
+- Disponer de documentación técnica completa y trazable.
+- Garantizar la coherencia entre todos los documentos del Software Design Document.
 
 ---
 
 # 18. Trazabilidad
 
-Este documento constituye el punto de partida del proceso de Specification-Driven Development (SDD).
+Este documento constituye el punto de partida del Software Design Document (SDD).
 
-Las decisiones estratégicas aquí definidas servirán de referencia para el desarrollo de los siguientes documentos del proyecto:
+Los documentos posteriores desarrollarán las especificaciones del sistema respetando el alcance definido en este documento.
 
-- Especificación de Requisitos.
-- Arquitectura del Sistema.
-- Estrategia de Datos y EDA.
-- Desarrollo y Evaluación de Modelos de Machine Learning.
-- Diseño de la Plataforma SaaS.
-- Estrategia de Validación y Pruebas.
-- Documentación Técnica y Defensa del Proyecto.
+| Documento | Propósito |
+|------------|-----------|
+| SDD-01 · Requirements | Definición de requisitos funcionales y no funcionales |
+| SDD-02 · Architecture | Arquitectura lógica y conceptual del sistema |
+| SDD-03 · Implementation Structure | Organización del proyecto y estructura del software |
+| SDD-04 · Data Pipeline | Ciclo de vida y procesamiento de los datos |
+| SDD-05 · Modeling | Diseño de la solución de Machine Learning |
+| SDD-06 · Frontend | Especificación de la interfaz de usuario |
+| SDD-07 · API | Definición de las interfaces del sistema |
+| SDD-08 · Testing | Estrategia de validación y pruebas |
+| SDD-09 · Deployment | Estrategia de despliegue y operación |
