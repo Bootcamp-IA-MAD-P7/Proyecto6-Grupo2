@@ -152,7 +152,7 @@ ax.tick_params(axis="x", rotation=30)
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_03_age.png", dpi=150)
 plt.show()
-print("Interpretation: The 25-34 age group dominates. The survey skews toward early and mid-career professionals.")
+print("Interpretation: The 25-34 age group dominates with 32,813 respondents (37.1%). The survey skews toward early and mid-career professionals.")
 
 # %% [markdown]
 # ## 5. Professional Profile
@@ -177,7 +177,7 @@ ax.tick_params(axis="x", rotation=15)
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_04_remote_work.png", dpi=150)
 plt.show()
-print("Interpretation: Hybrid and Remote together account for over 83% of professional developers.")
+print("Interpretation: Hybrid and Remote together account for over 83% of professional developers. In-person work is a minority in 2023.")
 
 # %%
 edlevel = professional_population["EdLevel"].drop_nulls().value_counts(sort=True)
@@ -196,7 +196,7 @@ ax.set_title("Education level — Professional developers 2023")
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_05_edlevel.png", dpi=150)
 plt.show()
-print("Interpretation: Bachelor's degree is the most common qualification.")
+print("Interpretation: Bachelor's degree is the most common qualification (36,205). Master's degrees are the second most frequent.")
 
 # %%
 years_pro = (
@@ -225,7 +225,7 @@ ax.set_title("Professional coding experience — Stack Overflow Survey 2023")
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_06_years_code_pro.png", dpi=150)
 plt.show()
-print("Interpretation: Experience is right-skewed. Most professionals have between 2 and 10 years.")
+print("Interpretation: Experience is right-skewed. Most professionals have between 2 and 10 years of experience.")
 
 # %%
 devtype = professional_population["DevType"].drop_nulls().value_counts(sort=True)
@@ -244,7 +244,7 @@ ax.set_title("Developer type — Professional developers 2023")
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_07_devtype.png", dpi=150)
 plt.show()
-print("Interpretation: Full-stack leads by a wide margin, followed by back-end and front-end.")
+print("Interpretation: Full-stack (25,379) leads by a wide margin, followed by back-end (13,573) and front-end (5,020).")
 
 # %% [markdown]
 # ## 6. Compensation
@@ -283,7 +283,7 @@ ax.set_title("Compensation distribution — Professional developers 2023 (up to 
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_08_compensation.png", dpi=150)
 plt.show()
-print("Interpretation: Compensation is strongly right-skewed. Median is lower than mean due to extreme values.")
+print("Interpretation: Compensation is strongly right-skewed. The median is $74,963 while the mean is $102,911, pulled up by extreme values.")
 
 # %%
 log_comp = compensation.with_columns(
@@ -297,7 +297,7 @@ ax.set_title("Log10 compensation — Professional developers 2023")
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_09_compensation_log.png", dpi=150)
 plt.show()
-print("Interpretation: Log-scale reveals a roughly normal central distribution. Useful for modeling.")
+print("Interpretation: The log-scale view reveals a roughly normal central distribution. This transformation may be useful for modeling.")
 
 # %%
 comp_remote = (
@@ -329,7 +329,7 @@ ax.tick_params(axis="x", rotation=15)
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_10_comp_by_remote.png", dpi=150)
 plt.show()
-print("Interpretation: Remote workers tend to earn more than hybrid or in-person workers.")
+print("Interpretation: Remote workers tend to earn more than hybrid or in-person workers. This differential is a relevant signal for the model.")
 
 # %% [markdown]
 # ## 7. Technology Landscape
@@ -367,7 +367,7 @@ ax.set_title("Top programming languages — Professional developers 2023")
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_11_languages.png", dpi=150)
 plt.show()
-print("Interpretation: JavaScript leads, followed by HTML/CSS and Python. Multi-select fields require multi-hot encoding.")
+print("Interpretation: JavaScript leads, followed by HTML/CSS and Python. Multi-select fields require multi-hot encoding before modeling.")
 
 # %%
 top_databases = top_multi_select(professional_population, "DatabaseHaveWorkedWith")
@@ -425,7 +425,7 @@ ax.set_title("Are developers using AI tools? — 2023")
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_14_ai_select.png", dpi=150)
 plt.show()
-print("Interpretation: 43.4% already use AI tools. 25.3% plan to start soon. Only 29.1% have no plans to adopt.")
+print("Interpretation: 43.4% of respondents already use AI tools. 25.3% plan to start soon. Only 29.1% have no plans to adopt AI tools.")
 
 # %%
 ai_sent = df["AISent"].drop_nulls().value_counts(sort=True)
@@ -453,7 +453,7 @@ ax.tick_params(axis="x", rotation=20)
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_15_ai_sentiment.png", dpi=150)
 plt.show()
-print("Interpretation: 77.5% hold a favorable or very favorable view. Negative sentiment is a small minority (3.3%).")
+print("Interpretation: 77.5% of respondents hold a favorable or very favorable view of AI tools. Negative sentiment is a small minority (3.3%).")
 
 # %%
 ai_ben = df["AIBen"].drop_nulls().value_counts(sort=True)
@@ -481,7 +481,7 @@ ax.tick_params(axis="x", rotation=20)
 plt.tight_layout()
 plt.savefig("notebooks/figures/2023_16_ai_trust.png", dpi=150)
 plt.show()
-print("Interpretation: Most developers somewhat trust AI output but are not fully confident.")
+print("Interpretation: Most developers somewhat trust AI output but are not fully confident. Highly trust is the smallest group (2.8%).")
 
 # %%
 ai_cross = (
@@ -507,7 +507,7 @@ sensitive_audit = pl.DataFrame({
 })
 print("Sensitive variables audit — 2023 vs 2021:")
 print(sensitive_audit)
-print("\nInterpretation: All six sensitive demographic variables present in 2021 are ABSENT in 2023.")
+print("\nInterpretation: All six sensitive demographic variables present in the 2021 survey are ABSENT in the 2023 edition.")
 print("This is a deliberate survey design decision by Stack Overflow, not a data quality issue.")
 print("The absence of Gender makes the 2023 dataset unsuitable for gender equity analysis.")
 
@@ -655,7 +655,7 @@ comparison = pl.DataFrame({
 })
 print("Comparative summary 2021 vs 2023:")
 print(comparison)
-print("\nConclusion: Neither 2021 nor 2023 supports the project's supervised learning objective.")
+print("\nConclusion: Neither the 2021 nor the 2023 dataset supports the project's supervised learning objective.")
 print("The 2022 dataset is the team's selected edition for model training.")
 
 # %% [markdown]
@@ -678,7 +678,7 @@ decision_log = pl.DataFrame({
         "2022 contains JobSat and Gender — confirmed by team EDA",
     ],
     "consequence": [
-        "load_raw_data.py updated with pandas fallback",
+        "load_raw_data.py updated with _PANDAS_FALLBACK_YEARS = {2023}",
         "Finding documented in SDD-04 and this notebook",
         "Notebook preserved as dataset selection evidence",
         "2023 cannot support the current supervised objective",
@@ -691,43 +691,14 @@ print(decision_log)
 # %% [markdown]
 # ## Executive Summary — English
 #
-# - **Dataset overview:** 88,645 responses, 84 variables, 0 duplicated rows.
+# - **Dataset overview:** The Stack Overflow Developer Survey 2023 contains 88,645 responses
+#   and 84 variables. No duplicated rows were detected.
 # - **CSV quality issue:** Column `SOAI` contains unescaped double quotes that prevent standard
 #   CSV parsing. A pandas fallback was implemented in `utils/load_raw_data.py`.
 # - **Respondent population:** 66,259 respondents (74.7%) identify as professional developers.
-# - **Professional profile:** The 25-34 age group is the largest. Bachelor's degrees are the most
-#   common qualification. Full-stack is the leading developer type.
-# - **Remote work:** Hybrid and Remote together represent 83% of professionals.
-# - **Compensation:** 53.8% of professionals have a valid positive compensation value.
-#   Distribution is strongly right-skewed; log transformation recommended for modeling.
-# - **Technology:** JavaScript, HTML/CSS, and Python are the top languages.
-#   Multi-select fields require multi-hot encoding.
-# - **AI landscape:** 43.4% already use AI tools. 77.5% hold a favorable view.
-#   19 AI-specific columns are exclusive to the 2023 edition.
-# - **Sensitive variables:** All six demographic variables (Gender, Trans, Sexuality, Ethnicity,
-#   Accessibility, MentalHealth) are absent. This is a deliberate survey design decision.
-# - **Suitability verdict:** The 2023 dataset is NOT suitable for supervised model training.
-#   Both the target variable (JobSat) and Gender are absent.
-# - **Decision:** The 2022 dataset remains the selected edition for model training.
-
-# %% [markdown]
-# ## Resumen Ejecutivo — Español
-#
-# - **Visión general:** 88.645 respuestas, 84 variables, 0 filas duplicadas.
-# - **Problema de calidad CSV:** La columna `SOAI` contiene comillas dobles sin escapar que
-#   impiden el parseo estándar. Se implementó un fallback con pandas en `utils/load_raw_data.py`.
-# - **Población encuestada:** 66.259 respondentes (74,7%) se identifican como desarrolladores profesionales.
-# - **Perfil profesional:** El grupo de 25-34 años es el más numeroso. El grado universitario es
-#   la titulación más frecuente. Full-stack es el tipo de desarrollador predominante.
-# - **Trabajo remoto:** Híbrido y remoto representan juntos el 83% de los profesionales.
-# - **Compensación:** El 53,8% de los profesionales tiene un valor de compensación válido y positivo.
-#   La distribución es fuertemente asimétrica hacia la derecha; se recomienda transformación logarítmica.
-# - **Tecnología:** JavaScript, HTML/CSS y Python son los lenguajes más usados.
-#   Los campos multi-selección requieren codificación multi-hot.
-# - **Paisaje de IA:** El 43,4% ya usa herramientas de IA. El 77,5% tiene una visión favorable.
-#   19 columnas exclusivas de IA son únicas en la edición 2023.
-# - **Variables sensibles:** Las seis variables demográficas (Gender, Trans, Sexuality, Ethnicity,
-#   Accessibility, MentalHealth) están ausentes. Es una decisión deliberada de diseño de la encuesta.
-# - **Veredicto de idoneidad:** El dataset 2023 NO es apto para entrenamiento supervisado.
-#   Faltan tanto la variable objetivo (JobSat) como Gender.
-# - **Decisión:** El dataset 2022 sigue siendo la edición seleccionada para el entrenamiento del modelo.
+# - **Professional profile:** The 25-34 age group is the largest (32,813). Bachelor's degrees
+#   are the most common qualification (36,205). Full-stack is the leading developer type (25,379).
+# - **Remote work:** Hybrid (30,671) and Remote (30,092) together represent 83% of professionals.
+#   In-person work is a minority in 2023.
+# - **Compensation:** 47,278 professionals (53.8%) have a valid positive compensation value.
+#   Median is $74,963
