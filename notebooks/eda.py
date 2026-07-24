@@ -1,3 +1,17 @@
+# %% [markdown]
+# # Exploratory Data Analysis — Stack Overflow Survey 2021
+
+# %% [markdown]
+# ## 1. Project Overview
+#
+# This notebook documents the exploratory assessment of the Stack Overflow
+# Developer Survey 2021. It evaluates the dataset structure, data quality,
+# respondent population, professional attributes, compensation, technology
+# usage, sensitive variables, and feature feasibility.
+#
+# This phase is descriptive. It does not train a model or create production
+# preprocessing artifacts. Its final purpose is to determine whether the 2021
+# survey supports the supervised objective defined by the project.
 
 # %%
 import sys
