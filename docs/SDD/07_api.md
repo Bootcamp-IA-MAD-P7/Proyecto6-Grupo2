@@ -1,36 +1,58 @@
-# API Design
+# Software Design Document (SDD)
 
-**Versión:** 1.0
-**Estado:** Draft
+# SDD-07 · API
 
----
-
-# 1. Descripción
-
-El backend expone una API REST desarrollada con FastAPI. Su única responsabilidad es recibir los datos del formulario, validarlos, invocar el modelo de ML y devolver la predicción con su explicación.
-
-No contiene lógica de entrenamiento. Actúa como puente entre el frontend y el modelo entrenado.
-
----
-
-# 2. Stack Tecnológico
-
-| Tecnología | Decisión |
+| Campo | Valor |
 |---|---|
-| Framework | FastAPI |
-| Lenguaje | Python |
-| Validación | Pydantic (schemas) |
-| Servidor | Uvicorn |
+| Proyecto | TalentCare AI |
+| Documento | API |
+| Código | SDD-07 |
+| Versión | 2.0 |
+| Estado | Draft |
+| Última actualización | Julio 2026 |
+| Documentos de origen | SDD-00, SDD-01, SDD-02, SDD-03 |
+| Documentos relacionados | SDD-05, SDD-06, SDD-08 |
 
 ---
 
-# 3. Endpoints
+## 1. Stack
 
-## GET /health
+| Tecnología | Decisión | Estado |
+|---|---|---|
+| Framework | FastAPI | Confirmado |
+| Lenguaje | Python | Confirmado |
+| Validación | Pydantic | Confirmado |
+| Servidor | Uvicorn | Confirmado |
+
+---
+
+## 2. Estructura de archivos
+
+```text
+backend/app/
+├── __init__.py
+├── main.py       — crea la app, registra routers
+├── routes.py     — endpoints
+├── schemas.py    — PredictionRequest / PredictionResponse
+└── inference.py  — puente hacia src/inference/
+```
+
+> Estado actual: archivos creados, contenido pendiente de implementación.
+
+---
+
+## 3. Endpoints
+
+### GET /health
 
 Comprueba que el servicio está activo.
 
-**Response:**
+| Campo | Valor |
+|---|---|
+| Autenticación | No requerida |
+| Estado | Previsto |
+
+**Response `200`:**
 ```json
 {
   "status": "ok"
@@ -39,9 +61,14 @@ Comprueba que el servicio está activo.
 
 ---
 
-## POST /predict
+### POST /api/v1/predictions
 
-Recibe el perfil profesional del empleado y devuelve la predicción del modelo.
+Recibe el perfil profesional y devuelve la predicción con explicación y recomendaciones.
+
+| Campo | Valor |
+|---|---|
+| Autenticación | No requerida |
+| Estado | Previsto |
 
 **Request:**
 ```json
@@ -54,69 +81,105 @@ Recibe el perfil profesional del empleado y devuelve la predicción del modelo.
 }
 ```
 
-**Response:**
+> Los campos definitivos se confirmarán tras el EDA (OD-002 en SDD-01).
+
+**Response `200`:**
 ```json
 {
-  "prediction": 1,
-  "label": "Satisfecho",
-  "probability": 0.82,
-  "top_factors": [
-    {"feature": "remote_work", "importance": 0.31},
-    {"feature": "converted_comp_yearly", "importance": 0.27},
-    {"feature": "years_code_pro", "importance": 0.19}
-  ]
+  "prediction": {
+    "class": 1,
+    "label": "Satisfecho"
+  },
+  "explanation": {
+    "top_factors": [
+      {"feature": "remote_work", "display_name": "Modalidad de trabajo", "importance": 0.31},
+      {"feature": "converted_comp_yearly", "display_name": "Salario anual", "importance": 0.27},
+      {"feature": "years_code_pro", "display_name": "Años de experiencia", "importance": 0.19}
+    ]
+  },
+  "recommendations": [],
+  "metadata": {
+    "model_version": "pending"
+  }
 }
 ```
 
----
-
-# 4. Validación de Datos
-
-La validación de los campos de entrada se realiza mediante schemas Pydantic definidos en `backend/app/schemas.py`.
-
-Si los datos de entrada son inválidos, la API devuelve un error `422 Unprocessable Entity` con el detalle del campo incorrecto. Esto cubre el UC4 y UC10 del SDD-00A.
+> `recommendations` y `probability` se incluirán cuando el equipo apruebe su implementación (OD-005, OD-006).
 
 ---
 
-# 5. Integración con el Modelo
+## 4. Códigos de respuesta
 
-El flujo interno de la API al recibir una petición es:
+| Código | Situación |
+|---|---|
+| 200 | Predicción completada correctamente |
+| 422 | Datos de entrada inválidos (Pydantic) |
+| 503 | Modelo no disponible |
+| 500 | Error interno no controlado |
 
-```
-POST /predict
-      │
-      ▼
+---
+
+## 5. Validación de entrada
+
+La validación se realiza en dos niveles:
+
+| Nivel | Responsable | Cobertura |
+|---|---|---|
+| Interfaz | Frontend | Campos vacíos, formatos básicos |
+| Servidor | Pydantic (schemas.py) | Esquema completo, tipos, rangos, categorías |
+
+La validación del servidor es autoritativa. Un error de validación devuelve `422` con el detalle del campo afectado.
+
+---
+
+## 6. Flujo interno
+
+```text
+POST /api/v1/predictions
+        │
+        ▼
 Validación Pydantic (schemas.py)
-      │
-      ▼
-Carga del pipeline entrenado (inference.py → src/inference/load_pipeline.py)
-      │
-      ▼
-Preprocesado + Predicción (src/inference/predict.py)
-      │
-      ▼
-Respuesta JSON al frontend
+        │
+        ▼
+Carga del pipeline (inference.py → src/inference/load_pipeline.py)
+        │
+        ▼
+Preprocesado + predicción (src/inference/predict.py)
+        │
+        ▼
+Explicabilidad
+        │
+        ▼
+Recomendaciones
+        │
+        ▼
+PredictionResponse → frontend
 ```
 
-El modelo se carga una sola vez al arrancar la aplicación para evitar latencia en cada petición.
+El modelo se carga una sola vez al arrancar la aplicación.
 
 ---
 
-# 6. Estructura de Ficheros
+## 7. Decisiones pendientes
 
-```
-backend/
-└── app/
-    ├── main.py       — crea la app FastAPI
-    ├── routes.py     — define los endpoints
-    ├── schemas.py    — request/response con Pydantic
-    └── inference.py  — puente hacia src/inference/
-```
+| ID | Decisión |
+|---|---|
+| OD-002 | Campos definitivos del request (tras EDA) |
+| OD-003 | Clases finales de JobSat |
+| OD-004 | Técnica de explicabilidad y formato de `top_factors` |
+| OD-005 | Lógica de recomendaciones |
+| OD-006 | Incluir `probability` en la respuesta |
+| OD-007 | Umbral máximo de tiempo de respuesta |
 
 ---
 
-# 7. Decisiones Pendientes
+## 8. Trazabilidad
 
-- Campos definitivos del request: se confirmarán tras el EDA y la selección de variables del modelo.
-- Formato exacto de `top_factors`: depende de la técnica de explicabilidad (XAI) seleccionada.
-- CORS: configurar los orígenes permitidos según el entorno de despliegue.
+| Documento | Relación |
+|---|---|
+| SDD-01 · Requirements | FR-007 a FR-014, FR-019, FR-023, NFR-016, NFR-017 |
+| SDD-02 · Architecture | Sección 6.2 Backend y API, Sección 9 y 10 Contratos |
+| SDD-03 · Implementation Structure | Sección 4 Backend |
+| SDD-05 · Modeling | Clases de salida, formato de explicabilidad |
+| SDD-06 · Frontend | Contrato de comunicación |
+| SDD-08 · Testing | Tests del backend |

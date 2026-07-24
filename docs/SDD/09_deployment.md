@@ -1,224 +1,198 @@
-## 1. Purpose
+# Software Design Document (SDD)
 
-This document describes how the multiclass classification system is packaged, configured, executed, and deployed.
+# SDD-09 · Deployment
 
-It explains:
-- Deployment architecture
-- Containerization strategy
-- Environment configuration
-- Service communication
-- Local development setup
-- Production deployment considerations
+| Campo | Valor |
+|---|---|
+| Proyecto | TalentCare AI |
+| Documento | Deployment |
+| Código | SDD-09 |
+| Versión | 2.0 |
+| Estado | Draft |
+| Última actualización | Julio 2026 |
+| Documentos de origen | SDD-00, SDD-01, SDD-02, SDD-03 |
+| Documentos relacionados | SDD-07, SDD-08 |
 
-This document focuses on operational aspects of the system.
+---
 
-## 2. Deployment Overview
+## 1. Arquitectura de despliegue
 
-The application is deployed as a multi-service system composed of:
-- Frontend application
-- Backend API
-- Machine learning model artifacts
+```text
+Usuario
+    │
+    ▼
+Frontend Container  (React + Vite)
+    │
+    │ HTTP / REST
+    ▼
+Backend Container   (FastAPI + Uvicorn)
+    │
+    │ Carga en arranque
+    ▼
+Model Artifacts     (models/)
+```
 
-The system uses containerization to ensure consistent execution across environments.
+---
 
-Architecture:
+## 2. Componentes
 
-User
- |
- v
-Frontend Container
- |
- HTTP API Requests
- |
- v
-Backend Container
- |
- ML Inference
- |
- v
-Model Artifacts
+| Servicio | Ubicación | Tecnología | Estado |
+|---|---|---|---|
+| Frontend | `frontend/` | React, TypeScript, Vite | Parcial |
+| Backend | `backend/` | FastAPI, Python, Uvicorn | Parcial |
+| Artefactos ML | `models/` | joblib / pickle | Pendiente |
 
-## 3. Deployment Components
+---
 
-### Frontend Service
+## 3. Contenedores
 
-Location:
-frontend/
+| Archivo | Responsabilidad | Estado |
+|---|---|---|
+| `frontend/Dockerfile` | Build y servicio del frontend | Previsto |
+| `backend/Dockerfile` | Arranque del backend | Previsto |
+| `docker-compose.yml` | Orquestación de servicios | Previsto |
 
-Purpose:
-Provides the user interface.
+### docker-compose.yml gestiona
 
-Technology:
-- React
-- TypeScript
-- Vite
+- Definición de servicios.
+- Red interna entre contenedores.
+- Variables de entorno.
+- Montaje de artefactos del modelo.
+- Arranque ordenado.
 
-Responsibilities:
-- Build frontend application
-- Serve static files
-- Communicate with backend API
+---
 
-### Backend Service
+## 4. Variables de entorno
 
-Location:
-backend/
+Plantilla en `.env.example`:
 
-Purpose:
-Provides the prediction API.
+```env
+APP_ENV=development
+API_HOST=0.0.0.0
+API_PORT=8000
+MODEL_PATH=models/pipelines/pipeline.joblib
+MODEL_METADATA_PATH=models/pipelines/metadata.json
+LOG_LEVEL=INFO
+CORS_ORIGINS=http://localhost:5173
+```
 
-Responsibilities:
-- Start API server
-- Load ML pipeline
-- Receive prediction requests
-- Return predictions
+El archivo `.env` no se versiona. No se incluyen secretos en el repositorio.
 
-### Machine Learning Artifacts
+---
 
-Location:
-models/
+## 5. CI/CD
 
-Contains:
-- Trained models
-- Pipelines
-- Metrics
+| Archivo | Triggers | Pasos | Estado |
+|---|---|---|---|
+| `.github/workflows/ci.yml` | Push / PR a `main` y `dev` | checkout → setup-python → uv sync → pytest | Implementado |
 
-The backend uses these artifacts during inference.
+Ninguna PR se fusiona si el CI falla.
 
-## 4. Container Architecture
+Pasos previstos para ampliar el pipeline:
 
-Docker containers isolate application services.
+```text
+1. Instalación de dependencias
+2. Linting
+3. Tests unitarios
+4. Tests de integración
+5. Build de contenedores
+6. Validación de despliegue
+```
 
-Components:
-- Frontend container
-- Backend container
-- Model artifacts
+---
 
-## 5. Docker Configuration
+## 6. Entornos
 
-docker-compose.yml manages:
-- Service definitions
-- Container networking
-- Environment variables
-- Application startup
+| Entorno | Propósito | Estado |
+|---|---|---|
+| Development | Desarrollo local con Docker Compose | Previsto |
+| Testing | Validación automática en CI | Implementado (pytest) |
+| Production | Despliegue optimizado | Pendiente |
 
-## 6. Environment Configuration
+---
 
-.env.example provides configuration templates.
+## 7. Despliegue local
 
-Examples:
-- API URLs
-- Model paths
-- Environment settings
-- Ports
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/Bootcamp-IA-MAD-P7/Proyecto6-Grupo2.git
 
-Sensitive information should not be stored in the repository.
+# 2. Configurar variables de entorno
+cp .env.example .env
 
-## 7. Local Development Deployment
-
-Requirements:
-- Docker
-- Docker Compose
-- Python
-- Node.js
-
-Steps:
-
-1. Clone repository
-
-2. Configure environment variables
-
-3. Build containers:
+# 3. Construir contenedores
 docker compose build
 
-4. Start application:
+# 4. Arrancar la aplicación
 docker compose up
+```
 
-## 8. Continuous Integration and Deployment
+---
 
-GitHub workflows automate:
-- Tests
-- Dependency checks
-- Container builds
-- Deployment validation
+## 8. Estrategia del modelo
 
-Location:
-.github/workflows/
+```text
+Entrenamiento (local / CI)
+        │
+        ▼
+Pipeline serializado → models/pipelines/
+        │
+        ▼
+Montado en el backend container
+        │
+        ▼
+Cargado una vez al arrancar FastAPI
+        │
+        ▼
+Disponible para inferencia
+```
 
-## 9. Deployment Environments
+El artefacto debe contener preprocesado, transformaciones y modelo. No se recarga en cada petición.
 
-Development:
-- Local development
-- Debug configuration
+---
 
-Testing:
-- Automated validation
-- Test datasets
+## 9. Observabilidad
 
-Production:
-- Optimized containers
-- Production configuration
-- Monitoring
+| Capa | Qué se registra | Estado |
+|---|---|---|
+| Backend | Arranque, carga del modelo, versión, errores, duración de inferencia | Previsto |
+| Frontend | Errores de cliente, fallos de API | Previsto |
+| CI | Resultados de tests, fallos de build | Implementado |
 
-## 10. Model Deployment Strategy
+Los logs no incluirán datos personales ni secretos (NFR-037 en SDD-01).
 
-Training environment
-        |
-        v
-Saved pipeline
-        |
-        v
-Model artifact
-        |
-        v
-Backend container
-        |
-        v
-Prediction API
+---
 
-The deployed artifact must contain:
-- Preprocessing
-- Feature transformations
-- Classification model
+## 10. Seguridad
 
-## 11. Logging and Monitoring
+| Práctica | Estado |
+|---|---|
+| Secretos fuera del repositorio | Implementado (.gitignore) |
+| Validación de entradas en API | Previsto (Pydantic) |
+| Variables de entorno para configuración | Previsto |
+| Dependencias versionadas | Implementado (uv.lock) |
 
-Monitor:
+---
 
-Backend:
-- Requests
-- Errors
-- Response times
+## 11. Escalabilidad prevista
 
-Machine Learning:
-- Prediction failures
-- Input changes
-- Performance degradation
+Las siguientes capacidades no forman parte del MVP:
 
-Frontend:
-- Client errors
-- API failures
+- Múltiples instancias del backend.
+- Balanceo de carga.
+- Despliegue en cloud.
+- Servicio de inferencia independiente.
+- Reentrenamiento automático.
+- Model registry.
 
-## 12. Security Considerations
+---
 
-Practices:
-- Do not commit secrets
-- Validate API inputs
-- Update dependencies
-- Use environment variables
+## 12. Trazabilidad
 
-## 13. Scalability Considerations
-
-Future improvements:
-- Multiple backend instances
-- Load balancing
-- Cloud deployment
-- Dedicated model serving
-- Automated retraining
-
-## 14. Future Improvements
-
-Possible additions:
-- CI/CD pipelines
-- Monitoring dashboards
-- Model registry
-- Production observability
+| Documento | Relación |
+|---|---|
+| SDD-01 · Requirements | NFR-004, NFR-005, NFR-030, NFR-036, NFR-037 |
+| SDD-02 · Architecture | Sección 15 Despliegue conceptual |
+| SDD-03 · Implementation Structure | Sección 7 Configuración, Sección 18 CI |
+| SDD-07 · API | Configuración de CORS y puertos |
+| SDD-08 · Testing | Integración con CI |
