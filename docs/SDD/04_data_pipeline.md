@@ -8,24 +8,50 @@ Describe how raw data becomes usable model input.
 
 # 1. Data Sources
 
-Explain:
+- **Origin:** Stack Overflow Developer Survey (2021–2025), hosted on Hugging Face
+- **Format:** CSV → Parquet (after processing)
+- **Target variable:** `JobSat` (0–10, available only in 2024 and 2025)
 
-- Dataset origin
-- Format
-- Size
-- Features
-- Target variable
+### Training Dataset (2024–2025)
+
+| Property | Value |
+|---|---|
+| Source files | `survey_results_public_2024.csv`, `survey_results_public_2025.csv` |
+| Raw merged | `data/raw/merged_survey_2024_2025.parquet` (113,983 rows, 25 cols) |
+| Cleaned | `data/processed/merged_survey_2024_2025_clean.parquet` (55,008 rows, 15 cols) |
+| Target | `JobSat` (Int8, 0–10) |
+
+### Auxiliary Dataset (2021–2025)
+
+| Property | Value |
+|---|---|
+| Source files | All 5 years |
+| Raw merged | `data/raw/merged_survey_2021_2025.parquet` (359,335 rows, 24 cols) |
+| Cleaned | `data/processed/auxiliary/merged_survey_2021_2025_clean.parquet` (342,138 rows, 14 cols) |
+| Note | No `JobSat` column (not asked in 2021–2023) |
 
 
 ---
 
-# 2. Data Schema
-
-Document:
+# 2. Data Schema (Training Dataset)
 
 | Feature | Type | Description |
 |---|---|---|
-| feature_1 | numeric | Description |
+| `MainBranch` | String | Developer type (e.g., "I am a developer by profession") |
+| `Employment` | String | Employment status (full-time, part-time, freelance, etc.) |
+| `Country` | String | Country of residence |
+| `EdLevel` | String | Education level |
+| `Age` | String | Age range (e.g., "25-34 years old") |
+| `DevType` | String | Developer role(s), semicolon-separated (multi-select) |
+| `OrgSize` | String | Organization size |
+| `ConvertedCompYearly` | Float64 | Annual salary in USD, imputed with per-(Year,Country) median |
+| `LanguageHaveWorkedWith` | String | Programming languages used, semicolon-separated (multi-select) |
+| `DatabaseHaveWorkedWith` | String | Databases used, semicolon-separated (multi-select) |
+| `PlatformHaveWorkedWith` | String | Cloud platforms used, semicolon-separated (multi-select) |
+| `WebframeHaveWorkedWith` | String | Web frameworks used, semicolon-separated (multi-select) |
+| `LearnCode` | String | How the respondent learned to code |
+| `YearsCodeNum` | Float64 | Years of coding experience (numeric) |
+| `JobSat` | Int8 | **Target** — job satisfaction score (0–10) |
 
 
 ---
@@ -165,24 +191,36 @@ Model Training
 
 This module is the entry point of the data pipeline. It retrieves the raw survey data and schema, making them available for all subsequent preprocessing and machine learning stages.
 
-Checks performed before processing.
+## Cleaning Steps
 
-## Cleaning
+1. **Column selection** — keep only 15 common columns across years (see schema above)
+2. **Employment normalization** — standardize punctuation variants (e.g., `"Employed, full-time"` → `"Employed full-time"`)
+3. **EdLevel normalization** — map `"Other (please specify):"` and `"Something else"` to `"Other"`, shorten `"Professional degree (JD, MD, Ph.D, Ed.D, etc.)"` → `"Professional degree (JD, MD, etc.)"`
+4. **MainBranch cleanup** — strip stray quotes and trailing suffixes
+5. **YearsCode → YearsCodeNum** — parse `"Less than 1 year"` → 0, `"More than 50 years"` → 50, `"None"` → null, cast to Float64
+6. **Salary imputation** — `ConvertedCompYearly` nulls filled with per-(Year, Country) median, falling back to per-Year median
+7. **Target filtering** — keep only rows where `JobSat` is numeric (0–10), cast to Int8
+8. **Drop columns** — remove `*WantToWorkWith`, `Currency`, `YearsCode` (string), `AgeClean`, `Year`, `SOAccount`, `SOVisitFreq`, `SOComm`, `SOPartFreq`
+9. **Drop nulls** — remove any remaining rows with null values (60 rows in `YearsCodeNum`)
 
-Handling:
+## Output Structure
 
-- Missing values
-- Duplicates
-- Invalid values
+```
+data/raw/
+  merged_survey_2024_2025.parquet        (113,983 rows, 25 cols — raw merge)
+  merged_survey_2021_2025.parquet        (359,335 rows, 24 cols — raw merge)
 
+data/processed/
+  merged_survey_2024_2025_clean.parquet   (55,008 rows, 15 cols — training-ready)
 
-## Transformation
+data/processed/auxiliary/
+  merged_survey_2021_2025_clean.parquet   (342,138 rows, 14 cols — no JobSat)
 
-Examples:
-
-- Encoding
-- Scaling
-- Normalization
+data/processed/splits/
+  train.parquet   (38,505 rows)
+  dev.parquet      (8,251 rows)
+  test.parquet     (8,252 rows)
+```
 
 
 ---
