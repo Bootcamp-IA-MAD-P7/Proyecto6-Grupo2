@@ -18,7 +18,7 @@ endif
 
 .PHONY: sync check format run clean notebook
 
-# Format notebook source files without applying fixes.
+# Format notebook source files without applyinryfg fixes.
 format:
 	@echo "Formatting notebooks..."
 	ruff format $(PY_NOTEBOOKS)
