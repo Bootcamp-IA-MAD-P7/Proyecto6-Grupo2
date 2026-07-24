@@ -65,7 +65,10 @@ Como punto de partida se entrenará un modelo de referencia simple (DummyClassif
 # 4. Estrategia de Entrenamiento
 
 - División de datos: 70% entrenamiento, 15% validación, 15% test.
-- Estrategia de split: estratificado por clase para mantener la proporción de clases.
+- Estrategia de split: aleatorio con semilla fija (seed=42).
+- Tamaños reales: 38,505 train / 8,251 dev / 8,252 test (55,008 total).
+- Los splits se guardan en `data/processed/splits/` como Parquet.
+- Script de split: `scripts/create_splits.py`.
 - Búsqueda de hiperparámetros: `src/training/tuning.py`
 - Validación cruzada: k-fold estratificado (k=5).
 
