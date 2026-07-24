@@ -12,4 +12,6 @@ dependencies = [
     "altair>=5.4.0",
     "vegafusion>=2.0.0",
     "pyarrow>=17.0.0",
+    "ipykernel>=7.3.0",
+    "jupytext>=1.19.5",
 ]
