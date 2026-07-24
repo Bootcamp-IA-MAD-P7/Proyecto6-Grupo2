@@ -1,4 +1,8 @@
+import io
+import urllib.request
 import polars as pl
+import pyarrow.csv as pacsv
+import pandas as pd
 from datasets import load_dataset
 
 
@@ -22,9 +26,31 @@ class RawData:
             return df
 
         except Exception as e:
-            print(f"Failed to download DataFrame {self.year}")
-            print(f"Reason: {e}")
-            raise
+            print(f"Polars read_csv encountered issue ({e}), attempting PyArrow/Pandas fallback...")
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req) as resp:
+                    content = resp.read()
+
+                parse_options = pacsv.ParseOptions(
+                    newlines_in_values=True, invalid_row_handler=lambda r: "skip"
+                )
+                table = pacsv.read_csv(io.BytesIO(content), parse_options=parse_options)
+                df = pl.from_arrow(table)
+                print(f"Downloaded {df.height} rows and {df.width} columns via fallback")
+
+                return df
+            except Exception as fallback_e:
+                try:
+                    pdf = pd.read_csv(io.BytesIO(content), engine="python", on_bad_lines="skip")
+                    df = pl.from_pandas(pdf)
+                    print(f"Downloaded {df.height} rows and {df.width} columns via pandas fallback")
+
+                    return df
+                except Exception:
+                    print(f"Failed to download DataFrame {self.year}")
+                    print(f"Reason: {fallback_e}")
+                    raise
 
 
 class Schema:
