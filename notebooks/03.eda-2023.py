@@ -5,7 +5,7 @@
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path.cwd().parent  # sube de notebooks/ a la raíz del repo
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -29,6 +29,7 @@ if INTERACTIVE_SESSION:
     INTERACTIVE_SHELL.run_line_magic("matplotlib", "inline")
 elif "MPLBACKEND" not in os.environ:
     matplotlib.use("Agg")
+import notebooks.boot
 
 import matplotlib.pyplot as plt
 from utils.load_raw_data import RawData, Schema
