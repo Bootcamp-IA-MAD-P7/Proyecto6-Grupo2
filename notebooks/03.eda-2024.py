@@ -2,17 +2,13 @@
 # %% 
 # import sys
 import sys
-import math
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from utils.load_raw_data import RawData
-from IPython.display import display
 import polars as pl
 import seaborn as sns
 import matplotlib.pyplot as plt
-import altair as alt
-import seaborn as sns
 sns.set_theme(style="darkgrid")
 
 data_raw = RawData(year=2024)
@@ -186,3 +182,4 @@ print("""
       tanto, la retención. Además, el tamaño de cada categoría (n) permite priorizar conclusiones: si una modalidad tiene más casos, 
       la señal es más robusta, lo cual fortalece su uso para diseñar recomendaciones y políticas de mejora.
       """)
+
