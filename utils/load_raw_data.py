@@ -35,14 +35,16 @@ class RawData:
                 parse_options = pacsv.ParseOptions(
                     newlines_in_values=True, invalid_row_handler=lambda r: "skip"
                 )
-                table = pacsv.read_csv(io.BytesIO(content), parse_options=parse_options)
+                with io.BytesIO(content) as buf:
+                    table = pacsv.read_csv(buf, parse_options=parse_options)
                 df = pl.from_arrow(table)
                 print(f"Downloaded {df.height} rows and {df.width} columns via fallback")
 
                 return df
             except Exception as fallback_e:
                 try:
-                    pdf = pd.read_csv(io.BytesIO(content), engine="python", on_bad_lines="skip")
+                    with io.BytesIO(content) as buf:
+                        pdf = pd.read_csv(buf, engine="python", on_bad_lines="skip")
                     df = pl.from_pandas(pdf)
                     print(f"Downloaded {df.height} rows and {df.width} columns via pandas fallback")
 
