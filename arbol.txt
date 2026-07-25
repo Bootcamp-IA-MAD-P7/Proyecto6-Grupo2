@@ -1,0 +1,159 @@
+﻿Listado de rutas de carpetas para el volumen Acer
+C:.
+|   .dockerignore
+|   .env.example
+|   .gitignore
+|   .python-version
+|   docker-compose.yml
+|   main.py
+|   Makefile
+|   pyproject.toml
+|   README.md
+|   uv.lock
+|   __init__.py
+|   
++---.github
+|   \---workflows
+|           ci.yml
+|           proyecto6-grupo2.yml
+|           
+
++---backend
+|   |   Dockerfile
+|   |   
+|   \---app
+|           inference.py
+|           main.py
+|           routes.py
+|           schemas.py
+|           __init__.py
+|           
++---data
+|   +---processed
+|   |   |   merged_survey_2024_2025_clean.parquet
+|   |   |   
+|   |   +---auxiliary
+|   |   |       merged_survey_2021_2025_clean.parquet
+|   |   |       
+|   |   \---splits
+|   |           dev.parquet
+|   |           test.parquet
+|   |           train.parquet
+|   |           
+|   \---raw
+|           .gitkeep
+|           merged_survey_2021_2025.parquet
+|           merged_survey_2024_2025.parquet
+|           
++---docs
+|   \---SDD
+|           00A_use_cases.md
+|           00_scope.md
+|           01_requirements.md
+|           02_architecture.md
+|           03_implementation_structure.md
+|           04_data_pipeline.md
+|           05_modeling.md
+|           06_frontend.md
+|           07_api.md
+|           08_testing.md
+|           09_deployment.md
+|           
++---frontend
+|   |   Dockerfile
+|   |   package.json
+|   |   vite.config.ts
+|   |   
+|   \---src
+|           app.tsx
+|           main.tsx
+|           
++---models
+|   +---metrics
+|   |       .gitkeep
+|   |       
+|   +---pipelines
+|   |       .gitkeep
+|   |       
+|   \---trained
+|           .gitkeep
+|           
++---notebooks
+|       01.eda-2021.ipynb
+|       01.eda-2021.py
+|       02.eda_2022.ipynb
+|       02.eda_2022.py
+|       03.eda-2023.ipynb
+|       03.eda-2023.py
+|       04.eda-2024.ipynb
+|       04.eda-2024.py
+|       05.eda-2025.ipynb
+|       05.eda-2025.py
+|       
++---reports
++---scripts
+|       clean_merged_datasets.py
+|       clean_merged_datasets_2024_2025.py
+|       create_splits.py
+|       evaluate.py
+|       predict.py
+|       preprocess.py
+|       train.py
+|       upload_to_hf.py
+|       
++---src
+|   |   __init__.py
+|   |   
+|   +---data
+|   |       loader.py
+|   |       preprocessing.py
+|   |       split.py
+|   |       validation.py
+|   |       __init__.py
+|   |       
+|   +---evaluation
+|   |       compare.py
+|   |       evaluate.py
+|   |       metrics.py
+|   |       plots.py
+|   |       
+|   +---features
+|   |       engineering.py
+|   |       selection.py
+|   |       
+|   +---inference
+|   |       load_pipeline.py
+|   |       predict.py
+|   |       
+|   +---training
+|   |       baseline.py
+|   |       common.py
+|   |       ensemble.py
+|   |       random_forest.py
+|   |       train.py
+|   |       tuning.py
+|   |       xgboost.py
+|   |       
+|   \---__pycache__
+|           __init__.cpython-313.pyc
+|           __init__.cpython-314.pyc
+|           
++---tests
+|       test_backend.py
+|       test_data.py
+|       test_evaluation.py
+|       test_inference.py
+|       test_training.py
+|       
+\---utils
+    |   load_raw_data.py
+    |   __init__.py
+    |   
+    \---__pycache__
+            load_raw_data.cpython-312.pyc
+            load_raw_data.cpython-313.pyc
+            load_raw_data.cpython-314.pyc
+            __init__.cpython-312.pyc
+            __init__.cpython-313.pyc
+            __init__.cpython-314.pyc
+            

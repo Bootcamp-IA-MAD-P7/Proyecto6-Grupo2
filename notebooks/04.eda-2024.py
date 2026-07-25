@@ -3,7 +3,11 @@
 # import sys
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+ROOT = Path.cwd().parent  # sube de notebooks/ a la raíz del repo
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 
 from utils.load_raw_data import RawData
 import polars as pl
