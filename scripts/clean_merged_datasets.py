@@ -37,7 +37,6 @@ TYPE_CASTS = {
     "ConvertedCompYearly": pl.String,
 }
 
-
 def load_and_select(year: int) -> pl.DataFrame:
     df = RawData(year=year).download()
     df = df.select(COMMON_COLUMNS)
