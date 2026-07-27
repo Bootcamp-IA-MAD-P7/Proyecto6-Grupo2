@@ -1,16 +1,5 @@
-import React from 'react';
-import { MainPage } from './MainPage';
+import { ExecutiveDashboard } from "@/components/dashboard/executive-dashboard"
 
-/**
- * Componente principal App
- * Carga directamente el componente MainPage para visualizar la interfaz sin errores de enrutamiento.
- */
-function App() {
-  return (
-    <div className="app-container">
-      <MainPage />
-    </div>
-  );
+export default function App() {
+  return <ExecutiveDashboard />
 }
-
-export default App;
