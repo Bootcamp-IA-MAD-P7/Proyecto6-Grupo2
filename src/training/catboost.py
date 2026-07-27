@@ -94,3 +94,7 @@ def run_catboost(
     print(f"OOF predictions shape: {oof_preds.shape}")
     print(f"Test predictions shape: {test_preds.shape}")
     print("CatBoost training complete.")
+
+
+if __name__ == "__main__":
+    run_catboost(pipeline_dir=PIPELINE_DIR)
