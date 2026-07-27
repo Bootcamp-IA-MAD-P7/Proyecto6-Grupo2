@@ -27,6 +27,13 @@ TARGET = "JobSat"
 PIPELINE_DIR = Path("models/pipelines/cat_lgbm_xgb")
 
 
+def bin_target(y: np.ndarray) -> np.ndarray:
+    result = np.zeros(len(y), dtype=np.int8)
+    result[(y >= 4) & (y <= 6)] = 1
+    result[y >= 7] = 2
+    return result
+
+
 def load_splits(data_dir: Path) -> tuple[pl.DataFrame, pl.DataFrame, pl.DataFrame]:
     splits_dir = data_dir / "splits"
     train = pl.read_parquet(splits_dir / "train.parquet")
@@ -72,6 +79,28 @@ def expand_multiselect(
         )
 
     return train, dev, test
+
+
+def engineer_features(
+    train: pl.DataFrame,
+    dev: pl.DataFrame,
+    test: pl.DataFrame,
+) -> tuple[pl.DataFrame, pl.DataFrame, pl.DataFrame]:
+    def _engineer(df: pl.DataFrame) -> pl.DataFrame:
+        median_salary = train["ConvertedCompYearly"].median()
+        return df.with_columns(
+            [
+                (pl.col("ConvertedCompYearly") / (pl.col("YearsCodeNum") + 1)).alias(
+                    "salary_per_year_experience"
+                ),
+                (pl.col("YearsCodeNum") > 10).cast(pl.Int8).alias("is_senior"),
+                (pl.col("ConvertedCompYearly") > median_salary)
+                .cast(pl.Int8)
+                .alias("is_high_earner"),
+            ]
+        )
+
+    return _engineer(train), _engineer(dev), _engineer(test)
 
 
 def _rebuild_encoded_df(
@@ -133,9 +162,9 @@ def save_pipeline(
     X_train_enc: pl.DataFrame,
     X_dev_enc: pl.DataFrame,
     X_test_enc: pl.DataFrame,
-    y_train: pl.Series,
-    y_dev: pl.Series,
-    y_test: pl.Series,
+    y_train: np.ndarray,
+    y_dev: np.ndarray,
+    y_test: np.ndarray,
 ) -> None:
     pipeline_dir.mkdir(parents=True, exist_ok=True)
 
@@ -147,9 +176,9 @@ def save_pipeline(
     X_dev_enc.write_parquet(pipeline_dir / "X_dev_enc.parquet")
     X_test_enc.write_parquet(pipeline_dir / "X_test_enc.parquet")
 
-    np.save(pipeline_dir / "y_train.npy", y_train.to_numpy())
-    np.save(pipeline_dir / "y_dev.npy", y_dev.to_numpy())
-    np.save(pipeline_dir / "y_test.npy", y_test.to_numpy())
+    np.save(pipeline_dir / "y_train.npy", y_train)
+    np.save(pipeline_dir / "y_dev.npy", y_dev)
+    np.save(pipeline_dir / "y_test.npy", y_test)
 
     print(f"Pipeline saved to {pipeline_dir}")
 
@@ -179,15 +208,17 @@ def run_preprocessing(
     print("Expanding multi-select columns...")
     train, dev, test = expand_multiselect(train, dev, test)
 
+    print("Engineering features...")
+    train, dev, test = engineer_features(train, dev, test)
+
     print("Separating features and target...")
     X_train = train.drop(TARGET)
-    y_train = train[TARGET].cast(pl.Float64)
-
     X_dev = dev.drop(TARGET)
-    y_dev = dev[TARGET].cast(pl.Float64)
-
     X_test = test.drop(TARGET)
-    y_test = test[TARGET].cast(pl.Float64)
+
+    y_train = bin_target(train[TARGET].cast(pl.Float64).to_numpy())
+    y_dev = bin_target(dev[TARGET].cast(pl.Float64).to_numpy())
+    y_test = bin_target(test[TARGET].cast(pl.Float64).to_numpy())
 
     print("Encoding categoricals for LightGBM/XGBoost...")
     X_train_enc, X_dev_enc, X_test_enc, encoder = encode_categoricals(
@@ -217,10 +248,10 @@ def run_preprocessing(
         "X_train": X_train,
         "X_dev": X_dev,
         "X_test": X_test,
-        "y_train": y_train,
-        "y_dev": y_dev,
-        "y_test": y_test,
         "X_train_enc": X_train_enc,
         "X_dev_enc": X_dev_enc,
         "X_test_enc": X_test_enc,
+        "y_train": y_train,
+        "y_dev": y_dev,
+        "y_test": y_test,
     }

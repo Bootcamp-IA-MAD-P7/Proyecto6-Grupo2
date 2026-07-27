@@ -1,78 +1,72 @@
 import numpy as np
+import joblib
 from pathlib import Path
-from sklearn.linear_model import Ridge
-from sklearn.metrics import root_mean_squared_error
-from safetensors.numpy import save_file, load_file
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
 from src.data.cat_lgbm_xgb.preprocessing import PIPELINE_DIR, load_pipeline
+from src.training.catboost import bin_target
 
 TRAINED_DIR = Path("models/trained")
 RANDOM_SEED = 42
-RIDGE_PARAMS = {
-    "alpha": 1.0,
-    "fit_intercept": True,
+LR_PARAMS = {
+    "multi_class": "multinomial",
+    "solver": "lbfgs",
+    "max_iter": 1000,
+    "random_state": RANDOM_SEED,
 }
+N_CLASSES = 3
 
 
-def load_oof_predictions(
-    pipeline_dir: Path,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    oof_catboost: np.ndarray = np.load(pipeline_dir / "oof_catboost.npy")
-    oof_lgbm: np.ndarray = np.load(pipeline_dir / "oof_lgbm.npy")
-    oof_xgb: np.ndarray = np.load(pipeline_dir / "oof_xgb.npy")
-    oof_stack: np.ndarray = np.column_stack([oof_catboost, oof_lgbm, oof_xgb])
-    return oof_stack, oof_catboost, oof_lgbm, oof_xgb
+def _stack_proba(*arrays: np.ndarray) -> np.ndarray:
+    return np.column_stack(arrays)
 
 
-def load_test_predictions(pipeline_dir: Path) -> np.ndarray:
-    test_catboost: np.ndarray = np.load(pipeline_dir / "test_preds_catboost.npy")
-    test_lgbm: np.ndarray = np.load(pipeline_dir / "test_preds_lgbm.npy")
-    test_xgb: np.ndarray = np.load(pipeline_dir / "test_preds_xgb.npy")
-    return np.column_stack([test_catboost, test_lgbm, test_xgb])
+def load_oof_probas(pipeline_dir: Path) -> np.ndarray:
+    cb = np.load(pipeline_dir / "oof_catboost_proba.npy")
+    lgb = np.load(pipeline_dir / "oof_lgbm_proba.npy")
+    xgb = np.load(pipeline_dir / "oof_xgb_proba.npy")
+    return _stack_proba(cb, lgb, xgb)
 
 
-def load_dev_predictions(data: dict, trained_dir: Path) -> np.ndarray:
-    from catboost import CatBoostRegressor, Pool
+def load_test_probas(pipeline_dir: Path) -> np.ndarray:
+    cb = np.load(pipeline_dir / "test_preds_catboost_proba.npy")
+    lgb = np.load(pipeline_dir / "test_preds_lgbm_proba.npy")
+    xgb = np.load(pipeline_dir / "test_preds_xgb_proba.npy")
+    return _stack_proba(cb, lgb, xgb)
+
+
+def load_dev_probas(data: dict, trained_dir: Path) -> np.ndarray:
+    from catboost import CatBoostClassifier, Pool
     import lightgbm as lgb
     import xgboost as xgb
     from src.data.cat_lgbm_xgb.preprocessing import CATEGORICAL_COLS
 
-    catboost_model = CatBoostRegressor()
-    catboost_model.load_model(str(trained_dir / "catboost.cbm"))
+    cb_model = CatBoostClassifier()
+    cb_model.load_model(str(trained_dir / "catboost.cbm"))
     X_dev_pd = data["X_dev"].to_pandas()
     dev_pool = Pool(X_dev_pd, cat_features=CATEGORICAL_COLS)
-    dev_catboost: np.ndarray = catboost_model.predict(dev_pool)
+    dev_cb: np.ndarray = np.asarray(cb_model.predict_proba(dev_pool))
 
-    lgbm_model = lgb.Booster(model_file=str(trained_dir / "lgbm.txt"))
+    lgb_model = lgb.Booster(model_file=str(trained_dir / "lgbm.txt"))
     X_dev_enc_np = data["X_dev_enc"].to_numpy()
-    dev_catboost: np.ndarray = np.asarray(catboost_model.predict(dev_pool))
+    dev_lgb: np.ndarray = np.asarray(lgb_model.predict(X_dev_enc_np))
 
-    lgbm_model = lgb.Booster(model_file=str(trained_dir / "lgbm.txt"))
-    X_dev_enc_np = data["X_dev_enc"].to_numpy()
-    dev_lgbm: np.ndarray = np.asarray(lgbm_model.predict(X_dev_enc_np))
-
-    xgb_model = xgb.XGBRegressor()
+    xgb_model = xgb.XGBClassifier()
     xgb_model.load_model(str(trained_dir / "xgb.ubj"))
-    dev_xgb: np.ndarray = np.asarray(xgb_model.predict(X_dev_enc_np))
+    dev_xgb: np.ndarray = np.asarray(xgb_model.predict_proba(X_dev_enc_np))
 
-    return np.column_stack([dev_catboost, dev_lgbm, dev_xgb])
+    return _stack_proba(dev_cb, dev_lgb, dev_xgb)
 
 
-def save_ridge(model: Ridge, trained_dir: Path) -> None:
+def save_meta_model(model: LogisticRegression, trained_dir: Path) -> None:
     trained_dir.mkdir(parents=True, exist_ok=True)
-    tensors = {
-        "coef": model.coef_.astype(np.float32),
-        "intercept": np.array([model.intercept_], dtype=np.float32),
-    }
-    save_file(tensors, str(trained_dir / "ridge_meta.safetensors"))
-    print(f"Ridge meta-model saved to {trained_dir / 'ridge_meta.safetensors'}")
+    path = trained_dir / "ensemble_meta.joblib"
+    joblib.dump(model, path)
+    print(f"Meta-model saved to {path}")
 
 
-def load_ridge(trained_dir: Path) -> Ridge:
-    tensors = load_file(str(trained_dir / "ridge_meta.safetensors"))
-    model = Ridge()
-    model.coef_ = tensors["coef"].astype(np.float64)
-    model.intercept_ = tensors["intercept"][0].astype(np.float64)
-    return model
+def load_meta_model(trained_dir: Path) -> LogisticRegression:
+    return joblib.load(trained_dir / "ensemble_meta.joblib")
 
 
 def run_ensemble(
@@ -82,38 +76,36 @@ def run_ensemble(
     print("Loading pipeline...")
     data = load_pipeline(pipeline_dir)
 
-    print("Loading OOF predictions...")
-    oof_stack, oof_catboost, oof_lgbm, oof_xgb = load_oof_predictions(pipeline_dir)
-    y_train = data["y_train"]
+    print("Loading OOF probabilities...")
+    oof_stack = load_oof_probas(pipeline_dir)
+    y_train = bin_target(data["y_train"].astype(np.int8))
 
-    print("Individual OOF RMSEs:")
-    print(f"  CatBoost : {root_mean_squared_error(y_train, oof_catboost):.4f}")
-    print(f"  LGBM     : {root_mean_squared_error(y_train, oof_lgbm):.4f}")
-    print(f"  XGBoost  : {root_mean_squared_error(y_train, oof_xgb):.4f}")
+    target_names = ["low", "medium", "high"]
 
-    print("Training Ridge meta-model on OOF stack...")
-    ridge = Ridge(**RIDGE_PARAMS)
-    ridge.fit(oof_stack, y_train)
-    print(f"Ridge coefficients: {ridge.coef_}")
-    print(f"Ridge intercept: {ridge.intercept_:.4f}")
+    print(f"OOF feature matrix shape: {oof_stack.shape} ({N_CLASSES} classes × 3 models)")
 
-    print("Saving Ridge meta-model...")
-    save_ridge(ridge, trained_dir)
+    print("Training LogisticRegression meta-model on OOF probabilities...")
+    meta = LogisticRegression(**LR_PARAMS)
+    meta.fit(oof_stack, y_train)
+
+    oof_preds = meta.predict(oof_stack)
+    print("\nOOF Ensemble classification report:")
+    print(classification_report(y_train, oof_preds, target_names=target_names, zero_division=0))
+
+    print("Saving meta-model...")
+    save_meta_model(meta, trained_dir)
 
     print("Evaluating on dev set...")
-    dev_stack = load_dev_predictions(data, trained_dir)
-    y_dev = data["y_dev"]
-
-    dev_preds = ridge.predict(dev_stack)
-    dev_rmse = root_mean_squared_error(y_dev, dev_preds)
-    print(f"Dev RMSE (ensemble): {dev_rmse:.4f}")
+    dev_stack = load_dev_probas(data, trained_dir)
+    y_dev = bin_target(data["y_dev"].astype(np.int8))
+    dev_preds = meta.predict(dev_stack)
+    print("\nEnsemble Dev classification report:")
+    print(classification_report(y_dev, dev_preds, target_names=target_names, zero_division=0))
 
     print("Generating test predictions...")
-    test_stack = load_test_predictions(pipeline_dir)
-    test_preds = ridge.predict(test_stack)
+    test_stack = load_test_probas(pipeline_dir)
+    test_preds = meta.predict(test_stack)
     np.save(pipeline_dir / "test_preds_ensemble.npy", test_preds)
-    print(
-        f"Ensemble test predictions saved to {pipeline_dir / 'test_preds_ensemble.npy'}"
-    )
+    print(f"Ensemble test predictions saved to {pipeline_dir / 'test_preds_ensemble.npy'}")
 
     print("Ensemble complete.")
