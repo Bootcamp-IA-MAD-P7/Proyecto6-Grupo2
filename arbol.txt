@@ -1,23 +1,9 @@
-﻿Listado de rutas de carpetas para el volumen Acer
-C:.
-|   .dockerignore
-|   .env.example
-|   .gitignore
-|   .python-version
-|   docker-compose.yml
-|   main.py
-|   Makefile
-|   pyproject.toml
-|   README.md
-|   uv.lock
-|   __init__.py
-|   
+﻿
 +---.github
 |   \---workflows
 |           ci.yml
 |           proyecto6-grupo2.yml
-|           
-
+|                   
 +---backend
 |   |   Dockerfile
 |   |   
@@ -58,16 +44,62 @@ C:.
 |           07_api.md
 |           08_testing.md
 |           09_deployment.md
+|           10_release_plan.md
 |           
 +---frontend
+|   |   components.json
 |   |   Dockerfile
+|   |   index.html
+|   |   package-lock.json
 |   |   package.json
+|   |   tsconfig.app.json
+|   |   tsconfig.json
+|   |   tsconfig.node.json
 |   |   vite.config.ts
 |   |   
+|   +---docs
+|   |       Product_Design_Guide.md
+|   |       
 |   \---src
-|           app.tsx
-|           main.tsx
-|           
+|       |   app.tsx
+|       |   index.css
+|       |   main.tsx
+|       |   MainPage.tsx
+|       |   
+|       +---components
+|       |   +---dashboard
+|       |   |       chart-card.tsx
+|       |   |       department-risk-table.tsx
+|       |   |       executive-dashboard.tsx
+|       |   |       influence-factors-card.tsx
+|       |   |       insight-card.tsx
+|       |   |       kpi-card.tsx
+|       |   |       model-status-card.tsx
+|       |   |       page-header.tsx
+|       |   |       responsible-use-notice.tsx
+|       |   |       risk-distribution.tsx
+|       |   |       risk-trend-chart.tsx
+|       |   |       
+|       |   +---layout
+|       |   |       app-shell.tsx
+|       |   |       app-sidebar.tsx
+|       |   |       topbar.tsx
+|       |   |       
+|       |   \---ui
+|       |           badge.tsx
+|       |           button.tsx
+|       |           card.tsx
+|       |           separator.tsx
+|       |           
+|       +---data
+|       |       dashboard.ts
+|       |       
+|       +---lib
+|       |       utils.ts
+|       |       
+|       \---types
+|               dashboard.ts
+|               
 +---models
 |   +---metrics
 |   |       .gitkeep
@@ -79,17 +111,25 @@ C:.
 |           .gitkeep
 |           
 +---notebooks
-|       01.eda-2021.ipynb
-|       01.eda-2021.py
-|       02.eda_2022.ipynb
-|       02.eda_2022.py
-|       03.eda-2023.ipynb
-|       03.eda-2023.py
-|       04.eda-2024.ipynb
-|       04.eda-2024.py
-|       05.eda-2025.ipynb
-|       05.eda-2025.py
-|       
+|   |   01.eda-2021.ipynb
+|   |   01.eda-2021.py
+|   |   02.eda_2022.ipynb
+|   |   02.eda_2022.py
+|   |   03.eda-2023.ipynb
+|   |   03.eda-2023.py
+|   |   04.eda-2024.ipynb
+|   |   04.eda-2024.py
+|   |   05.eda-2025.ipynb
+|   |   05.eda-2025.py
+|   |   boot.ipynb
+|   |   boot.py
+|   |   __init__.ipynb
+|   |   __init__.py
+|   |   
+|   \---__pycache__
+|           boot.cpython-313.pyc
+|           __init__.cpython-313.pyc
+|           
 +---reports
 +---scripts
 |       clean_merged_datasets.py
@@ -129,6 +169,7 @@ C:.
 |   |       baseline.py
 |   |       common.py
 |   |       ensemble.py
+|   |       knn.py
 |   |       random_forest.py
 |   |       train.py
 |   |       tuning.py
@@ -139,12 +180,19 @@ C:.
 |           __init__.cpython-314.pyc
 |           
 +---tests
-|       test_backend.py
-|       test_data.py
-|       test_evaluation.py
-|       test_inference.py
-|       test_training.py
-|       
+|   |   test_backend.py
+|   |   test_data.py
+|   |   test_evaluation.py
+|   |   test_inference.py
+|   |   test_training.py
+|   |   
+|   \---__pycache__
+|           test_backend.cpython-313-pytest-9.1.1.pyc
+|           test_data.cpython-313-pytest-9.1.1.pyc
+|           test_evaluation.cpython-313-pytest-9.1.1.pyc
+|           test_inference.cpython-313-pytest-9.1.1.pyc
+|           test_training.cpython-313-pytest-9.1.1.pyc
+|           
 \---utils
     |   load_raw_data.py
     |   __init__.py
