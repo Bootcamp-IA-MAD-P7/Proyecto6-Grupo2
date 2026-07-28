@@ -165,6 +165,12 @@ Model Training
 
 This module is the entry point of the data pipeline. It retrieves the raw survey data and schema, making them available for all subsequent preprocessing and machine learning stages.
 
+### Multi-Select Columns (DevType, LearnCode, etc.)
+
+Columns like `DevType` and `LearnCode` are semicolon-delimited multi-select fields (same pattern as `LanguageHaveWorkedWith`). The current feature set deliberately **excludes** them because the sklearn `Pipeline` (one-hot encoding via `ColumnTransformer`) cannot handle delimited lists directly — they would need to be exploded into binary flag columns before preprocessing.
+
+**Decision:** Leave `DevType` and `LearnCode` out of `FEATURES` for now. This keeps the pipeline simple with 8 clean features (2 numeric + 6 categorical) while still producing a valid 3-class Random Forest. Multi-select columns can be added later via a custom preprocessor step or handled in the ensemble/XGBoost pipeline if needed.
+
 Checks performed before processing.
 
 ## Cleaning

@@ -22,36 +22,17 @@ from sklearn.metrics import (
 )
 from sklearn.pipeline import Pipeline
 
-from src.training import common
-from src.training.random_forest import (
-    REFERENCE_CATEGORICAL_FEATURES,
-    REFERENCE_NUMERIC_FEATURES,
-    save,
-    train,
-)
-
-SPLITS_DIR = Path(
-    getattr(common, "SPLITS_DIR", Path("data/processed/splits"))
-)
-TARGET = getattr(common, "TARGET", "JobSat")
-JOBSAT_THRESHOLD = getattr(common, "JOBSAT_THRESHOLD", 7)
-FEATURES = list(
-    getattr(
-        common,
-        "FEATURES",
-        REFERENCE_NUMERIC_FEATURES + REFERENCE_CATEGORICAL_FEATURES,
-    )
-)
+from src.training.common import FEATURES, SPLITS_DIR, TARGET, bin_jobsat
+from src.training.random_forest import save, train
 
 
 class Metrics(TypedDict):
-    """Scalar binary-classification metrics."""
+    """Scalar multiclass classification metrics."""
 
     accuracy: float
     balanced_accuracy: float
     precision: float
     recall: float
-    f1: float
     f1_macro: float
     roc_auc: float
 
@@ -61,19 +42,18 @@ def calculate_metrics(
     X: pd.DataFrame,
     y: pd.Series,
 ) -> tuple[Metrics, np.ndarray]:
-    """Calculate classification metrics and the confusion matrix."""
+    """Calculate multiclass classification metrics."""
     predictions = pipeline.predict(X)
-    probabilities = pipeline.predict_proba(X)[:, 1]
+    probabilities = pipeline.predict_proba(X)
     metrics: Metrics = {
         "accuracy": accuracy_score(y, predictions),
         "balanced_accuracy": balanced_accuracy_score(y, predictions),
-        "precision": precision_score(y, predictions, zero_division=0),
-        "recall": recall_score(y, predictions, zero_division=0),
-        "f1": f1_score(y, predictions, zero_division=0),
+        "precision": precision_score(y, predictions, average="macro", zero_division=0),
+        "recall": recall_score(y, predictions, average="macro", zero_division=0),
         "f1_macro": f1_score(y, predictions, average="macro", zero_division=0),
-        "roc_auc": roc_auc_score(y, probabilities),
+        "roc_auc": roc_auc_score(y, probabilities, multi_class="ovr", average="macro"),
     }
-    return metrics, confusion_matrix(y, predictions, labels=[0, 1])
+    return metrics, confusion_matrix(y, predictions, labels=[0, 1, 2])
 
 
 def print_comparison(train_metrics: Metrics, dev_metrics: Metrics) -> None:
@@ -94,14 +74,9 @@ def print_comparison(train_metrics: Metrics, dev_metrics: Metrics) -> None:
         )
 
 
-def prepare_split(
-    frame: pl.DataFrame,
-) -> tuple[pd.DataFrame, pd.Series]:
-    """Binarize JobSat and return the shared feature matrix and target."""
-    prepared = frame.with_columns(
-        (pl.col(TARGET) >= JOBSAT_THRESHOLD).cast(pl.Int8).alias(TARGET)
-    )
-    return prepared.select(FEATURES).to_pandas(), prepared[TARGET].to_pandas()
+def prepare_split(frame: pl.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
+    binned = bin_jobsat(frame)
+    return binned.select(FEATURES).to_pandas(), binned[TARGET].to_pandas()
 
 
 def main() -> None:
