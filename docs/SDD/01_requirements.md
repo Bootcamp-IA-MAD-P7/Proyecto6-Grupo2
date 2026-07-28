@@ -1,1558 +1,845 @@
 # Software Design Document (SDD)
 
-# SDD-01 · Requisitos del sistema
+# SDD-01 · Requirements
 
 | Campo | Valor |
 |---|---|
-| Proyecto | Nombre pendiente de definir |
-| Documento | Requisitos del sistema |
+| Proyecto | TalentCare *(nombre provisional)* |
+| Documento | Requirements |
 | Código | SDD-01 |
-| Versión | 1.0 |
+| Versión | 1.1 |
 | Estado | Draft |
 | Última actualización | Julio 2026 |
 | Documento padre | SDD-00 · Project Scope |
-| Documento de origen | SDD-00A · Casos de uso |
+| Documento relacionado | SDD-00A · Casos de uso |
 | Documentos relacionados | SDD-02 a SDD-09 |
 
-## 1. Propósito
+---
 
-Este documento define los requisitos funcionales, no funcionales y las reglas de negocio del Producto Mínimo Viable.
+## 1. Propósito y alcance
 
-Su finalidad es traducir el alcance aprobado y los casos de uso identificados en especificaciones verificables que orienten el diseño, la implementación y las pruebas del sistema.
-
-Los requisitos aquí definidos constituyen la referencia funcional para:
-
-- El diseño de la arquitectura.
-- El desarrollo del frontend.
-- La implementación de la API.
-- El desarrollo del servicio de inferencia.
-- La integración del modelo de Machine Learning.
-- La estrategia de pruebas.
-- La validación del MVP.
-
-## 2. Alcance del documento
-
-Este documento especifica:
-
-- Actores del sistema.
-- Casos de uso de referencia.
-- Requisitos funcionales.
-- Requisitos no funcionales.
-- Reglas de negocio.
-- Criterios generales de aceptación.
-- Priorización de requisitos.
-- Dependencias y decisiones pendientes.
-- Trazabilidad entre alcance, casos de uso y requisitos.
-
-Este documento no especifica:
-
-- Tecnologías concretas.
-- Arquitectura física o lógica detallada.
-- Contratos definitivos de API.
-- Diseño visual de pantallas.
-- Pipeline de datos detallado.
-- Algoritmos concretos de entrenamiento.
-- Infraestructura de despliegue.
-- Casos de prueba exhaustivos.
-
-Estos aspectos serán desarrollados en los documentos posteriores del SDD.
-
-## 3. Convenciones
-
-### 3.1 Identificación
-
-Los requisitos funcionales utilizarán el formato:
+Este documento transforma los casos de uso de TalentCare en requisitos verificables, define el comportamiento esperado del MVP y sirve de referencia para arquitectura, implementación y pruebas. Mantiene trazabilidad con el Scope y los casos de uso sin cerrar detalles técnicos pendientes.
 
 ```text
-FR-XXX
+Scope → Use Cases → Requirements → Architecture → Implementation → Testing
 ```
 
-Los requisitos no funcionales utilizarán el formato:
+El catálogo cubre la interacción del usuario profesional, captura y validación de datos, análisis, inferencia, resultados, explicabilidad, recomendaciones, gestión del estado, errores, privacidad, seguridad, fairness y supervisión humana. Los límites generales y usos prohibidos se definen en **SDD-00 · Project Scope**.
 
-```text
-NFR-XXX
-```
+Este documento no define arquitectura, tecnologías, contratos concretos de API, diseño visual, pipeline detallado, algoritmos definitivos, infraestructura ni casos de prueba exhaustivos.
 
-Las reglas de negocio utilizarán el formato:
+---
 
-```text
-BR-XXX
-```
+## 2. Convenciones y fuentes
 
-Las decisiones pendientes utilizarán el formato:
+### 2.1 Fuentes normativas
 
-```text
-OD-XXX
-```
+| Orden | Fuente | Responsabilidad |
+|---|---|---|
+| 1 | SDD-00 · Project Scope | Alcance, objetivos, límites y usos prohibidos |
+| 2 | SDD-00A · Casos de uso | Actores, interacciones y reglas funcionales |
+| 3 | Decisiones abiertas de este documento | Aspectos que no pueden asumirse como cerrados |
 
-### 3.2 Prioridad
+En caso de contradicción prevalece el orden anterior.
 
-Los requisitos se clasificarán siguiendo el método MoSCoW:
+### 2.2 Identificadores
+
+| Prefijo | Categoría |
+|---|---|
+| FR-XXX | Requisito funcional |
+| DR-XXX | Requisito de datos |
+| MLR-XXX | Requisito de Machine Learning |
+| XR-XXX | Requisito de explicabilidad y recomendaciones |
+| HR-XXX | Requisito de supervisión humana |
+| NFR-XXX | Requisito no funcional |
+| PR-XXX | Requisito de privacidad |
+| SEC-XXX | Requisito de seguridad |
+| FAIR-XXX | Requisito de fairness |
+| OBS-XXX | Requisito de observabilidad |
+| OD-XXX | Decisión abierta |
+
+### 2.3 Prioridad y redacción
 
 | Prioridad | Significado |
 |---|---|
-| Must Have | Imprescindible para que el MVP sea funcional |
-| Should Have | Importante, pero aplazable si existe una limitación justificada |
-| Could Have | Deseable si existe capacidad disponible |
-| Won't Have | Excluido expresamente del MVP |
+| Must Have | Obligatorio para aceptar el MVP |
+| Should Have | Importante, aplazable con justificación |
+| Could Have | Opcional y sujeto a capacidad |
 
-### 3.3 Redacción normativa
+`Deberá` expresa obligación; `no deberá`, prohibición; y `podrá`, únicamente una opción aprobada. Todo requisito incluye fuente y criterio de aceptación observable.
 
-Los requisitos se redactan utilizando el término **deberá** para indicar una obligación verificable del sistema.
+---
 
-Las expresiones **podrá**, **se evaluará** o **pendiente de decisión** indican una capacidad opcional o todavía no aprobada.
+## 3. Actores, supuestos, restricciones y dependencias
 
-## 4. Actores
+### 3.1 Actores y responsabilidades
 
-### 4.1 Usuario
-
-Persona que accede a la aplicación web, introduce información profesional, solicita una predicción y consulta los resultados, explicaciones y recomendaciones generadas.
-
-El MVP no requiere que el usuario disponga de una cuenta ni de un perfil persistente.
-
-### 4.2 Sistema
-
-Conjunto formado por la aplicación web, la lógica de negocio, los mecanismos de validación, el servicio de inferencia, el modelo predictivo, el módulo de explicabilidad y el mecanismo de recomendaciones.
-
-### 4.3 Administrador
-
-El rol de administrador no forma parte del alcance funcional aprobado para el MVP.
-
-Cualquier funcionalidad administrativa futura deberá incorporarse mediante una revisión formal del Scope y de este documento.
-
-## 5. Casos de uso de referencia
-
-Los requisitos de este documento derivan de los siguientes casos de uso:
-
-| Caso de uso | Descripción |
+| Actor | Responsabilidades |
 |---|---|
-| UC-01 | Acceder a la plataforma |
-| UC-02 | Consultar la finalidad del análisis |
-| UC-03 | Introducir información profesional |
-| UC-04 | Validar la información introducida |
-| UC-05 | Solicitar una predicción |
-| UC-06 | Consultar el resultado de la predicción |
-| UC-07 | Consultar la explicación de la predicción |
-| UC-08 | Consultar recomendaciones |
-| UC-09 | Iniciar un nuevo análisis |
-| UC-10 | Gestionar indisponibilidad o errores del análisis |
+| Usuario profesional | Persona autorizada de Recursos Humanos, People Analytics, gestión de talento, management, dirección o diversidad, equidad e inclusión; accede, introduce datos, solicita análisis y consulta resultados, explicaciones y recomendaciones. |
+| Sistema | Valida datos, ejecuta o solicita inferencia, presenta resultados, asocia explicaciones y recomendaciones, gestiona errores y mantiene estados coherentes. |
+| Supervisión humana | El usuario profesional conserva la responsabilidad sobre la interpretación y cualquier acción posterior. |
 
-## 6. Requisitos funcionales
+El modelo es un componente interno. Una trabajadora individual no se presupone como usuaria directa del MVP.
 
-### 6.1 Acceso e información inicial
+### 3.2 Supuestos
 
-#### FR-001 · Acceso a la aplicación
+- El usuario dispone de navegador y conexión.
+- El modelo desplegado habrá sido validado antes de ponerse a disposición del MVP.
+- El formulario se ajustará al esquema final del modelo.
+- El sistema se utilizará como apoyo a la decisión.
 
-**Descripción**
+### 3.3 Restricciones
 
-El sistema deberá permitir al usuario acceder a la aplicación mediante una interfaz web.
+- El caso de uso es exclusivamente laboral y se orienta a la retención de mujeres en puestos STEM.
+- El sistema no automatizará decisiones laborales ni realizará vigilancia individual continua.
+- El MVP no requerirá autenticación, perfil persistente ni histórico obligatorio.
+- El sistema no penalizará, excluirá ni clasificará de forma perjudicial a trabajadoras.
 
-**Prioridad**
+### 3.4 Dependencias documentales
 
-Must Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-01.
-
-**Precondiciones**
-
-- La aplicación se encuentra desplegada.
-- El usuario dispone de un navegador compatible.
-- El servicio está disponible.
-
-**Resultado esperado**
-
-El usuario visualiza la interfaz inicial de la plataforma.
-
-**Criterios de aceptación**
-
-- La interfaz inicial carga correctamente.
-- El usuario puede identificar la finalidad general de la plataforma.
-- El usuario puede localizar la acción necesaria para iniciar un análisis.
-- No se requiere autenticación para acceder al MVP.
+| Documento | Responsabilidad |
+|---|---|
+| SDD-02 · Architecture | Componentes y decisiones arquitectónicas |
+| SDD-04 · Data Pipeline | Datos, transformaciones y validaciones |
+| SDD-05 · Modeling | Problema, modelos, métricas y explicabilidad |
+| SDD-06 · Frontend | Interfaz, accesibilidad y compatibilidad |
+| SDD-07 · API | Interfaces y contratos |
+| SDD-08 · Testing | Casos, niveles y evidencias de prueba |
+| SDD-09 · Deployment | Despliegue y operación |
 
 ---
 
-#### FR-002 · Presentación de la finalidad de la solución
+## 4. Requisitos funcionales
 
-**Descripción**
+### 4.1 Acceso, finalidad y limitaciones — UC-01
 
-El sistema deberá explicar de forma comprensible qué analiza la plataforma y qué tipo de resultado puede obtener el usuario.
+#### FR-001 · Acceso
 
-**Prioridad**
+- **Requisito:** El sistema deberá permitir acceder a la aplicación web sin autenticación.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-01; BR-09.
+- **Criterio de aceptación:** Una sesión sin credenciales puede abrir la interfaz inicial y comenzar el recorrido.
 
-Must Have.
+#### FR-002 · Finalidad
 
-**Actor principal**
+- **Requisito:** El sistema deberá presentar la finalidad laboral de TalentCare antes de solicitar datos.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-01; SDD-00.
+- **Criterio de aceptación:** La interfaz inicial identifica el apoyo a la retención de mujeres en puestos STEM y el análisis de señales asociadas al riesgo de salida.
 
-Usuario.
+#### FR-003 · Limitaciones
 
-**Caso de uso relacionado**
+- **Requisito:** El sistema deberá comunicar que el resultado es orientativo, requiere supervisión humana, no establece causalidad y no constituye una decisión laboral.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-01; BR-03; BR-06.
+- **Criterio de aceptación:** Las cuatro limitaciones son visibles antes de solicitar el análisis.
 
-UC-02.
+### 4.2 Captura de datos — UC-02
 
-**Resultado esperado**
+#### FR-004 · Formulario compatible
 
-El usuario comprende que la plataforma genera una estimación de satisfacción laboral mediante un modelo de Machine Learning.
+- **Requisito:** El formulario deberá mostrar únicamente variables compatibles con el esquema del modelo aprobado.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-02; BR-02; OD-005.
+- **Criterio de aceptación:** La lista de campos coincide con la versión aprobada del esquema de inferencia.
 
-**Criterios de aceptación**
+#### FR-005 · Campos obligatorios
 
-- La finalidad del análisis se presenta antes de la solicitud de predicción.
-- El sistema informa de que el resultado es una estimación.
-- El sistema evita presentar el resultado como un hecho cierto o una decisión definitiva.
-- El usuario puede identificar que la predicción estará acompañada de una explicación.
+- **Requisito:** El formulario deberá diferenciar los campos obligatorios de los opcionales.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-02.
+- **Criterio de aceptación:** Cada campo obligatorio dispone de una identificación visible y determinista.
+
+#### FR-006 · Edición y abandono
+
+- **Requisito:** El sistema deberá permitir introducir, seleccionar y modificar valores antes del envío, así como reiniciar o abandonar la interacción.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-02.
+- **Criterio de aceptación:** El usuario puede realizar cada acción sin ejecutar inferencia.
+
+#### FR-007 · Conservación temporal
+
+- **Requisito:** El sistema deberá conservar los datos únicamente durante la interacción conforme a la política temporal aprobada.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-02; OD-014.
+- **Criterio de aceptación:** Los datos permanecen disponibles durante la interacción y siguen la política definida al finalizarla.
+
+### 4.3 Validación — UC-03
+
+#### FR-008 · Obligatoriedad
+
+- **Requisito:** El sistema deberá detectar campos obligatorios sin valor.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-03; BR-01.
+- **Criterio de aceptación:** Cada campo obligatorio vacío impide el análisis y queda identificado.
+
+#### FR-009 · Tipo y formato
+
+- **Requisito:** El sistema deberá rechazar valores cuyo tipo o formato no coincida con el esquema aprobado.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-03; BR-02.
+- **Criterio de aceptación:** Un valor incompatible produce un error asociado al campo y no alcanza la inferencia.
+
+#### FR-010 · Rango y categoría
+
+- **Requisito:** El sistema deberá rechazar valores fuera de los rangos o categorías admitidos.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-03; BR-02.
+- **Criterio de aceptación:** Los casos fuera del dominio aprobado se rechazan antes de procesarse.
+
+#### FR-011 · Mensajes de validación
+
+- **Requisito:** El sistema deberá asociar a cada error de entrada un mensaje comprensible y una posibilidad de corrección.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-03.
+- **Criterio de aceptación:** El usuario puede identificar y corregir el campo afectado sin reiniciar todo el formulario.
+
+#### FR-012 · Bloqueo de inferencia
+
+- **Requisito:** El sistema no deberá ejecutar inferencia mientras exista un error de validación.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-03; BR-01.
+- **Criterio de aceptación:** Ninguna solicitud inválida alcanza el componente de inferencia.
+
+#### FR-013 · Validación en límites
+
+- **Requisito:** Las entradas deberán validarse en la interfaz y nuevamente en el límite de procesamiento que reciba la solicitud.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-03; SEC-001.
+- **Criterio de aceptación:** Una solicitud manipulada que eluda la interfaz sigue siendo rechazada.
+
+### 4.4 Solicitud y procesamiento — UC-04
+
+#### FR-014 · Solicitud válida
+
+- **Requisito:** El sistema deberá permitir solicitar el análisis únicamente después de validar los datos.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-04; BR-01.
+- **Criterio de aceptación:** La acción inicia el procesamiento con datos válidos y permanece bloqueada en caso contrario.
+
+#### FR-015 · Adaptación al esquema
+
+- **Requisito:** El sistema deberá adaptar los datos validados al esquema de inferencia aprobado.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-04; BR-02.
+- **Criterio de aceptación:** El modelo recibe exclusivamente campos, tipos y transformaciones compatibles.
+
+#### FR-016 · Modelo aprobado
+
+- **Requisito:** La inferencia deberá utilizar una versión identificable del modelo y del procesamiento aprobados.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-04; MLR-013.
+- **Criterio de aceptación:** Cada ejecución permite identificar internamente las versiones utilizadas.
+
+#### FR-017 · Estimación
+
+- **Requisito:** El sistema deberá producir una estimación correspondiente a la variable objetivo y a la estrategia de clases finalmente validadas.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-04; OD-002; OD-004.
+- **Criterio de aceptación:** La salida pertenece al dominio aprobado y una salida desconocida se rechaza.
+
+#### FR-018 · Resultado compuesto
+
+- **Requisito:** El sistema deberá preparar el resultado, obtener una explicación y seleccionar o generar recomendaciones, o indicar de forma explícita su indisponibilidad.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-04; BR-04; BR-05.
+- **Criterio de aceptación:** La respuesta diferencia cada elemento disponible de cualquier estado de indisponibilidad.
+
+#### FR-019 · Estado de procesamiento
+
+- **Requisito:** El sistema deberá mostrar un estado de procesamiento y evitar envíos duplicados mientras una solicitud esté activa.
+- **Prioridad:** Should Have.
+- **Fuente:** UC-04.
+- **Criterio de aceptación:** Una acción iniciada muestra espera, bloquea duplicados y finaliza en resultado o error.
+
+### 4.5 Presentación del resultado — UC-05
+
+#### FR-020 · Presentación comprensible
+
+- **Requisito:** El sistema deberá presentar la estimación mediante una etiqueta comprensible.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-05.
+- **Criterio de aceptación:** La interfaz no expone identificadores internos como sustituto de la etiqueta.
+
+#### FR-021 · Separación de información
+
+- **Requisito:** El sistema deberá diferenciar visual y semánticamente los datos de entrada de la estimación.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-05.
+- **Criterio de aceptación:** Una revisión de la interfaz identifica ambas categorías de información sin ambigüedad.
+
+#### FR-022 · Interpretación
+
+- **Requisito:** El resultado deberá mostrarse como estimación no causal, sin lenguaje determinista, diagnóstico o garantía.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-05; BR-03.
+- **Criterio de aceptación:** El contenido visible incluye la limitación y no contiene afirmaciones deterministas.
+
+#### FR-023 · Probabilidad o confianza
+
+- **Requisito:** El sistema podrá mostrar probabilidades o confianza solo después de aprobar y validar su interpretación y presentación.
+- **Prioridad:** Could Have.
+- **Fuente:** UC-05; OD-013.
+- **Criterio de aceptación:** Mientras OD-013 siga Pending no se presenta este valor; tras su aprobación se verifica contra el criterio definido.
+
+#### FR-024 · Vínculo con explicación
+
+- **Requisito:** El resultado deberá vincularse con la explicación de la misma ejecución.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-05; BR-04.
+- **Criterio de aceptación:** No puede asociarse una explicación de otra solicitud o versión.
+
+### 4.6 Explicación — UC-06
+
+#### FR-025 · Explicación local
+
+- **Requisito:** El sistema deberá proporcionar una explicación local asociada a cada predicción válida o un estado explícito de indisponibilidad.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-06; BR-04.
+- **Criterio de aceptación:** Cada predicción válida contiene una explicación vinculada o el estado indicado.
+
+#### FR-026 · Factores relevantes
+
+- **Requisito:** La explicación deberá presentar factores relevantes y, cuando proceda, sus contribuciones positivas o negativas.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-06.
+- **Criterio de aceptación:** Los factores pertenecen a la entrada procesada y su dirección solo aparece cuando el método la sustenta.
+
+#### FR-027 · Comunicación de la explicación
+
+- **Requisito:** La explicación deberá usar lenguaje comprensible, evitar causalidad y no contradecir la predicción.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-06.
+- **Criterio de aceptación:** La revisión funcional confirma las tres condiciones y rechaza explicaciones incoherentes.
+
+### 4.7 Recomendaciones — UC-07
+
+#### FR-028 · Recomendaciones
+
+- **Requisito:** Las recomendaciones deberán ser generales, contextualizadas, no prescriptivas y coherentes con el resultado y la explicación disponible.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-07; BR-05.
+- **Criterio de aceptación:** Cada recomendación supera las reglas de contenido y trazabilidad aprobadas.
+
+#### FR-029 · Indisponibilidad de recomendaciones
+
+- **Requisito:** El sistema no deberá inventar recomendaciones y deberá mostrar un estado controlado cuando no existan recomendaciones válidas.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-07.
+- **Criterio de aceptación:** Un caso sin recomendación válida conserva el resultado y muestra la indisponibilidad.
+
+### 4.8 Nuevo análisis — UC-08
+
+#### FR-030 · Reinicio independiente
+
+- **Requisito:** El sistema deberá permitir iniciar un análisis independiente, limpiar el estado temporal y volver al formulario; podrá pedir confirmación si hay datos no enviados.
+- **Prioridad:** Should Have.
+- **Fuente:** UC-08; BR-08.
+- **Criterio de aceptación:** El nuevo formulario no reutiliza datos, resultados, explicaciones ni recomendaciones anteriores.
+
+### 4.9 Errores e indisponibilidad — UC-09
+
+#### FR-031 · Gestión funcional de errores
+
+- **Requisito:** El sistema deberá interrumpir de forma controlada una operación fallida, mantener un estado coherente, evitar resultados inválidos, informar sin detalles internos y ofrecer reintento o retorno cuando proceda.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-09; BR-07.
+- **Criterio de aceptación:** Los fallos de validación, inferencia, explicación y recomendaciones cumplen todas las condiciones y generan registro técnico.
 
 ---
 
-#### FR-003 · Información sobre las limitaciones del análisis
+## 5. Requisitos de datos y Machine Learning
 
-**Descripción**
+### 5.1 Contexto de datos
 
-El sistema deberá informar al usuario de las limitaciones generales de la predicción y del carácter orientativo del resultado.
+| Hecho verificado | Implicación |
+|---|---|
+| Gabriela realizó el EDA de la edición 2021. | El notebook de 2021 conserva la evidencia exploratoria. |
+| La edición 2021 contiene 83.439 registros y 48 variables. | Su estructura deberá documentarse sin convertirla en dataset final. |
+| La edición 2021 no contiene `JobSat`. | No permite por sí sola entrenar un modelo supervisado con esa variable. |
+| La edición 2025 contiene `JobSat`. | Su idoneidad como fuente y la de la variable siguen pendientes de validación. |
+| El equipo evalúa ediciones hasta 2025. | La edición o combinación final permanece en OD-001. |
 
-**Prioridad**
+### 5.2 Requisitos de datos
 
-Must Have.
+#### DR-001 · Correspondencia de esquema
 
-**Actor principal**
+- **Requisito:** Los datos de entrenamiento e inferencia deberán compartir definiciones compatibles para las variables utilizadas.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-00; BR-02.
+- **Criterio de aceptación:** Una comparación versionada no detecta diferencias no tratadas de nombre, tipo, categoría o significado.
 
-Usuario.
+#### DR-002 · Diccionario de datos
 
-**Caso de uso relacionado**
+- **Requisito:** El dataset seleccionado deberá disponer de un diccionario con significado, tipo, dominio, nulabilidad y sensibilidad de cada variable utilizada.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-04; SDD-05.
+- **Criterio de aceptación:** Toda variable incluida en entrenamiento o inferencia aparece documentada.
 
-UC-02.
+#### DR-003 · Calidad
 
-**Resultado esperado**
+- **Requisito:** La calidad deberá evaluarse para valores nulos, duplicados, tipos, rangos, categorías y consistencia.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-04.
+- **Criterio de aceptación:** Existe un informe reproducible con resultados y tratamiento decidido para cada dimensión.
 
-El usuario dispone del contexto mínimo necesario para interpretar correctamente la predicción.
+#### DR-004 · Transformaciones
 
-**Criterios de aceptación**
+- **Requisito:** Las transformaciones y codificaciones deberán ser deterministas, reproducibles y compartidas entre entrenamiento e inferencia.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-04; SDD-05.
+- **Criterio de aceptación:** La misma entrada y versión de pipeline producen la misma representación.
 
-- Se indica que el resultado depende de la información introducida.
-- Se indica que el resultado se basa en patrones aprendidos de datos históricos.
-- No se presenta la predicción como diagnóstico, garantía o decisión automatizada sobre una persona.
+#### DR-005 · Versionado y linaje
 
-### 6.2 Captura de información profesional
+- **Requisito:** El dataset y sus transformaciones deberán identificarse mediante versión y linaje.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-04.
+- **Criterio de aceptación:** Un artefacto entrenado puede vincularse a la fuente y transformación que lo generaron.
 
-#### FR-004 · Presentación del formulario de análisis
+#### DR-006 · Separación de capas
 
-**Descripción**
+- **Requisito:** Los datos brutos deberán mantenerse diferenciados de los datos procesados.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-04.
+- **Criterio de aceptación:** El pipeline no sobrescribe la fuente bruta y permite reconstruir la capa procesada.
 
-El sistema deberá presentar un formulario con las variables necesarias para que el modelo pueda generar una predicción.
+#### DR-007 · Prevención de leakage
 
-**Prioridad**
+- **Requisito:** Las variables y transformaciones deberán auditarse para impedir información no disponible en el momento de inferencia o derivada indebidamente del objetivo.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-00; SDD-05.
+- **Criterio de aceptación:** La revisión de leakage documenta variables excluidas y no detecta fugas no resueltas.
 
-Must Have.
+#### DR-008 · Variables descartadas
 
-**Actor principal**
+- **Requisito:** Toda variable descartada deberá registrar el motivo y la etapa de exclusión.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-04; SDD-05.
+- **Criterio de aceptación:** La configuración o documentación de selección permite reconstruir la decisión.
 
-Usuario.
+#### DR-009 · Variables sensibles
 
-**Caso de uso relacionado**
+- **Requisito:** Las variables sensibles y sus posibles proxies deberán identificarse y someterse a revisión de finalidad, privacidad y fairness.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-00; FAIR-003.
+- **Criterio de aceptación:** Existe un inventario revisado antes del entrenamiento final.
 
-UC-03.
+#### DR-010 · Representatividad
 
-**Precondiciones**
+- **Requisito:** La representatividad del dataset para mujeres en puestos STEM deberá evaluarse y documentarse.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-00.
+- **Criterio de aceptación:** El informe cuantifica la población disponible y documenta limitaciones relevantes.
 
-- El usuario ha accedido al flujo de análisis.
-- Se ha definido el conjunto de variables requerido por el modelo desplegado.
+#### DR-011 · Selección de dataset
 
-**Resultado esperado**
+- **Requisito:** Ninguna edición o combinación deberá declararse dataset final hasta resolver OD-001 y documentar comparabilidad, calidad, volumen, población y cambios de esquema.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-00; OD-001.
+- **Criterio de aceptación:** La selección aprobada incluye evidencia para cada criterio y una decisión registrada.
 
-El usuario puede introducir o seleccionar la información necesaria.
+### 5.3 Requisitos de Machine Learning
 
-**Criterios de aceptación**
+#### MLR-001 · Definición del problema
 
-- El formulario contiene todos los campos obligatorios.
-- Los campos se presentan con etiquetas comprensibles.
-- Los tipos de control son coherentes con los datos solicitados.
-- Las opciones disponibles coinciden con las categorías admitidas por el modelo.
+- **Requisito:** El diseño deberá diferenciar el problema de negocio, el fenómeno observado y la variable de modelado.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-00.
+- **Criterio de aceptación:** SDD-05 documenta por separado riesgo de rotación laboral, señal observada y objetivo seleccionado.
+
+#### MLR-002 · Variable objetivo
+
+- **Requisito:** La variable objetivo deberá justificarse y aprobarse antes del entrenamiento final.
+- **Prioridad:** Must Have.
+- **Fuente:** OD-002.
+- **Criterio de aceptación:** Existe una decisión aprobada con definición, limitaciones y relación con el fenómeno de interés.
+
+#### MLR-003 · Validación de JobSat
+
+- **Requisito:** La idoneidad de `JobSat` como variable objetivo directa o como proxy deberá validarse antes de cerrar el diseño del modelo.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-00; OD-003.
+- **Criterio de aceptación:** La evaluación distingue satisfacción laboral de rotación laboral y registra una conclusión aprobada.
+
+#### MLR-004 · Estrategia de clases
+
+- **Requisito:** La estrategia de clases deberá justificarse según la variable objetivo, su escala y distribución.
+- **Prioridad:** Must Have.
+- **Fuente:** OD-004.
+- **Criterio de aceptación:** SDD-05 registra clases, reglas de construcción y evidencia; mientras OD-004 siga Pending no se presupone formulación multiclase.
+
+#### MLR-005 · Baseline
+
+- **Requisito:** El modelado deberá establecer un baseline reproducible antes de comparar modelos candidatos.
+- **Prioridad:** Must Have.
+- **Fuente:** OD-008.
+- **Criterio de aceptación:** El baseline aprobado, configuración y resultados quedan registrados.
+
+#### MLR-006 · Modelos candidatos y ensemble
+
+- **Requisito:** Los modelos candidatos y cualquier ensemble deberán compararse bajo el mismo protocolo de evaluación.
+- **Prioridad:** Must Have.
+- **Fuente:** OD-009; OD-010.
+- **Criterio de aceptación:** La tabla comparativa utiliza las mismas particiones, métricas y reglas de validación.
+
+#### MLR-007 · Particiones
+
+- **Requisito:** Los datos deberán separarse en conjuntos de entrenamiento, validación y prueba sin contaminación entre ellos.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-05.
+- **Criterio de aceptación:** La partición es reproducible y la prueba no interviene en selección ni ajuste.
+
+#### MLR-008 · Validación cruzada
+
+- **Requisito:** La comparación de modelos deberá utilizar validación cruzada cuando sea compatible con los datos y documentar cualquier excepción.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-05.
+- **Criterio de aceptación:** Los resultados incluyen particiones reproducibles o una justificación aprobada de la excepción.
+
+#### MLR-009 · Hiperparámetros
+
+- **Requisito:** El ajuste de hiperparámetros deberá excluir el conjunto de prueba.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-05.
+- **Criterio de aceptación:** La configuración de búsqueda solo utiliza entrenamiento y validación.
+
+#### MLR-010 · Métricas
+
+- **Requisito:** Los modelos deberán evaluarse con las métricas y umbrales aprobados para el problema y por clase o subgrupo cuando corresponda.
+- **Prioridad:** Must Have.
+- **Fuente:** OD-006; OD-007.
+- **Criterio de aceptación:** No se selecciona modelo final mientras métricas o umbrales permanezcan sin aprobar.
+
+#### MLR-011 · Sobreajuste y errores
+
+- **Requisito:** La evaluación deberá incluir análisis de sobreajuste y de patrones de error.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-00; SDD-05.
+- **Criterio de aceptación:** El informe compara particiones y documenta errores relevantes y mitigaciones.
+
+#### MLR-012 · Reproducibilidad
+
+- **Requisito:** El entrenamiento y la evaluación deberán registrar datos, código, configuración, semillas y entorno necesarios para reproducir resultados.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-05.
+- **Criterio de aceptación:** Una ejecución controlada reproduce el protocolo y resultados dentro de la variación documentada.
+
+#### MLR-013 · Artefacto versionado
+
+- **Requisito:** El modelo, preprocesamiento y esquema de inferencia aprobados deberán persistirse y versionarse como una unidad compatible.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-05.
+- **Criterio de aceptación:** La carga de una versión recupera los tres elementos y rechaza combinaciones incompatibles.
+
+#### MLR-014 · Selección y limitaciones
+
+- **Requisito:** La selección final deberá justificar la comparación de modelos y documentar limitaciones, población aplicable y usos no permitidos.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-00; SDD-05.
+- **Criterio de aceptación:** La aprobación del modelo incluye evidencia comparativa y ficha de limitaciones.
+
+#### MLR-015 · Consistencia de inferencia
+
+- **Requisito:** La inferencia deberá aplicar el mismo procesamiento aprobado que la evaluación del modelo.
+- **Prioridad:** Must Have.
+- **Fuente:** BR-02; DR-004.
+- **Criterio de aceptación:** Una prueba de paridad confirma representaciones y salidas coherentes entre ambos flujos.
 
 ---
 
-#### FR-005 · Introducción de datos profesionales
+## 6. Explicabilidad, recomendaciones y supervisión humana
 
-**Descripción**
+### 6.1 Explicabilidad y recomendaciones
 
-El sistema deberá permitir que el usuario introduzca o seleccione los datos profesionales requeridos para ejecutar el análisis.
+| ID | Requisito | Prioridad | Fuente | Criterio de aceptación |
+|---|---|---|---|---|
+| XR-001 | El método de explicabilidad deberá aprobarse en SDD-05 antes de integrarse. | Must Have | OD-011 | La implementación corresponde al método y versión registrados. |
+| XR-002 | La explicación deberá corresponder a la predicción concreta y a los factores efectivamente utilizados. | Must Have | UC-06 | La trazabilidad vincula entrada, versión de modelo, salida y explicación. |
+| XR-003 | El sistema deberá rechazar explicaciones vacías, incompatibles o contradictorias. | Must Have | UC-06; BR-07 | Los tres casos producen indisponibilidad controlada y no una explicación válida. |
+| XR-004 | Una explicación deberá ser reproducible para la misma entrada, modelo, configuración y condiciones documentadas. | Must Have | SDD-05 | La prueba definida para el método cumple la tolerancia aprobada. |
+| XR-005 | La explicación deberá usar nombres comprensibles, contextualizar contribuciones y advertir que asociación no implica causalidad. | Must Have | UC-06; SDD-00 | La revisión de contenido confirma las tres condiciones. |
+| XR-006 | La lógica de recomendaciones deberá ser trazable, validable y aprobada antes de su uso. | Must Have | OD-012 | Cada recomendación se vincula a una regla, versión o fuente aprobada. |
+| XR-007 | Las recomendaciones deberán revisarse para excluir contenido discriminatorio, perjudicial, prescriptivo, diagnóstico o garantista. | Must Have | UC-07; SDD-00 | El conjunto publicado supera una revisión documentada de las categorías prohibidas. |
+| XR-008 | Las recomendaciones deberán relacionarse con el resultado y la explicación disponible, o mostrar indisponibilidad explícita. | Must Have | UC-07; BR-05 | Una recomendación incoherente se rechaza sin alterar la predicción. |
 
-**Prioridad**
+### 6.2 Supervisión humana y uso responsable
 
-Must Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-03.
-
-**Resultado esperado**
-
-La información introducida queda disponible temporalmente para su validación.
-
-**Criterios de aceptación**
-
-- El usuario puede completar todos los campos requeridos.
-- El usuario puede modificar los valores antes de solicitar el análisis.
-- Los datos se mantienen durante la interacción actual.
-- El sistema no ejecuta la predicción mientras falten datos obligatorios.
+| ID | Requisito | Prioridad | Fuente | Criterio de aceptación |
+|---|---|---|---|---|
+| HR-001 | TalentCare deberá presentarse y operar como herramienta de apoyo a la decisión. | Must Have | SDD-00; BR-06 | La interfaz y documentación no atribuyen al sistema autoridad decisoria. |
+| HR-002 | El usuario profesional deberá conservar la interpretación y decisión final. | Must Have | UC-01; SDD-00 | Las advertencias asignan explícitamente la decisión a una persona responsable. |
+| HR-003 | Ninguna predicción deberá activar automáticamente contratación, despido, promoción, sanción, evaluación u otra acción laboral. | Must Have | SDD-00; BR-06 | No existe un flujo que ejecute automáticamente esas acciones. |
+| HR-004 | El sistema no deberá sustituir el criterio de profesionales de Recursos Humanos, People Analytics o gestión de talento. | Must Have | SDD-00 | Ningún resultado se presenta como instrucción obligatoria. |
+| HR-005 | El sistema no deberá utilizarse para vigilancia individual continua. | Must Have | SDD-00 | El MVP carece de seguimiento continuo o perfil histórico individual. |
+| HR-006 | Los resultados no deberán utilizarse para penalizar, excluir o clasificar de forma perjudicial a trabajadoras. | Must Have | UC-07; SDD-00 | La limitación es visible y no existen acciones de penalización o exclusión. |
+| HR-007 | Los resultados deberán mostrar sus limitaciones y requerir interpretación dentro del contexto profesional aplicable. | Must Have | UC-01; UC-05 | Resultado, explicación y recomendaciones mantienen visibles las limitaciones. |
 
 ---
-
-#### FR-006 · Identificación de campos obligatorios
-
-**Descripción**
-
-El sistema deberá identificar claramente qué campos son obligatorios para realizar la predicción.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-03.
-
-**Criterios de aceptación**
-
-- Los campos obligatorios se diferencian de los opcionales.
-- El usuario puede reconocer qué información falta antes de enviar el formulario.
-- La ausencia de un campo obligatorio impide solicitar la predicción.
-
-### 6.3 Validación de datos
-
-#### FR-007 · Validación de campos obligatorios
-
-**Descripción**
-
-El sistema deberá comprobar que todos los campos obligatorios han sido completados antes de solicitar una predicción.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-04.
-
-**Resultado esperado**
-
-Solo se procesan formularios completos.
-
-**Criterios de aceptación**
-
-- El sistema detecta campos obligatorios vacíos.
-- El sistema identifica los campos afectados.
-- El sistema muestra un mensaje comprensible.
-- La predicción no se ejecuta hasta que los errores hayan sido corregidos.
-
----
-
-#### FR-008 · Validación de formato y tipo
-
-**Descripción**
-
-El sistema deberá verificar que cada dato introducido cumple el tipo y formato esperado.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-04.
-
-**Criterios de aceptación**
-
-- Los valores numéricos solo aceptan formatos compatibles.
-- Las variables categóricas solo aceptan opciones reconocidas.
-- Los valores no válidos se rechazan antes de ejecutar la inferencia.
-- El usuario recibe una indicación clara sobre cómo corregir el error.
-
----
-
-#### FR-009 · Validación de rangos y categorías
-
-**Descripción**
-
-El sistema deberá validar que los valores introducidos se encuentran dentro de los rangos o categorías aceptados por el modelo.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-04.
-
-**Criterios de aceptación**
-
-- El sistema impide valores fuera de los rangos permitidos.
-- El sistema impide categorías desconocidas.
-- Las reglas de validación coinciden con el esquema de inferencia.
-- Los errores se comunican sin exponer detalles técnicos internos.
-
----
-
-#### FR-010 · Corrección de datos inválidos
-
-**Descripción**
-
-El sistema deberá permitir al usuario corregir los datos que no hayan superado la validación.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-04.
-
-**Criterios de aceptación**
-
-- Los valores válidos permanecen disponibles cuando se detecta otro error.
-- Los campos incorrectos se identifican visualmente.
-- El usuario puede corregirlos sin reiniciar todo el formulario.
-- El sistema vuelve a validar los datos tras la corrección.
-
-### 6.4 Predicción
-
-#### FR-011 · Solicitud de análisis
-
-**Descripción**
-
-El sistema deberá permitir al usuario solicitar una predicción cuando la información introducida haya sido validada correctamente.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-05.
-
-**Precondiciones**
-
-- Los datos requeridos están completos.
-- Los datos han superado las validaciones.
-- El modelo está disponible.
-
-**Resultado esperado**
-
-El sistema inicia el proceso de inferencia.
-
-**Criterios de aceptación**
-
-- La acción de análisis solo está disponible cuando los datos son válidos.
-- El sistema evita solicitudes duplicadas accidentales.
-- El usuario recibe una indicación de que la solicitud está siendo procesada.
-
----
-
-#### FR-012 · Preparación de datos para inferencia
-
-**Descripción**
-
-El sistema deberá transformar la información validada al esquema esperado por el modelo desplegado.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-05.
-
-**Resultado esperado**
-
-El modelo recibe un conjunto de variables compatible con el pipeline de inferencia.
-
-**Criterios de aceptación**
-
-- Las variables se envían en el orden y formato esperado.
-- Se aplican las mismas transformaciones requeridas por el pipeline validado.
-- No se incluyen variables desconocidas.
-- La inferencia se bloquea si el esquema no es compatible.
-
----
-
-#### FR-013 · Ejecución de inferencia
-
-**Descripción**
-
-El sistema deberá ejecutar el modelo de Machine Learning sobre los datos validados y preparados.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-05.
-
-**Resultado esperado**
-
-El modelo devuelve una categoría válida de satisfacción laboral.
-
-**Criterios de aceptación**
-
-- La inferencia utiliza el modelo aprobado para el MVP.
-- La respuesta contiene una categoría reconocida.
-- El sistema detecta respuestas vacías, incompletas o inválidas.
-- Los errores de inferencia se gestionan de forma controlada.
-
----
-
-#### FR-014 · Obtención de la categoría predicha
-
-**Descripción**
-
-El sistema deberá recuperar y procesar la categoría de satisfacción laboral estimada por el modelo.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-05 y UC-06.
-
-**Criterios de aceptación**
-
-- La categoría pertenece al conjunto de clases definido durante el modelado.
-- La categoría se transforma a una etiqueta comprensible para el usuario.
-- El sistema no muestra identificadores internos del modelo.
-- Una categoría desconocida genera un error controlado.
-
----
-
-#### FR-015 · Presentación del estado de procesamiento
-
-**Descripción**
-
-El sistema deberá informar al usuario mientras la predicción se encuentra en proceso.
-
-**Prioridad**
-
-Should Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-05.
-
-**Criterios de aceptación**
-
-- El usuario recibe una señal visual de procesamiento.
-- El formulario no se envía repetidamente durante la espera.
-- El sistema recupera el control de la interfaz al finalizar o fallar la solicitud.
-
-### 6.5 Presentación del resultado
-
-#### FR-016 · Visualización de la predicción
-
-**Descripción**
-
-El sistema deberá mostrar al usuario la categoría de satisfacción laboral estimada.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-06.
-
-**Precondiciones**
-
-- La inferencia se ha completado correctamente.
-- La categoría devuelta es válida.
-
-**Resultado esperado**
-
-El usuario visualiza el resultado principal del análisis.
-
-**Criterios de aceptación**
-
-- La categoría predicha se presenta de forma destacada.
-- La etiqueta es comprensible.
-- El resultado se identifica como una estimación del modelo.
-- La predicción se diferencia claramente de los datos introducidos.
-
----
-
-#### FR-017 · Contextualización del resultado
-
-**Descripción**
-
-El sistema deberá acompañar la predicción con información que facilite su interpretación.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-06.
-
-**Criterios de aceptación**
-
-- Se explica brevemente qué representa la categoría mostrada.
-- Se evita lenguaje determinista.
-- El resultado se vincula con su explicación.
-- El resultado se vincula con las recomendaciones disponibles.
-
----
-
-#### FR-018 · Presentación de probabilidades o confianza
-
-**Descripción**
-
-El sistema podrá mostrar probabilidades por clase o un nivel de confianza cuando esta funcionalidad haya sido aprobada y validada por el equipo.
-
-**Prioridad**
-
-Pendiente de decisión.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-06.
-
-**Estado**
-
-Decisión abierta.
-
-**Condiciones para su inclusión**
-
-- El modelo debe producir valores interpretables.
-- Las probabilidades deben estar suficientemente calibradas.
-- La presentación no debe inducir a una interpretación errónea.
-- El equipo debe aprobar formalmente su inclusión en el MVP.
-
-### 6.6 Explicabilidad
-
-#### FR-019 · Generación de explicación
-
-**Descripción**
-
-El sistema deberá obtener una explicación asociada a cada predicción válida.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-07.
-
-**Resultado esperado**
-
-Existe información que permite identificar los factores más relevantes de la predicción.
-
-**Criterios de aceptación**
-
-- La explicación corresponde a la predicción concreta.
-- Los factores explicativos pertenecen a las variables utilizadas por el modelo.
-- El sistema detecta explicaciones vacías o incompatibles.
-- La explicación no contradice el resultado mostrado.
-
----
-
-#### FR-020 · Presentación de factores relevantes
-
-**Descripción**
-
-El sistema deberá mostrar al usuario los factores que más han influido en la predicción.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-07.
-
-**Criterios de aceptación**
-
-- Los factores se presentan con nombres comprensibles.
-- La información técnica se traduce a lenguaje accesible.
-- Se diferencia, cuando proceda, entre contribuciones favorables y desfavorables.
-- La explicación se vincula claramente al resultado concreto.
-
----
-
-#### FR-021 · Visualización comprensible de la explicación
-
-**Descripción**
-
-El sistema deberá presentar la explicación mediante texto, recursos visuales o una combinación de ambos.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-07.
-
-**Criterios de aceptación**
-
-- La explicación puede comprenderse sin conocimientos avanzados de Machine Learning.
-- Los elementos visuales incluyen etiquetas.
-- El sistema evita exponer valores técnicos sin contexto.
-- La representación utilizada es coherente con los datos explicativos.
-
----
-
-#### FR-022 · Gestión de indisponibilidad de la explicación
-
-**Descripción**
-
-El sistema deberá gestionar de forma controlada los casos en los que la explicación no pueda generarse.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-07 y UC-10.
-
-**Criterios de aceptación**
-
-- El sistema no presenta explicaciones inventadas o incompletas como válidas.
-- El usuario recibe un mensaje comprensible.
-- La predicción se identifica como parcialmente disponible.
-- El sistema registra el error para su diagnóstico.
-
-### 6.7 Recomendaciones
-
-#### FR-023 · Generación o selección de recomendaciones
-
-**Descripción**
-
-El sistema deberá generar o seleccionar recomendaciones relacionadas con la predicción y con la información explicativa disponible.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-08.
-
-**Resultado esperado**
-
-El usuario recibe recomendaciones contextualizadas con el análisis.
-
-**Criterios de aceptación**
-
-- Las recomendaciones mantienen relación con el resultado.
-- Las recomendaciones utilizan la información explicativa cuando esta se encuentra disponible.
-- El sistema evita recomendaciones incompatibles con la predicción.
-- La lógica aplicada puede ser trazada y validada.
-
----
-
-#### FR-024 · Presentación de recomendaciones
-
-**Descripción**
-
-El sistema deberá mostrar las recomendaciones de forma clara, estructurada y comprensible.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-08.
-
-**Criterios de aceptación**
-
-- Las recomendaciones se diferencian del resultado predictivo.
-- El contenido utiliza lenguaje no determinista.
-- No se presentan como órdenes, diagnósticos o garantías.
-- El usuario puede identificar su relación con el análisis.
-
----
-
-#### FR-025 · Gestión de recomendaciones no disponibles
-
-**Descripción**
-
-El sistema deberá informar de manera controlada cuando no existan recomendaciones válidas para un resultado.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-08 y UC-10.
-
-**Criterios de aceptación**
-
-- El sistema no inventa recomendaciones.
-- Se informa al usuario de la indisponibilidad.
-- La ausencia de recomendaciones no modifica la categoría predicha.
-- El error se registra cuando corresponda.
-
-### 6.8 Reinicio del análisis
-
-#### FR-026 · Inicio de un nuevo análisis
-
-**Descripción**
-
-El sistema deberá permitir que el usuario inicie un nuevo análisis después de consultar un resultado.
-
-**Prioridad**
-
-Should Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-09.
-
-**Criterios de aceptación**
-
-- El usuario dispone de una acción para iniciar un nuevo análisis.
-- La aplicación vuelve al formulario.
-- El resultado anterior deja de mostrarse como resultado activo.
-- Los datos del análisis previo no se reutilizan accidentalmente.
-
----
-
-#### FR-027 · Limpieza del estado temporal
-
-**Descripción**
-
-El sistema deberá eliminar del estado activo los datos temporales del análisis anterior cuando el usuario inicie uno nuevo.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-09.
-
-**Criterios de aceptación**
-
-- Los campos del nuevo formulario no contienen valores anteriores salvo decisión explícita.
-- Las explicaciones anteriores no se vinculan a la nueva predicción.
-- Las recomendaciones anteriores no se reutilizan.
-- La nueva solicitud se procesa como una interacción independiente.
-
-### 6.9 Gestión de errores
-
-#### FR-028 · Detección de errores funcionales
-
-**Descripción**
-
-El sistema deberá detectar errores que impidan completar la validación, inferencia, explicación o generación de recomendaciones.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-10.
-
-**Criterios de aceptación**
-
-- Los errores se detectan antes de presentar resultados inválidos.
-- El sistema diferencia entre errores de validación y errores internos.
-- Los componentes afectados se identifican internamente.
-- El sistema conserva un estado coherente.
-
----
-
-#### FR-029 · Mensajes de error comprensibles
-
-**Descripción**
-
-El sistema deberá mostrar mensajes de error comprensibles para el usuario sin exponer detalles técnicos internos.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-10.
-
-**Criterios de aceptación**
-
-- El mensaje explica qué operación no pudo completarse.
-- El mensaje evita trazas, nombres internos o datos sensibles.
-- El usuario recibe una acción posible para continuar.
-- Los mensajes mantienen un lenguaje coherente en toda la aplicación.
-
----
-
-#### FR-030 · Reintento de una operación
-
-**Descripción**
-
-El sistema deberá permitir al usuario volver a intentar una predicción cuando el error sea recuperable.
-
-**Prioridad**
-
-Should Have.
-
-**Actor principal**
-
-Usuario.
-
-**Caso de uso relacionado**
-
-UC-10.
-
-**Criterios de aceptación**
-
-- El usuario puede volver al formulario o repetir la solicitud.
-- Los datos válidos pueden conservarse cuando sea seguro.
-- El sistema evita solicitudes duplicadas no controladas.
-- El nuevo intento no reutiliza respuestas inválidas.
-
----
-
-#### FR-031 · Prevención de resultados parciales inválidos
-
-**Descripción**
-
-El sistema no deberá presentar como resultado completo una respuesta incompleta, inconsistente o técnicamente inválida.
-
-**Prioridad**
-
-Must Have.
-
-**Actor principal**
-
-Sistema.
-
-**Caso de uso relacionado**
-
-UC-10.
-
-**Criterios de aceptación**
-
-- Una categoría desconocida no se muestra como válida.
-- Una explicación incompatible no se presenta.
-- Las recomendaciones no se muestran si no cumplen las reglas definidas.
-- El sistema diferencia entre resultado completo, resultado parcial controlado y error.
 
 ## 7. Requisitos no funcionales
 
-### 7.1 Rendimiento
+### 7.1 Rendimiento, disponibilidad y resiliencia
 
-#### NFR-001 · Tiempo de respuesta de la interfaz
+#### NFR-001 · Medición de rendimiento
 
-La aplicación deberá responder a las interacciones locales del usuario sin bloqueos perceptibles durante el uso normal.
+- **Requisito:** El sistema deberá medir los tiempos de las interacciones y del análisis contra los umbrales aprobados.
+- **Prioridad:** Must Have.
+- **Fuente:** OD-017.
+- **Criterio de aceptación:** SDD-08 registra resultados contra los umbrales; no se presupone un valor mientras OD-017 siga Pending.
 
-**Prioridad:** Must Have.
+#### NFR-002 · Espera visible
 
-**Métrica definitiva:** pendiente de definir en función de la arquitectura y las pruebas.
+- **Requisito:** Una operación no inmediata deberá mostrar un estado de procesamiento hasta terminar o fallar.
+- **Prioridad:** Should Have.
+- **Fuente:** UC-04.
+- **Criterio de aceptación:** El indicador aparece durante la operación y desaparece en ambos estados terminales.
 
----
+#### NFR-003 · Estado coherente
 
-#### NFR-002 · Tiempo de respuesta de la predicción
+- **Requisito:** Un fallo total o parcial no deberá dejar la interfaz ni el procesamiento en un estado incoherente.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-09.
+- **Criterio de aceptación:** Las pruebas de fallo finalizan en resultado válido, indisponibilidad controlada o error recuperable.
 
-El sistema deberá devolver el resultado de una solicitud de predicción dentro de un tiempo compatible con una experiencia interactiva.
+#### NFR-004 · Recuperación
 
-**Prioridad:** Must Have.
+- **Requisito:** Después de un error recuperable, el sistema deberá permitir reintentar o regresar a un estado funcional.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-09.
+- **Criterio de aceptación:** Cada error recuperable probado ofrece al menos una ruta de recuperación operativa.
 
-**Valor objetivo:** pendiente de aprobación.
+### 7.2 Usabilidad, accesibilidad y compatibilidad
 
-La métrica definitiva deberá establecerse antes de aprobar el documento de Testing.
+#### NFR-005 · Lenguaje y consistencia
 
----
+- **Requisito:** Controles, etiquetas, mensajes, resultados y acciones deberán utilizar lenguaje comprensible y patrones consistentes.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-01 a UC-09.
+- **Criterio de aceptación:** La revisión de interfaz no encuentra términos técnicos sin contexto ni acciones equivalentes con comportamiento contradictorio.
 
-#### NFR-003 · Estado de espera visible
+#### NFR-006 · Identificación de errores
 
-Cuando una operación no sea inmediata, el sistema deberá mostrar un estado de procesamiento.
+- **Requisito:** La interfaz deberá identificar cada error y la acción necesaria para corregirlo o continuar.
+- **Prioridad:** Must Have.
+- **Fuente:** UC-03; UC-09.
+- **Criterio de aceptación:** Los casos de error previstos muestran ubicación, causa funcional y siguiente acción.
 
-**Prioridad:** Should Have.
+#### NFR-007 · Teclado y etiquetas
 
-### 7.2 Disponibilidad y resiliencia
+- **Requisito:** Los controles interactivos deberán poder operarse con teclado y disponer de etiquetas programáticamente asociadas.
+- **Prioridad:** Should Have.
+- **Fuente:** SDD-06; OD-018.
+- **Criterio de aceptación:** El recorrido principal se completa con teclado y los controles exponen nombre accesible.
 
-#### NFR-004 · Disponibilidad para demostración
+#### NFR-008 · Percepción
 
-El sistema deberá encontrarse operativo durante las sesiones planificadas de evaluación y demostración.
+- **Requisito:** El sistema no deberá depender solo del color y deberá mantener contraste y semántica conforme al nivel de accesibilidad aprobado.
+- **Prioridad:** Should Have.
+- **Fuente:** SDD-06; OD-018.
+- **Criterio de aceptación:** Las pruebas del nivel aprobado verifican color, contraste y estructura semántica.
 
-**Prioridad:** Must Have.
+#### NFR-009 · Diseño adaptable
 
----
+- **Requisito:** La interfaz deberá ser utilizable en los tamaños de pantalla incluidos en la matriz aprobada.
+- **Prioridad:** Should Have.
+- **Fuente:** OD-019.
+- **Criterio de aceptación:** El recorrido crítico funciona en todos los tamaños registrados.
 
-#### NFR-005 · Gestión controlada de fallos
+#### NFR-010 · Compatibilidad
 
-Los fallos de un componente no deberán provocar que el sistema presente resultados inválidos como correctos.
+- **Requisito:** La aplicación deberá funcionar en la matriz mínima de navegadores y entornos aprobada.
+- **Prioridad:** Must Have.
+- **Fuente:** OD-019.
+- **Criterio de aceptación:** SDD-08 registra el resultado del recorrido crítico para cada elemento de la matriz.
 
-**Prioridad:** Must Have.
+### 7.3 Mantenibilidad, testabilidad y evolución
 
----
+#### NFR-011 · Modularidad
 
-#### NFR-006 · Recuperación de la interfaz
+- **Requisito:** La solución deberá separar responsabilidades de interfaz, negocio, datos, inferencia, explicabilidad y recomendaciones.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-00; SDD-02.
+- **Criterio de aceptación:** SDD-02 asigna cada responsabilidad a límites identificables sin ciclos no justificados.
 
-Después de un error recuperable, la interfaz deberá permitir al usuario volver a un estado funcional.
+#### NFR-012 · Configuración
 
-**Prioridad:** Must Have.
+- **Requisito:** La configuración variable entre entornos deberá gestionarse fuera de la lógica de negocio y sin secretos en el código.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-02; SEC-004.
+- **Criterio de aceptación:** La revisión del repositorio no encuentra valores sensibles ni configuración de entorno codificados en la lógica.
 
-### 7.3 Usabilidad
+#### NFR-013 · Calidad y documentación
 
-#### NFR-007 · Claridad de la interfaz
+- **Requisito:** El código, artefactos y documentación deberán mantenerse versionados y alineados con las decisiones SDD aprobadas.
+- **Prioridad:** Must Have.
+- **Fuente:** BR-10.
+- **Criterio de aceptación:** La revisión de una entrega no detecta divergencias no registradas entre implementación y SDD.
 
-La interfaz deberá utilizar textos, controles y mensajes comprensibles para usuarios sin conocimientos técnicos especializados.
+#### NFR-014 · Pruebas
 
-**Prioridad:** Must Have.
+- **Requisito:** Los componentes críticos y el recorrido completo deberán disponer de pruebas automatizadas o evidencia reproducible de validación.
+- **Prioridad:** Must Have.
+- **Fuente:** SDD-08.
+- **Criterio de aceptación:** La ejecución definida en SDD-08 cubre unidades críticas e integración desde entrada hasta resultado.
 
----
+#### NFR-015 · Evolución proporcional
 
-#### NFR-008 · Consistencia de interacción
-
-Los formularios, mensajes, acciones y resultados deberán mantener criterios de interacción consistentes.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-009 · Prevención de errores
-
-La interfaz deberá reducir la probabilidad de errores mediante controles adecuados, opciones limitadas y validaciones visibles.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-010 · Diseño adaptable
-
-La aplicación deberá ser utilizable en los tamaños de pantalla definidos para el MVP.
-
-**Prioridad:** Should Have.
-
-Los dispositivos y resoluciones objetivo deberán especificarse en `SDD-06 · Frontend`.
-
-### 7.4 Accesibilidad
-
-#### NFR-011 · Navegación comprensible
-
-La estructura y los componentes de la interfaz deberán seguir una jerarquía comprensible.
-
-**Prioridad:** Should Have.
-
----
-
-#### NFR-012 · Alternativas textuales
-
-Los elementos visuales que transmitan información relevante deberán disponer de etiquetas o alternativas textuales.
-
-**Prioridad:** Should Have.
-
----
-
-#### NFR-013 · No dependencia exclusiva del color
-
-El sistema no deberá utilizar únicamente el color para comunicar estados, errores o diferencias entre factores.
-
-**Prioridad:** Should Have.
-
-El nivel concreto de conformidad de accesibilidad queda pendiente de definición.
-
-### 7.5 Seguridad y privacidad
-
-#### NFR-014 · Minimización de datos
-
-El sistema solo deberá solicitar los datos necesarios para realizar la predicción y presentar el resultado.
-
-**Prioridad:** Must Have.
+- **Requisito:** La solución deberá permitir sustituir datasets o modelos aprobados sin exigir una arquitectura distribuida para el MVP.
+- **Prioridad:** Should Have.
+- **Fuente:** SDD-00; SDD-02.
+- **Criterio de aceptación:** La arquitectura documenta puntos de sustitución sin imponer componentes fuera del alcance.
 
 ---
 
-#### NFR-015 · Ausencia de datos identificativos innecesarios
+## 8. Privacidad, seguridad y fairness
 
-El MVP no deberá solicitar datos personales identificativos que no sean necesarios para la inferencia.
+### 8.1 Privacidad
 
-**Prioridad:** Must Have.
+| ID | Requisito | Prioridad | Fuente | Criterio de aceptación |
+|---|---|---|---|---|
+| PR-001 | El sistema deberá solicitar únicamente datos necesarios para la finalidad aprobada. | Must Have | SDD-00 | Cada campo dispone de justificación y los no justificados se excluyen. |
+| PR-002 | El MVP no deberá solicitar identificadores personales innecesarios. | Must Have | SDD-00 | El formulario y esquema no contienen identificadores sin finalidad aprobada. |
+| PR-003 | Los datos de una interacción no deberán persistirse ni reutilizarse en otra salvo aprobación expresa. | Must Have | BR-08; BR-09; OD-014 | El ciclo de vida cumple la política temporal aprobada. |
+| PR-004 | Los datos no deberán utilizarse para una finalidad distinta del análisis solicitado. | Must Have | SDD-00 | Los flujos no incluyen usos secundarios sin decisión aprobada. |
+| PR-005 | El almacenamiento de entradas, predicciones o feedback deberá aprobarse y documentar finalidad, datos, acceso, retención y eliminación. | Must Have | OD-022 | Mientras OD-022 siga Pending no existe almacenamiento persistente; si se aprueba, constan los cinco elementos. |
 
----
+### 8.2 Seguridad
 
-#### NFR-016 · Validación de entradas
+| ID | Requisito | Prioridad | Fuente | Criterio de aceptación |
+|---|---|---|---|---|
+| SEC-001 | Toda entrada recibida deberá validarse antes de su procesamiento. | Must Have | UC-03 | Se rechazan entradas ausentes, malformadas, fuera de dominio o no previstas. |
+| SEC-002 | Los errores no deberán exponer trazas, rutas, configuración, secretos ni detalles internos. | Must Have | UC-09 | Las respuestas de error no contienen ninguna categoría prohibida. |
+| SEC-003 | Los secretos y valores sensibles deberán mantenerse fuera del repositorio y del contenido entregado al cliente. | Must Have | SDD-02; SDD-09 | La revisión no encuentra secretos en código, historial entregado ni respuestas. |
+| SEC-004 | Las dependencias deberán declararse, versionarse y revisarse para detectar vulnerabilidades conocidas. | Must Have | SDD-03; SDD-09 | La entrega incluye inventario reproducible y resultado de revisión. |
+| SEC-005 | Las interfaces expuestas deberán aceptar solo operaciones y datos previstos por sus contratos aprobados. | Must Have | SDD-07 | Las pruebas rechazan entradas no admitidas sin revelar información interna. |
+| SEC-006 | Las vulnerabilidades deberán registrarse, evaluarse y resolverse o aceptarse antes del despliegue. | Must Have | SDD-08; SDD-09 | Ninguna vulnerabilidad relevante carece de estado, responsable y decisión. |
 
-Toda información recibida por el sistema deberá ser validada antes de su procesamiento.
+### 8.3 Fairness y evaluación responsable
 
-**Prioridad:** Must Have.
-
----
-
-#### NFR-017 · Protección de detalles internos
-
-Los mensajes dirigidos al usuario no deberán exponer trazas, configuraciones, rutas internas, secretos ni detalles técnicos sensibles.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-018 · Persistencia limitada
-
-Los datos introducidos por el usuario no deberán almacenarse de forma persistente salvo que esta capacidad sea aprobada y documentada expresamente.
-
-**Prioridad:** Must Have.
-
-La gestión exacta del estado temporal se definirá en los documentos de Arquitectura y Data Pipeline.
-
-### 7.6 Inteligencia Artificial Responsable
-
-#### NFR-019 · Explicabilidad
-
-Toda predicción válida deberá estar acompañada de una explicación o de un estado explícito que informe de la indisponibilidad de dicha explicación.
-
-**Prioridad:** Must Have.
+| ID | Requisito | Prioridad | Fuente | Criterio de aceptación |
+|---|---|---|---|---|
+| FAIR-001 | El rendimiento deberá evaluarse por los subgrupos relevantes definidos en el plan responsable. | Must Have | SDD-00; OD-015 | El informe presenta métricas aprobadas por subgrupo cuando los datos permiten una evaluación válida. |
+| FAIR-002 | Las diferencias entre subgrupos deberán cuantificarse y contextualizarse sin asumir que una métrica garantiza equidad. | Must Have | SDD-00; OD-016 | El informe incluye diferencias, limitación muestral y evaluación frente a criterios aprobados. |
+| FAIR-003 | Las variables sensibles y posibles proxies deberán revisarse antes de seleccionar variables predictoras. | Must Have | DR-009 | Cada variable dispone de decisión de inclusión, exclusión o uso para auditoría. |
+| FAIR-004 | La evaluación deberá documentar la representación de mujeres en puestos STEM y sus limitaciones. | Must Have | SDD-00; DR-010 | El informe incluye tamaños, cobertura y advertencias de generalización. |
+| FAIR-005 | Los sesgos y riesgos relevantes deberán documentarse con mitigaciones y riesgos residuales. | Must Have | SDD-00 | Ningún riesgo identificado queda sin evaluación, mitigación o aceptación explícita. |
+| FAIR-006 | Las métricas y umbrales de fairness deberán aprobarse antes de aceptar el modelo. | Must Have | OD-015; OD-016 | El modelo no se acepta mientras alguna decisión siga Pending. |
+| FAIR-007 | El despliegue deberá bloquearse si no están documentados los riesgos relevantes y su revisión humana. | Must Have | SDD-00; HR-002 | La evidencia de despliegue incluye aprobación responsable y evaluación de riesgos. |
 
 ---
 
-#### NFR-020 · Transparencia
+## 9. Errores y observabilidad
 
-El sistema deberá informar al usuario de que el resultado ha sido generado mediante un modelo de Machine Learning.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-021 · No determinismo comunicativo
-
-El lenguaje utilizado no deberá presentar la predicción como una verdad absoluta, diagnóstico o garantía.
-
-**Prioridad:** Must Have.
+| ID | Requisito | Prioridad | Fuente | Criterio de aceptación |
+|---|---|---|---|---|
+| OBS-001 | El sistema deberá registrar información para diagnosticar errores de validación, inferencia, explicación, recomendaciones e infraestructura. | Must Have | UC-09 | Cada fallo previsto identifica etapa, estado y resultado. |
+| OBS-002 | Los registros no deberán contener datos personales, sensibles, secretos ni entradas completas innecesarias. | Must Have | PR-001; SEC-003 | La inspección de logs no encuentra categorías prohibidas. |
+| OBS-003 | Las operaciones deberán correlacionarse para diagnóstico sin identificar innecesariamente a personas. | Should Have | UC-09 | Una solicitud se sigue mediante un identificador técnico no personal. |
+| OBS-004 | El sistema deberá gestionar los tiempos de espera agotados como errores controlados. | Must Have | UC-09; OD-017 | La operación termina sin resultado inválido y ofrece recuperación. |
+| OBS-005 | El sistema deberá recopilar las métricas aprobadas de disponibilidad, errores y tiempos. | Should Have | SDD-09; OD-017 | Los indicadores pueden consultarse sin exponer datos sensibles. |
+| OBS-006 | Los componentes deberán permitir una comprobación de estado cuando SDD-02 y SDD-09 lo determinen. | Should Have | SDD-02; SDD-09 | Cada componente señalado distingue operación e indisponibilidad. |
 
 ---
 
-#### NFR-022 · Coherencia entre predicción y explicación
+## 10. Exclusiones y usos prohibidos
 
-La información explicativa deberá corresponder a la misma ejecución de inferencia que generó el resultado.
+### 10.1 Capacidades fuera del MVP
 
-**Prioridad:** Must Have.
+Las capacidades siguientes se remiten a **SDD-00 · Project Scope** y, cuando proceda, a **SDD-10 · Roadmap**:
 
----
-
-#### NFR-023 · Coherencia de recomendaciones
-
-Las recomendaciones deberán estar vinculadas a la predicción y a los factores disponibles.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-024 · Evaluación del modelo
-
-El modelo deberá evaluarse mediante métricas adecuadas para clasificación multiclase antes de integrarse en el MVP.
-
-**Prioridad:** Must Have.
-
-Las métricas concretas y sus umbrales se definirán en `SDD-05 · Modeling`.
-
----
-
-#### NFR-025 · Evaluación de clases
-
-La evaluación del modelo deberá considerar el comportamiento por clase y no únicamente una métrica agregada.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-026 · Trazabilidad del modelo
-
-La versión del modelo utilizada por el sistema deberá poder identificarse internamente.
-
-**Prioridad:** Should Have.
-
-### 7.7 Mantenibilidad
-
-#### NFR-027 · Modularidad
-
-El sistema deberá mantener separados los componentes de interfaz, lógica de negocio, inferencia, explicabilidad y recomendaciones.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-028 · Desacoplamiento del modelo
-
-La aplicación no deberá depender de detalles internos del algoritmo más allá del contrato de inferencia definido.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-029 · Calidad del código
-
-El código deberá mantener criterios homogéneos de estructura, legibilidad y documentación.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-030 · Configuración externa
-
-Los valores de configuración que puedan variar entre entornos no deberán quedar codificados directamente en el código fuente cuando puedan gestionarse de forma externa.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-031 · Documentación sincronizada
-
-Las decisiones implementadas deberán mantenerse alineadas con los documentos del SDD.
-
-**Prioridad:** Must Have.
-
-### 7.8 Testabilidad
-
-#### NFR-032 · Requisitos verificables
-
-Cada requisito Must Have deberá disponer de uno o más criterios de aceptación verificables.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-033 · Pruebas automatizadas
-
-Los componentes críticos deberán disponer de pruebas automatizadas adecuadas a su naturaleza.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-034 · Validación de integración
-
-El flujo completo desde la entrada de datos hasta la presentación del resultado deberá ser probado de forma integrada.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-035 · Reproducibilidad del modelo
-
-El proceso de entrenamiento y evaluación deberá poder reproducirse dentro de las condiciones definidas por el proyecto.
-
-**Prioridad:** Must Have.
-
-### 7.9 Observabilidad
-
-#### NFR-036 · Registro de errores
-
-El sistema deberá registrar los errores técnicos necesarios para facilitar su diagnóstico.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-037 · No inclusión de datos sensibles en logs
-
-Los registros no deberán contener información sensible o identificativa innecesaria.
-
-**Prioridad:** Must Have.
-
----
-
-#### NFR-038 · Identificación del origen del fallo
-
-Los registros deberán permitir distinguir, cuando sea posible, entre errores de validación, inferencia, explicación, recomendaciones e infraestructura.
-
-**Prioridad:** Should Have.
-
-### 7.10 Compatibilidad
-
-#### NFR-039 · Navegadores compatibles
-
-La aplicación deberá funcionar en los navegadores definidos como objetivo para el MVP.
-
-**Prioridad:** Must Have.
-
-La lista definitiva se especificará en `SDD-06 · Frontend`.
-
----
-
-#### NFR-040 · Contratos estables
-
-La comunicación entre componentes deberá utilizar contratos definidos y documentados.
-
-**Prioridad:** Must Have.
-
-## 8. Reglas de negocio
-
-| ID | Regla |
-|---|---|
-| BR-001 | El sistema solo deberá ejecutar una predicción cuando todos los datos obligatorios hayan sido validados. |
-| BR-002 | El modelo solo deberá recibir variables compatibles con su esquema de inferencia. |
-| BR-003 | La variable objetivo del MVP será Job Satisfaction, salvo modificación formal del Scope. |
-| BR-004 | La salida principal deberá corresponder a una de las categorías definidas y aprobadas durante el modelado. |
-| BR-005 | Toda predicción válida deberá vincularse a una explicación o a un estado explícito de indisponibilidad. |
-| BR-006 | Las recomendaciones deberán mantener coherencia con la predicción y con la explicación disponible. |
-| BR-007 | El sistema no deberá presentar las recomendaciones como diagnósticos, garantías ni decisiones obligatorias. |
-| BR-008 | El sistema no deberá presentar predicciones técnicamente inválidas, incompletas o desconocidas como resultados correctos. |
-| BR-009 | El MVP no dependerá de autenticación, cuentas de usuario ni perfiles persistentes. |
-| BR-010 | El MVP no almacenará un histórico de análisis salvo modificación formal del alcance. |
-| BR-011 | Un nuevo análisis deberá tratarse como una interacción independiente. |
-| BR-012 | El sistema no deberá reutilizar accidentalmente datos, explicaciones o recomendaciones de una interacción anterior. |
-| BR-013 | Los campos del formulario deberán derivar de las variables utilizadas por el pipeline aprobado. |
-| BR-014 | Las transformaciones aplicadas en inferencia deberán ser compatibles con las utilizadas durante el entrenamiento. |
-| BR-015 | La predicción se comunicará como una estimación probabilística o estadística, no como una certeza sobre el usuario. |
-| BR-016 | La lógica de recomendaciones deberá ser trazable y validable. |
-| BR-017 | Las decisiones pendientes no deberán ser asumidas unilateralmente por agentes o componentes de implementación. |
-| BR-018 | Cualquier funcionalidad fuera del MVP deberá aprobarse primero mediante una actualización del Scope y de los requisitos. |
-
-## 9. Requisitos excluidos del MVP
-
-Las siguientes capacidades no forman parte de la primera versión:
-
-| ID | Capacidad excluida |
-|---|---|
-| EX-001 | Registro y autenticación de usuarios |
-| EX-002 | Perfiles persistentes |
-| EX-003 | Histórico de predicciones |
-| EX-004 | Comparación de análisis |
-| EX-005 | Exportación de informes, salvo aprobación posterior |
-| EX-006 | Panel administrativo |
-| EX-007 | Gestión de múltiples modelos |
-| EX-008 | Selección de diferentes variables objetivo |
-| EX-009 | Integración con plataformas corporativas |
-| EX-010 | Aplicación móvil |
-| EX-011 | Agente conversacional |
-| EX-012 | Interacción por voz |
-| EX-013 | Reentrenamiento automático |
-| EX-014 | Automatización completa de MLOps |
-| EX-015 | Decisiones automatizadas sobre personas |
-
-## 10. Decisiones pendientes
-
-| ID | Decisión | Impacto |
-|---|---|---|
-| OD-001 | Edición o combinación de ediciones del dataset | Data Pipeline y Modeling |
-| OD-002 | Variables finales del formulario | Frontend, API y Modeling |
-| OD-003 | Clases finales de JobSat | Modeling, Frontend y Testing |
-| OD-004 | Técnica concreta de explicabilidad | Modeling y Frontend |
-| OD-005 | Lógica concreta de recomendaciones | Requirements, Modeling y Testing |
-| OD-006 | Mostrar solo categoría o también probabilidades/confianza | Modeling y Frontend |
-| OD-007 | Umbral máximo de respuesta de inferencia | Architecture, API y Testing |
-| OD-008 | Idiomas disponibles en el MVP | Frontend y Testing |
-| OD-009 | Navegadores y tamaños de pantalla objetivo | Frontend y Testing |
-| OD-010 | Nivel concreto de accesibilidad | Frontend y Testing |
-| OD-011 | Persistencia exclusivamente en memoria o ausencia total de estado en backend | Architecture y Data Pipeline |
-| OD-012 | Inclusión de exportación de resultados | Scope y Requirements |
-| OD-013 | Métricas mínimas de aceptación del modelo | Modeling y Testing |
-| OD-014 | Tecnología o mecanismo de generación de recomendaciones | Architecture y Modeling |
-
-Las decisiones pendientes deberán resolverse en el documento responsable o mediante una decisión formal del equipo antes de su implementación.
-
-## 11. Priorización del MVP
-
-### Must Have
-
-- Acceso web sin autenticación.
-- Información sobre la finalidad y limitaciones.
-- Formulario de entrada.
-- Validación de datos.
-- Ejecución del modelo.
-- Presentación de la categoría predicha.
-- Explicación de la predicción.
-- Recomendaciones.
-- Gestión de errores.
-- Protección frente a resultados inválidos.
-- Minimización de datos.
-- Pruebas del flujo crítico.
-- Documentación sincronizada.
-
-### Should Have
-
-- Estado visible de procesamiento.
-- Inicio directo de un nuevo análisis.
-- Reintento de operaciones recuperables.
-- Diseño adaptable.
-- Medidas básicas de accesibilidad.
-- Identificación interna de la versión del modelo.
-- Clasificación detallada del origen de errores.
-
-### Could Have
-
-No se han aprobado todavía requisitos Could Have para el MVP.
-
-Las mejoras adicionales deberán evaluarse después de garantizar todos los requisitos Must Have.
-
-### Won't Have
-
-- Autenticación.
-- Histórico.
-- Panel administrativo.
-- Múltiples modelos.
+- Autenticación y perfiles persistentes.
+- Histórico y exportación.
 - Integraciones corporativas.
-- Aplicación móvil.
-- Voz.
-- Agente conversacional.
-- Reentrenamiento automático.
-- MLOps completo.
+- Aplicación móvil y agentes conversacionales.
+- Entrenamiento continuo y automatización completa de MLOps.
+- Gestión administrable de múltiples modelos.
 
-## 12. Criterios generales de aceptación del MVP
+### 10.2 Usos permanentemente prohibidos
 
-El MVP podrá considerarse funcionalmente aceptado cuando:
+- Decisiones laborales automatizadas.
+- Penalización, exclusión o clasificación perjudicial.
+- Sustitución de profesionales.
+- Vigilancia individual continua.
 
-1. El usuario pueda acceder a la aplicación sin autenticación.
-2. El sistema explique la finalidad y las limitaciones del análisis.
-3. El usuario pueda completar el formulario con las variables definidas.
-4. El sistema detecte y comunique los datos inválidos.
-5. El sistema pueda ejecutar una inferencia con datos válidos.
-6. El sistema muestre una categoría reconocida de satisfacción laboral.
-7. El usuario pueda consultar una explicación asociada a la predicción.
-8. El usuario pueda consultar recomendaciones coherentes con el análisis.
-9. El sistema gestione de forma controlada los fallos de inferencia, explicación o recomendaciones.
-10. El sistema no presente respuestas incompletas como resultados válidos.
-11. Los componentes críticos dispongan de pruebas.
-12. La implementación se mantenga alineada con el Scope, los casos de uso y este documento.
+Los usos prohibidos no constituyen funcionalidades futuras.
 
-## 13. Trazabilidad de requisitos funcionales
+---
 
-| Caso de uso | Requisitos |
+## 11. Decisiones abiertas
+
+Todas las decisiones de esta sección permanecen en estado `Pending` y no deberán asumirse como cerradas durante diseño o implementación.
+
+| ID | Decisión | Impacto | Documento responsable | Estado |
+|---|---|---|---|---|
+| OD-001 | Edición o combinación de datasets | Datos, reproducibilidad y modelado | SDD-04 / SDD-05 | Pending |
+| OD-002 | Variable objetivo definitiva | Modelo, interfaz y evaluación | SDD-05 | Pending |
+| OD-003 | Uso de `JobSat` como target o proxy | Validez del problema | SDD-05 | Pending |
+| OD-004 | Estrategia de clases | Modelado, interfaz y pruebas | SDD-05 | Pending |
+| OD-005 | Variables definitivas del formulario | Datos, frontend, API y modelo | SDD-04 / SDD-05 / SDD-06 | Pending |
+| OD-006 | Métricas de evaluación | Comparación de modelos | SDD-05 / SDD-08 | Pending |
+| OD-007 | Umbrales de aceptación del modelo | Aprobación y despliegue | SDD-05 / SDD-08 | Pending |
+| OD-008 | Modelo baseline | Comparación inicial | SDD-05 | Pending |
+| OD-009 | Modelos candidatos | Experimentación | SDD-05 | Pending |
+| OD-010 | Uso y composición de ensemble | Complejidad y rendimiento | SDD-05 | Pending |
+| OD-011 | Método de explicabilidad | Interpretación y frontend | SDD-05 / SDD-06 | Pending |
+| OD-012 | Lógica de recomendaciones | Contenido y validación | SDD-01 / SDD-05 | Pending |
+| OD-013 | Presentación de probabilidades o confianza | Interpretación y calibración | SDD-05 / SDD-06 | Pending |
+| OD-014 | Persistencia temporal de datos | Privacidad y arquitectura | SDD-02 / SDD-04 / SDD-07 | Pending |
+| OD-015 | Métricas de fairness | Evaluación responsable | SDD-05 / SDD-08 | Pending |
+| OD-016 | Umbrales de fairness | Aceptación responsable | SDD-05 / SDD-08 | Pending |
+| OD-017 | Umbrales de rendimiento y espera | Experiencia y operación | SDD-02 / SDD-07 / SDD-08 | Pending |
+| OD-018 | Nivel objetivo de accesibilidad | Frontend y pruebas | SDD-06 / SDD-08 | Pending |
+| OD-019 | Matriz de compatibilidad | Frontend y pruebas | SDD-06 / SDD-08 | Pending |
+| OD-020 | Idiomas disponibles | Contenido e interfaz | SDD-01 / SDD-06 | Pending |
+| OD-021 | Exportación de resultados | Alcance y privacidad | SDD-00 / SDD-01 / SDD-10 | Pending |
+| OD-022 | Almacenamiento de predicciones o feedback | Privacidad y operación | SDD-00 / SDD-02 / SDD-07 | Pending |
+| OD-023 | Definición operativa de mujer en los datos | Población y fairness | SDD-04 / SDD-05 | Pending |
+| OD-024 | Definición operativa de roles STEM | Población y generalización | SDD-04 / SDD-05 | Pending |
+
+---
+
+## 12. Trazabilidad y aprobación
+
+### 12.1 Casos de uso y requisitos
+
+| Caso de uso | Dominio | Requisitos principales |
+|---|---|---|
+| UC-01 | Acceso, finalidad, transparencia y limitaciones | FR-001 a FR-003; HR-001; HR-002; HR-007 |
+| UC-02 | Captura y tratamiento temporal de datos | FR-004 a FR-007; PR-001 a PR-005 |
+| UC-03 | Validación y esquema | FR-008 a FR-013; DR-001; SEC-001 |
+| UC-04 | Inferencia y procesamiento | FR-014 a FR-019; MLR-013; MLR-015 |
+| UC-05 | Presentación e interpretación | FR-020 a FR-024; HR-007 |
+| UC-06 | Explicabilidad | FR-025 a FR-027; XR-001 a XR-005 |
+| UC-07 | Recomendaciones y uso responsable | FR-028; FR-029; XR-006 a XR-008; HR-003 a HR-006 |
+| UC-08 | Gestión del estado | FR-030; PR-003 |
+| UC-09 | Errores, resiliencia y observabilidad | FR-031; NFR-003; NFR-004; OBS-001 a OBS-006 |
+
+### 12.2 Trazabilidad documental
+
+| Fuente o destino | Trazabilidad |
 |---|---|
-| UC-01 | FR-001 |
-| UC-02 | FR-002, FR-003 |
-| UC-03 | FR-004, FR-005, FR-006 |
-| UC-04 | FR-007, FR-008, FR-009, FR-010 |
-| UC-05 | FR-011, FR-012, FR-013, FR-014, FR-015 |
-| UC-06 | FR-014, FR-016, FR-017, FR-018 |
-| UC-07 | FR-019, FR-020, FR-021, FR-022 |
-| UC-08 | FR-023, FR-024, FR-025 |
-| UC-09 | FR-026, FR-027 |
-| UC-10 | FR-022, FR-025, FR-028, FR-029, FR-030, FR-031 |
+| SDD-00 · Project Scope | Define objetivos, límites, población y usos prohibidos |
+| SDD-00A · Casos de uso | Origina los requisitos funcionales UC-01 a UC-09 |
+| SDD-02 a SDD-07 | Desarrollan las decisiones técnicas sin ampliar el alcance |
+| SDD-08 · Testing | Convertirá requisitos y criterios de aceptación en pruebas detalladas |
+| SDD-09 · Deployment | Verificará requisitos de operación, seguridad y observabilidad |
 
-## 14. Dependencias documentales
+No es necesario mapear cada requisito con archivos de código en esta fase. La trazabilidad detallada con pruebas se completará en **SDD-08 · Testing**.
 
-| Documento | Relación con Requirements |
-|---|---|
-| SDD-00 · Project Scope | Define el alcance que los requisitos deben respetar |
-| SDD-00A · Casos de uso | Define las interacciones de las que derivan los requisitos |
-| SDD-02 · Architecture | Diseñará los componentes necesarios para satisfacer los requisitos |
-| SDD-03 · Implementation Structure | Organizará el código según las responsabilidades definidas |
-| SDD-04 · Data Pipeline | Especificará datos, transformaciones y validaciones |
-| SDD-05 · Modeling | Definirá clases, modelo, métricas, explicabilidad y recomendaciones |
-| SDD-06 · Frontend | Convertirá los requisitos de interacción en interfaces |
-| SDD-07 · API | Definirá los contratos necesarios para el flujo funcional |
-| SDD-08 · Testing | Convertirá requisitos y criterios de aceptación en pruebas |
-| SDD-09 · Deployment | Definirá cómo operar el sistema en los entornos previstos |
+### 12.3 Criterios de aprobación
 
-## 15. Criterios de aprobación del documento
+El documento podrá aprobarse cuando:
 
-Este documento podrá aprobarse cuando el equipo confirme:
-
-- Que todos los casos de uso del MVP están cubiertos por requisitos.
-- Que cada requisito funcional tiene un comportamiento verificable.
-- Que no se han introducido funcionalidades fuera del Scope.
-- Que las decisiones abiertas están claramente identificadas.
-- Que los requisitos Must Have representan el mínimo necesario para la demostración.
-- Que los requisitos de IA Responsable están incluidos.
-- Que los requisitos pueden transformarse en tareas, componentes y pruebas.
-- Que los distintos agentes del proyecto pueden interpretar el documento sin asumir decisiones no aprobadas.
+- Esté alineado con SDD-00 y SDD-00A.
+- Todos los requisitos tengan identificador único y criterio verificable.
+- No existan contradicciones ni requisitos duplicados.
+- Ninguna decisión abierta se presente como cerrada.
+- Exista trazabilidad con UC-01 a UC-09.
+- Estén cubiertos datos, ML, interfaz, API, seguridad, privacidad y fairness.
+- El problema y la terminología sean exclusivamente laborales.
+- `JobSat` no se presente como objetivo definitivo ni como equivalente de rotación laboral.
+- No exista automatización de decisiones laborales.
+- Los usos prohibidos estén separados de las capacidades futuras.
+- Las referencias cruzadas sean válidas.
