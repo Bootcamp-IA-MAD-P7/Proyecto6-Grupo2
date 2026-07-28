@@ -3,7 +3,6 @@ import polars as pl
 import optuna
 from pathlib import Path
 from catboost import CatBoostClassifier, Pool
-from optuna_integration.catboost import CatBoostPruningCallback
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import classification_report, f1_score
 from src.data.cat_lgbm_xgb.preprocessing import (
@@ -50,11 +49,11 @@ def objective(
 ) -> float:
     params = {
         **BASE_PARAMS,
+        "bootstrap_type": "Bernoulli",
         "iterations": trial.suggest_int("iterations", 300, 1000),
         "learning_rate": trial.suggest_float("learning_rate", 0.005, 0.2, log=True),
         "depth": trial.suggest_int("depth", 4, 10),
         "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1.0, 15.0),
-        "bagging_temperature": trial.suggest_float("bagging_temperature", 0.0, 1.0),
         "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 1, 50),
         "subsample": trial.suggest_float("subsample", 0.5, 1.0),
     }
@@ -70,11 +69,7 @@ def objective(
         val_pool = Pool(X_val, y_val, cat_features=cat_indices)
 
         model = CatBoostClassifier(**params)
-        model.fit(
-            train_pool,
-            eval_set=val_pool,
-            callbacks=[CatBoostPruningCallback(trial, "TotalF1")],
-        )
+        model.fit(train_pool, eval_set=val_pool)
 
         preds = model.predict(X_val).flatten().astype(np.int8)
         scores.append(f1_score(y_val, preds, average="macro"))
@@ -86,9 +81,7 @@ def tune_catboost(
     X: np.ndarray, y: np.ndarray, cat_indices: list[int], n_trials: int = 50
 ) -> dict:
     study = optuna.create_study(direction="maximize")
-    study.optimize(
-        lambda trial: objective(trial, X, y, cat_indices), n_trials=n_trials
-    )
+    study.optimize(lambda trial: objective(trial, X, y, cat_indices), n_trials=n_trials)
     print(f"Best macro F1: {study.best_value:.4f}")
     print(f"Best params: {study.best_params}")
     return study.best_params
@@ -109,7 +102,7 @@ def train_catboost_oof(
 
     print("Tuning CatBoost hyperparameters with Optuna...")
     best_params = tune_catboost(X_train_pd.to_numpy(), y_train, cat_indices)
-    tuned_params = {**BASE_PARAMS, **best_params}
+    tuned_params = {**BASE_PARAMS, "bootstrap_type": "Bernoulli", **best_params}
 
     kf = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=RANDOM_SEED)
     n_classes = 3
@@ -188,12 +181,14 @@ def run_catboost(
     dev_pool = Pool(X_dev_pd, cat_features=CATEGORICAL_COLS)
     dev_preds = model.predict(dev_pool).flatten().astype(np.int8)
     print(
-        classification_report(
-            y_dev, dev_preds, target_names=["low", "medium", "high"]
-        )
+        classification_report(y_dev, dev_preds, target_names=["low", "medium", "high"])
     )
 
     print(f"OOF predictions shape: {oof_preds.shape}")
     print(f"OOF probabilities shape: {oof_proba.shape}")
     print(f"Test predictions shape: {test_preds.shape}")
     print("CatBoost training complete.")
+
+
+if __name__ == "__main__":
+    run_catboost(pipeline_dir=PIPELINE_DIR)
