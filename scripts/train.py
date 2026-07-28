@@ -1,3 +1,4 @@
+import argparse
 import sys
 from pathlib import Path
 
@@ -13,7 +14,18 @@ from src.training.xgboost import train, save
 
 
 def main() -> None:
-    print("Loading splits...")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--tune", action="store_true", help="Run Optuna hyperparameter search")
+    parser.add_argument("--n-trials", type=int, default=50)
+    args = parser.parse_args()
+
+    if args.tune:
+        from src.training.tuning import tune_and_save
+        print(f"Running Optuna tuning ({args.n_trials} trials)...")
+        tune_and_save(n_trials=args.n_trials)
+        return
+
+    print("Loading splits (default training)...")
     train_df, dev_df, _ = load_splits()
 
     train_df = binarize_target(train_df)
