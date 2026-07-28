@@ -15,7 +15,7 @@ TRAINED_DIR = Path("models/trained")
 N_SPLITS = 5
 RANDOM_SEED = 42
 
-CLASS_WEIGHTS = [4.41, 1.45, 0.48]
+CLASS_WEIGHTS = [9.0, 3.0, 1.0]
 
 BASE_PARAMS = {
     "random_seed": RANDOM_SEED,

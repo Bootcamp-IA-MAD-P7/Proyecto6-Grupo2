@@ -9,10 +9,10 @@ from src.training.catboost import bin_target
 TRAINED_DIR = Path("models/trained")
 RANDOM_SEED = 42
 LR_PARAMS = {
-    "multi_class": "multinomial",
     "solver": "lbfgs",
     "max_iter": 1000,
     "random_state": RANDOM_SEED,
+    "class_weight": {0: 9.0, 1: 3.0, 2: 1.0},
 }
 N_CLASSES = 3
 
@@ -22,16 +22,16 @@ def _stack_proba(*arrays: np.ndarray) -> np.ndarray:
 
 
 def load_oof_probas(pipeline_dir: Path) -> np.ndarray:
-    cb = np.load(pipeline_dir / "oof_catboost_proba.npy")
-    lgb = np.load(pipeline_dir / "oof_lgbm_proba.npy")
-    xgb = np.load(pipeline_dir / "oof_xgb_proba.npy")
+    cb: np.ndarray = np.load(pipeline_dir / "oof_catboost_proba.npy")
+    lgb: np.ndarray = np.load(pipeline_dir / "oof_lgbm_proba.npy")
+    xgb: np.ndarray = np.load(pipeline_dir / "oof_xgb_proba.npy")
     return _stack_proba(cb, lgb, xgb)
 
 
 def load_test_probas(pipeline_dir: Path) -> np.ndarray:
-    cb = np.load(pipeline_dir / "test_preds_catboost_proba.npy")
-    lgb = np.load(pipeline_dir / "test_preds_lgbm_proba.npy")
-    xgb = np.load(pipeline_dir / "test_preds_xgb_proba.npy")
+    cb: np.ndarray = np.load(pipeline_dir / "test_preds_catboost_proba.npy")
+    lgb: np.ndarray = np.load(pipeline_dir / "test_preds_lgbm_proba.npy")
+    xgb: np.ndarray = np.load(pipeline_dir / "test_preds_xgb_proba.npy")
     return _stack_proba(cb, lgb, xgb)
 
 
@@ -82,7 +82,9 @@ def run_ensemble(
 
     target_names = ["low", "medium", "high"]
 
-    print(f"OOF feature matrix shape: {oof_stack.shape} ({N_CLASSES} classes × 3 models)")
+    print(
+        f"OOF feature matrix shape: {oof_stack.shape} ({N_CLASSES} classes × 3 models)"
+    )
 
     print("Training LogisticRegression meta-model on OOF probabilities...")
     meta = LogisticRegression(**LR_PARAMS)
@@ -90,7 +92,11 @@ def run_ensemble(
 
     oof_preds = meta.predict(oof_stack)
     print("\nOOF Ensemble classification report:")
-    print(classification_report(y_train, oof_preds, target_names=target_names, zero_division=0))
+    print(
+        classification_report(
+            y_train, oof_preds, target_names=target_names, zero_division=0
+        )
+    )
 
     print("Saving meta-model...")
     save_meta_model(meta, trained_dir)
@@ -100,12 +106,18 @@ def run_ensemble(
     y_dev = bin_target(data["y_dev"].astype(np.int8))
     dev_preds = meta.predict(dev_stack)
     print("\nEnsemble Dev classification report:")
-    print(classification_report(y_dev, dev_preds, target_names=target_names, zero_division=0))
+    print(
+        classification_report(
+            y_dev, dev_preds, target_names=target_names, zero_division=0
+        )
+    )
 
     print("Generating test predictions...")
     test_stack = load_test_probas(pipeline_dir)
     test_preds = meta.predict(test_stack)
     np.save(pipeline_dir / "test_preds_ensemble.npy", test_preds)
-    print(f"Ensemble test predictions saved to {pipeline_dir / 'test_preds_ensemble.npy'}")
+    print(
+        f"Ensemble test predictions saved to {pipeline_dir / 'test_preds_ensemble.npy'}"
+    )
 
     print("Ensemble complete.")

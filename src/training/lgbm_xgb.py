@@ -14,12 +14,15 @@ N_SPLITS = 5
 RANDOM_SEED = 42
 N_CLASSES = 3
 
+CLASS_WEIGHTS = {0: 9.0, 1: 3.0, 2: 1.0}
+
 LGBM_BASE = {
     "objective": "multiclass",
     "num_class": N_CLASSES,
     "eval_metric": "multi_logloss",
     "random_state": RANDOM_SEED,
     "verbose": -1,
+    "class_weight": CLASS_WEIGHTS,
 }
 
 XGB_BASE = {
@@ -30,6 +33,14 @@ XGB_BASE = {
     "verbosity": 0,
     "device": "cuda",
 }
+
+
+def _get_sample_weights(y: np.ndarray) -> np.ndarray:
+    weights = np.ones(len(y))
+    weights[y == 0] = 9.0
+    weights[y == 1] = 3.0
+    weights[y == 2] = 1.0
+    return weights
 
 
 def _tune_lgbm(X: np.ndarray, y: np.ndarray, n_trials: int = 30) -> dict:
@@ -50,8 +61,15 @@ def _tune_lgbm(X: np.ndarray, y: np.ndarray, n_trials: int = 30) -> dict:
         for train_idx, val_idx in kf.split(X, y):
             X_tr, X_val = X[train_idx], X[val_idx]
             y_tr, y_val = y[train_idx], y[val_idx]
+            sw = _get_sample_weights(y_tr)
             model = lgb.LGBMClassifier(**params)
-            model.fit(X_tr, y_tr, eval_set=[(X_val, y_val)], callbacks=[lgb.early_stopping(15), lgb.log_evaluation(0)])
+            model.fit(
+                X_tr,
+                y_tr,
+                sample_weight=sw,
+                eval_set=[(X_val, y_val)],
+                callbacks=[lgb.early_stopping(15), lgb.log_evaluation(0)],
+            )
             preds = model.predict(X_val)
             scores.append(f1_score(y_val, preds, average="macro"))
         return float(np.mean(scores))
@@ -81,8 +99,11 @@ def _tune_xgb(X: np.ndarray, y: np.ndarray, n_trials: int = 30) -> dict:
         for train_idx, val_idx in kf.split(X, y):
             X_tr, X_val = X[train_idx], X[val_idx]
             y_tr, y_val = y[train_idx], y[val_idx]
+            sw = _get_sample_weights(y_tr)
             model = xgb.XGBClassifier(**params)
-            model.fit(X_tr, y_tr, eval_set=[(X_val, y_val)], verbose=False)
+            model.fit(
+                X_tr, y_tr, sample_weight=sw, eval_set=[(X_val, y_val)], verbose=False
+            )
             preds = model.predict(X_val)
             scores.append(f1_score(y_val, preds, average="macro"))
         return float(np.mean(scores))
@@ -107,8 +128,40 @@ def train_lgbm_xgb_oof(
     X_train_np = X_train.to_numpy()
     X_test_np = X_test.to_numpy()
 
-    lgbm_params = {**LGBM_BASE, **(_tune_lgbm(X_train_np, y_train) if tune else {"learning_rate": 0.05, "num_leaves": 31, "n_estimators": 300, "subsample": 0.8, "colsample_bytree": 0.8, "min_child_samples": 20, "reg_alpha": 0.0, "reg_lambda": 0.0})}
-    xgb_params = {**XGB_BASE, **(_tune_xgb(X_train_np, y_train) if tune else {"learning_rate": 0.05, "max_depth": 6, "n_estimators": 300, "subsample": 0.8, "colsample_bytree": 0.8, "min_child_weight": 1, "reg_alpha": 0.0, "reg_lambda": 0.0})}
+    lgbm_params = {
+        **LGBM_BASE,
+        **(
+            _tune_lgbm(X_train_np, y_train)
+            if tune
+            else {
+                "learning_rate": 0.05,
+                "num_leaves": 31,
+                "n_estimators": 300,
+                "subsample": 0.8,
+                "colsample_bytree": 0.8,
+                "min_child_samples": 20,
+                "reg_alpha": 0.0,
+                "reg_lambda": 0.0,
+            }
+        ),
+    }
+    xgb_params = {
+        **XGB_BASE,
+        **(
+            _tune_xgb(X_train_np, y_train)
+            if tune
+            else {
+                "learning_rate": 0.05,
+                "max_depth": 6,
+                "n_estimators": 300,
+                "subsample": 0.8,
+                "colsample_bytree": 0.8,
+                "min_child_weight": 1,
+                "reg_alpha": 0.0,
+                "reg_lambda": 0.0,
+            }
+        ),
+    }
 
     kf = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=RANDOM_SEED)
 
@@ -122,14 +175,23 @@ def train_lgbm_xgb_oof(
 
         X_tr, X_val = X_train_np[train_idx], X_train_np[val_idx]
         y_tr, y_val = y_train[train_idx], y_train[val_idx]
+        sw = _get_sample_weights(y_tr)
 
-        lgbm = lgb.LGBMClassifier(**lgbm_params)
-        lgbm.fit(X_tr, y_tr, eval_set=[(X_val, y_val)], callbacks=[lgb.early_stopping(15), lgb.log_evaluation(0)])
-        oof_lgbm_proba[val_idx] = lgbm.predict_proba(X_val)
-        test_lgbm_proba += lgbm.predict_proba(X_test_np) / N_SPLITS
+        lgbm_model = lgb.LGBMClassifier(**lgbm_params)
+        lgbm_model.fit(
+            X_tr,
+            y_tr,
+            sample_weight=sw,
+            eval_set=[(X_val, y_val)],
+            callbacks=[lgb.early_stopping(15), lgb.log_evaluation(0)],
+        )
+        oof_lgbm_proba[val_idx] = lgbm_model.predict_proba(X_val)
+        test_lgbm_proba += lgbm_model.predict_proba(X_test_np) / N_SPLITS
 
         xgb_model = xgb.XGBClassifier(**xgb_params)
-        xgb_model.fit(X_tr, y_tr, eval_set=[(X_val, y_val)], verbose=False)
+        xgb_model.fit(
+            X_tr, y_tr, sample_weight=sw, eval_set=[(X_val, y_val)], verbose=False
+        )
         oof_xgb_proba[val_idx] = xgb_model.predict_proba(X_val)
         test_xgb_proba += xgb_model.predict_proba(X_test_np) / N_SPLITS
 
@@ -143,14 +205,16 @@ def train_lgbm_xgb_oof(
 
     print("Training final models on full train set...")
 
+    sw_full = _get_sample_weights(y_train)
+
     final_lgbm = lgb.LGBMClassifier(**lgbm_params)
-    final_lgbm.fit(X_train_np, y_train)
+    final_lgbm.fit(X_train_np, y_train, sample_weight=sw_full)
     lgbm_path = trained_dir / "lgbm.txt"
     final_lgbm.booster_.save_model(str(lgbm_path))
     print(f"LightGBM model saved to {lgbm_path}")
 
     final_xgb = xgb.XGBClassifier(**xgb_params)
-    final_xgb.fit(X_train_np, y_train)
+    final_xgb.fit(X_train_np, y_train, sample_weight=sw_full)
     xgb_path = trained_dir / "xgb.ubj"
     final_xgb.save_model(str(xgb_path))
     print(f"XGBoost model saved to {xgb_path}")
@@ -195,3 +259,7 @@ def run_lgbm_xgb(
     print(f"LGBM OOF proba shape: {result['oof_lgbm_proba'].shape}")
     print(f"XGB OOF proba shape: {result['oof_xgb_proba'].shape}")
     print("LGBM/XGB training complete.")
+
+
+if __name__ == "__main__":
+    run_lgbm_xgb(pipeline_dir=PIPELINE_DIR)
