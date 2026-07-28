@@ -171,6 +171,48 @@ Columns like `DevType` and `LearnCode` are semicolon-delimited multi-select fiel
 
 **Decision:** Leave `DevType` and `LearnCode` out of `FEATURES` for now. This keeps the pipeline simple with 8 clean features (2 numeric + 6 categorical) while still producing a valid 3-class Random Forest. Multi-select columns can be added later via a custom preprocessor step or handled in the ensemble/XGBoost pipeline if needed.
 
+### SMOTE + Class Weight Strategy
+
+The pipeline uses **both** SMOTE and `class_weight="balanced"` — they are complementary, not alternatives:
+
+- **SMOTE** (`imblearn.pipeline.Pipeline`) — inserted between the preprocessor and the classifier. After the preprocessor imputes nulls and one-hot encodes categoricals into numeric vectors, SMOTE synthesises new minority-class samples by interpolating between existing nearest neighbours (`k_neighbors=5`). This fixes the **input distribution**.
+
+- **`class_weight="balanced"`** on the `RandomForestClassifier` — inversely scales the split criterion's loss contribution by class frequency. This fixes the **loss function**.
+
+Using both gives the model two layers of protection against ignoring the minority class: the training set is rebalanced *and* the cost of misclassifying minority samples is higher.
+
+### Overfitting Risk with SMOTE
+
+SMOTE reduces class imbalance by generating synthetic samples, which can introduce **overfitting** if not carefully regularized:
+
+- Synthetic samples are interpolations between existing minority-class neighbours — they are not real observations, so the model can latch on to patterns that don't generalise to real data.
+- The RF pipeline applies three regularisation mechanisms to counter this:
+  1. **`max_depth=12`** — prevents trees from growing deep enough to memorise synthetic-noise patterns.
+  2. **`min_samples_leaf=5`** — forces each leaf to cover at least 5 samples, smoothing out spurious splits.
+  3. **`max_samples=0.75`** — bootstraps only 75% of rows per tree, reducing correlation between trees.
+- SMOTE itself uses **`k_neighbors=5`** (default), which limits interpolation to the 5 nearest real neighbours, reducing the risk of implausible synthetic points.
+
+The trade-off is deliberate: moderate overfitting risk from SMOTE is acceptable given the heavy regularisation on the RF classifier and the downstream benefit of the model actually seeing minority-class patterns during training.
+
+### Polars-to-Pandas Bridge
+
+SMOTE (and imbalanced-learn generally) expects numpy-compatible input — it doesn't understand Polars `DataFrame` objects. The pipeline includes a `PolarsToPandas` transformer (a no-op `sklearn` `BaseEstimator`) placed between the preprocessor and the SMOTE step:
+
+```python
+Pipeline([
+    ("preprocessor", build_preprocessor()),
+    ("to_pandas", PolarsToPandas()),
+    ("smote", SMOTE(...)),
+    ("classifier", RandomForestClassifier(...)),
+])
+```
+
+If the output of the `ColumnTransformer` is a Polars DataFrame (depending on how the data is passed downstream), `PolarsToPandas` converts it to pandas before SMOTE sees it. If it's already pandas, the transformer is a pass-through. This keeps the pipeline resilient regardless of the calling code's DataFrame convention.
+
+### Dependency
+
+The `imbalanced-learn` package was added via `uv add imbalanced-learn`. It provides both `SMOTE` and `imblearn.pipeline.Pipeline` (imblearn pipelines handle step indexing and resampling correctly during `fit`/`predict`, unlike wrapping SMOTE inside a vanilla sklearn `Pipeline`).
+
 Checks performed before processing.
 
 ## Cleaning

@@ -1,5 +1,7 @@
 from pathlib import Path
+
 import polars as pl
+from sklearn.base import BaseEstimator, TransformerMixin
 
 SPLITS_DIR = Path("data/processed/splits")
 TARGET = "JobSat"
@@ -19,6 +21,16 @@ CATEGORICAL_FEATURES = [
 ]
 
 FEATURES = NUMERIC_FEATURES + CATEGORICAL_FEATURES
+
+
+class PolarsToPandas(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        if isinstance(X, pl.DataFrame):
+            return X.to_pandas()
+        return X
 
 
 def bin_jobsat(frame: pl.DataFrame) -> pl.DataFrame:

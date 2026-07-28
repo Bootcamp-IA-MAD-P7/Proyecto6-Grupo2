@@ -9,7 +9,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import numpy as np
-import pandas as pd
 import polars as pl
 from sklearn.metrics import (
     accuracy_score,
@@ -39,8 +38,8 @@ class Metrics(TypedDict):
 
 def calculate_metrics(
     pipeline: Pipeline,
-    X: pd.DataFrame,
-    y: pd.Series,
+    X: pl.DataFrame,
+    y: pl.Series,
 ) -> tuple[Metrics, np.ndarray]:
     """Calculate multiclass classification metrics."""
     predictions = pipeline.predict(X)
@@ -74,9 +73,9 @@ def print_comparison(train_metrics: Metrics, dev_metrics: Metrics) -> None:
         )
 
 
-def prepare_split(frame: pl.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
+def prepare_split(frame: pl.DataFrame) -> tuple[pl.DataFrame, pl.Series]:
     binned = bin_jobsat(frame)
-    return binned.select(FEATURES).to_pandas(), binned[TARGET].to_pandas()
+    return binned.select(FEATURES), binned[TARGET]
 
 
 def main() -> None:
@@ -84,28 +83,28 @@ def main() -> None:
     print("Loading train and dev splits...")
     train_df = pl.read_parquet(SPLITS_DIR / "train.parquet")
     dev_df = pl.read_parquet(SPLITS_DIR / "dev.parquet")
-    X_train_pd, y_train_pd = prepare_split(train_df)
-    X_dev_pd, y_dev_pd = prepare_split(dev_df)
+    X_train, y_train = prepare_split(train_df)
+    X_dev, y_dev = prepare_split(dev_df)
 
-    print(f"Train: {X_train_pd.shape} | Dev: {X_dev_pd.shape}")
+    print(f"Train: {X_train.shape} | Dev: {X_dev.shape}")
     print(
         "Target distribution (train)"
-        f" — 0: {(y_train_pd == 0).sum()} | 1: {(y_train_pd == 1).sum()}"
+        f" — 0: {(y_train == 0).sum()} | 1: {(y_train == 1).sum()}"
     )
 
     print("\nTraining Random Forest pipeline...")
-    pipeline = train(X_train_pd, y_train_pd)
+    pipeline = train(X_train, y_train)
     print("Training complete.")
 
     train_metrics, train_matrix = calculate_metrics(
         pipeline,
-        X_train_pd,
-        y_train_pd,
+        X_train,
+        y_train,
     )
     dev_metrics, dev_matrix = calculate_metrics(
         pipeline,
-        X_dev_pd,
-        y_dev_pd,
+        X_dev,
+        y_dev,
     )
 
     print_comparison(train_metrics, dev_metrics)
