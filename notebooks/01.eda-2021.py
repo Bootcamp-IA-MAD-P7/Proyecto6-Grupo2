@@ -17,6 +17,10 @@
 import sys
 from pathlib import Path
 
+ROOT = Path.cwd().parent  # sube de notebooks/ a la raíz del repo
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 # Ensure Polars tables render correctly in Windows terminals.
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -51,7 +55,9 @@ elif "MPLBACKEND" not in os.environ:
     # Normal script execution must not depend on a local Tcl/Tk installation.
     matplotlib.use("Agg")
 
+
 import matplotlib.pyplot as plt
+
 
 from utils.load_raw_data import RawData
 

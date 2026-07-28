@@ -22,4 +22,6 @@ dependencies = [
     "safetensors>=0.8.0",
     "optuna>=4.9.0",
     "optuna-integration[catboost]>=3.6.0",
+    "ipykernel>=7.3.0",
+    "jupytext>=1.19.5",
 ]
