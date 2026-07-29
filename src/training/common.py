@@ -41,3 +41,9 @@ def bin_jobsat(frame: pl.DataFrame) -> pl.DataFrame:
         .cast(pl.Int8)
         .alias(TARGET)
     )
+
+
+def bin_jobsat_binary(frame: pl.DataFrame) -> pl.DataFrame:
+    return frame.with_columns(
+        (pl.col(TARGET) >= 7).cast(pl.Int8).alias(TARGET)
+    )

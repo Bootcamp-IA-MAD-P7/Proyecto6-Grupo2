@@ -1,7 +1,14 @@
 from pydantic import BaseModel
 
 
-class PredictionResponse(BaseModel):
+class PredictionResponseBinary(BaseModel):
+    prediction: int
+    label: str
+    probability_not_satisfied: float
+    probability_satisfied: float
+
+
+class PredictionResponseMulticlass(BaseModel):
     prediction: int
     label: str
     probability_low: float

@@ -20,6 +20,8 @@ from src.training.common import (
 )
 
 PIPELINES_DIR = Path("models/pipelines")
+RF_BINARY_PATH = PIPELINES_DIR / "random_forest_binary_pipeline.joblib"
+RF_MULTICLASS_PATH = PIPELINES_DIR / "random_forest_pipeline.joblib"
 
 REFERENCE_NUMERIC_FEATURES = list(NUMERIC_FEATURES)
 REFERENCE_CATEGORICAL_FEATURES = list(CATEGORICAL_FEATURES)
@@ -85,6 +87,37 @@ def train(
     pipeline = build_pipeline(params)
     pipeline.fit(X_train, y_train.to_numpy())
     return pipeline
+
+
+def build_binary_pipeline(params: Mapping[str, Any] | None = None) -> Pipeline:
+    merged_params = {**DEFAULT_PARAMS, **(params or {})}
+    merged_params["class_weight"] = "balanced"
+    merged_params["random_state"] = 42
+    return Pipeline([
+        ("to_pandas", PolarsToPandas()),
+        ("preprocessor", build_preprocessor()),
+        ("classifier", RandomForestClassifier(**merged_params)),
+    ])
+
+
+def train_binary(
+    X_train: pl.DataFrame,
+    y_train: pl.Series,
+    params: Mapping[str, Any] | None = None,
+) -> Pipeline:
+    pipeline = build_binary_pipeline(params)
+    pipeline.fit(X_train, y_train.to_numpy())
+    return pipeline
+
+
+def load_rf_pipeline(binary: bool = True) -> Pipeline:
+    path = RF_BINARY_PATH if binary else RF_MULTICLASS_PATH
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Trained pipeline not found at {path}. "
+            "Run scripts/train_random_forest.py first."
+        )
+    return joblib.load(path)
 
 
 def save(pipeline: Pipeline, path: str | Path | None = None) -> Path:
