@@ -1,43 +1,182 @@
-export type KpiId = "employees" | "low" | "medium" | "high"
+export type LanguageCode = "en" | "es"
 
-export interface DashboardKpi {
-  id: KpiId
+export type DashboardState = "loading" | "error" | "empty" | "success"
+
+export type MetricId = "profiles" | "review" | "lowerSatisfaction" | "segments"
+
+export type SegmentDimension =
+  | "experience"
+  | "education"
+  | "employment"
+  | "companySize"
+  | "country"
+  | "professionalRole"
+  | "age"
+
+export type SegmentStatus = "available" | "pending"
+
+export interface UserProfile {
+  id: string
+  name: string
+  role: string
+  email?: string
+  initials: string
+  avatarUrl?: string
+}
+
+export interface WorkforceMetric {
+  id: MetricId
+  value: number
+  format: "integer" | "percentage"
+  highlighted?: boolean
+}
+
+export interface EvidenceData {
+  segments: Array<{
+    id: string
+    value: number
+    highlighted: boolean
+  }>
+  seniorRateMultiplier: number
+  nextCohortDifference: number
+}
+
+export interface ExecutiveInsight {
+  id: string
+  evidence: EvidenceData
+}
+
+export interface SegmentData {
+  dimension: SegmentDimension
+  status: SegmentStatus
+  items: Array<{
+    id: string
+    value: number
+  }>
+  highlightedSegmentId?: string
+}
+
+export interface AssociatedFactor {
+  id: string
+  value: number
+}
+
+export interface RecommendedAction {
+  id: "earlyCareer" | "internalContext" | "listening"
+  priority: "high" | "recommended" | "consider"
+}
+
+export interface MethodologyItem {
+  id:
+    | "prediction"
+    | "source"
+    | "target"
+    | "limitations"
+    | "oversight"
+    | "privacy"
+}
+
+export interface DashboardOverview {
+  isDemo: true
+  profile: UserProfile
+  metrics: WorkforceMetric[]
+  executiveInsight: ExecutiveInsight
+  segmentDimensions: SegmentData[]
+  factors: AssociatedFactor[]
+  actions: RecommendedAction[]
+  methodology: MethodologyItem[]
+}
+
+export interface TranslationSection {
   title: string
-  value: string
-  context: string
-  comparison?: string
+  subtitle: string
 }
 
-export interface RiskTrendPoint {
-  month: string
-  high: number
-  medium: number
-}
-
-export interface RiskDistributionItem {
-  level: "Bajo" | "Medio" | "Alto"
-  value: number
-  percentage: number
-  color: string
-}
-
-export type DepartmentTrend = "Al alza" | "Estable" | "A la baja"
-
-export interface DepartmentRisk {
-  department: string
-  high: number
-  medium: number
-  trend: DepartmentTrend
-}
-
-export interface InfluenceFactor {
-  label: string
-  value: number
-}
-
-export interface ModelStatus {
-  version: string
-  lastTraining: string
-  dataPeriod: string
-  status: string
+export interface DashboardTranslations {
+  common: {
+    retry: string
+    comingSoon: string
+    close: string
+    percentage: string
+  }
+  navigation: {
+    productCategory: string
+    overview: string
+    people: string
+    insights: string
+    methodology: string
+    mainLabel: string
+    openMenu: string
+    closeMenu: string
+  }
+  language: {
+    label: string
+    english: string
+    spanish: string
+  }
+  profile: {
+    label: string
+    role: string
+  }
+  legal: {
+    copyright: string
+    rights: string
+  }
+  hero: {
+    eyebrow: string
+    greeting: string
+    subtitle: string
+    context: string
+  }
+  insight: TranslationSection & {
+    statement: string
+    note: string
+    explore: string
+    evidenceTitle: string
+    seniorRate: string
+    nextCohort: string
+    help: string
+  }
+  outlook: TranslationSection & {
+    metricLabels: Record<MetricId, string>
+    metricHelp: Partial<Record<MetricId, string>>
+  }
+  segments: TranslationSection & {
+    selectorLabel: string
+    dimensionLabels: Record<SegmentDimension, string>
+    itemLabels: Record<string, string>
+    contextTitles: Record<SegmentDimension, string>
+    experienceInterpretation: string
+    pendingTitle: string
+    pendingDescription: string
+    help: string
+  }
+  factors: TranslationSection & {
+    labels: Record<string, string>
+    helpLabel: string
+    help: string
+    interpretation: string
+  }
+  actions: TranslationSection & {
+    priorityLabels: Record<RecommendedAction["priority"], string>
+    items: Record<
+      RecommendedAction["id"],
+      { title: string; description: string; cta: string }
+    >
+    comingNext: string
+  }
+  methodology: TranslationSection & {
+    viewMethodology: string
+    items: Record<MethodologyItem["id"], { title: string; body: string }>
+    responsibleLabel: string
+    responsibleText: string
+  }
+  states: {
+    loading: string
+    loadingDescription: string
+    error: string
+    errorDescription: string
+    empty: string
+    emptyDescription: string
+  }
 }

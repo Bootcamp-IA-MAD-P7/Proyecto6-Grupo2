@@ -1,80 +1,82 @@
-import type {
-  DashboardKpi,
-  DepartmentRisk,
-  InfluenceFactor,
-  ModelStatus,
-  RiskDistributionItem,
-  RiskTrendPoint,
-} from "@/types/dashboard"
+import type { DashboardOverview, DashboardState } from "@/types/dashboard"
 
-export const dashboardMeta = {
-  period: "Febrero – julio de 2026",
-  lastUpdated: "26 de julio de 2026, 09:30",
+// Demonstration-only values approved for the validated prototype.
+export const dashboardMock: DashboardOverview = {
+  isDemo: true,
+  profile: {
+    id: "demo-hr-director",
+    name: "Julián Álvarez",
+    role: "HR Director",
+    email: "julian.alvarez@talentcare.demo",
+    initials: "JA",
+  },
+  metrics: [
+    { id: "profiles", value: 1248, format: "integer" },
+    { id: "review", value: 130, format: "integer" },
+    {
+      id: "lowerSatisfaction",
+      value: 10.4,
+      format: "percentage",
+      highlighted: true,
+    },
+    { id: "segments", value: 4, format: "integer" },
+  ],
+  executiveInsight: {
+    id: "early-career-concentration",
+    evidence: {
+      segments: [
+        { id: "0-2", value: 18.4, highlighted: true },
+        { id: "3-5", value: 11.2, highlighted: false },
+        { id: "6-10", value: 8.7, highlighted: false },
+        { id: "11-plus", value: 6.1, highlighted: false },
+      ],
+      seniorRateMultiplier: 3,
+      nextCohortDifference: 7.2,
+    },
+  },
+  segmentDimensions: [
+    {
+      dimension: "experience",
+      status: "available",
+      highlightedSegmentId: "0-2",
+      items: [
+        { id: "0-2", value: 18.4 },
+        { id: "3-5", value: 11.2 },
+        { id: "6-10", value: 8.7 },
+        { id: "11-plus", value: 6.1 },
+      ],
+    },
+    { dimension: "education", status: "pending", items: [] },
+    { dimension: "employment", status: "pending", items: [] },
+    { dimension: "companySize", status: "pending", items: [] },
+    { dimension: "country", status: "pending", items: [] },
+    { dimension: "professionalRole", status: "pending", items: [] },
+    { dimension: "age", status: "pending", items: [] },
+  ],
+  factors: [
+    { id: "experience", value: 28 },
+    { id: "salary", value: 22 },
+    { id: "employment", value: 16 },
+    { id: "education", value: 13 },
+    { id: "role", value: 10 },
+    { id: "companySize", value: 6 },
+    { id: "country", value: 3 },
+    { id: "age", value: 2 },
+  ],
+  actions: [
+    { id: "earlyCareer", priority: "high" },
+    { id: "internalContext", priority: "recommended" },
+    { id: "listening", priority: "consider" },
+  ],
+  methodology: [
+    { id: "prediction" },
+    { id: "source" },
+    { id: "target" },
+    { id: "limitations" },
+    { id: "oversight" },
+    { id: "privacy" },
+  ],
 }
 
-export const dashboardKpis: DashboardKpi[] = [
-  {
-    id: "employees",
-    title: "Empleadas analizadas",
-    value: "1.248",
-    context: "Cobertura actual del análisis",
-  },
-  {
-    id: "low",
-    title: "Riesgo bajo",
-    value: "842",
-    context: "67,5 % del total analizado",
-  },
-  {
-    id: "medium",
-    title: "Riesgo medio",
-    value: "276",
-    context: "22,1 % del total analizado",
-    comparison: "+7 frente a junio",
-  },
-  {
-    id: "high",
-    title: "Riesgo alto",
-    value: "130",
-    context: "10,4 % del total analizado",
-    comparison: "+6 frente a junio",
-  },
-]
-
-export const riskTrend: RiskTrendPoint[] = [
-  { month: "Feb", high: 96, medium: 238 },
-  { month: "Mar", high: 102, medium: 245 },
-  { month: "Abr", high: 108, medium: 252 },
-  { month: "May", high: 117, medium: 261 },
-  { month: "Jun", high: 124, medium: 269 },
-  { month: "Jul", high: 130, medium: 276 },
-]
-
-export const riskDistribution: RiskDistributionItem[] = [
-  { level: "Bajo", value: 842, percentage: 67.5, color: "var(--risk-low)" },
-  { level: "Medio", value: 276, percentage: 22.1, color: "var(--risk-medium)" },
-  { level: "Alto", value: 130, percentage: 10.4, color: "var(--risk-high)" },
-]
-
-export const departmentRisks: DepartmentRisk[] = [
-  { department: "Ingeniería de Datos", high: 36, medium: 72, trend: "Al alza" },
-  { department: "Desarrollo de Producto", high: 29, medium: 61, trend: "Estable" },
-  { department: "Ciberseguridad", high: 24, medium: 48, trend: "Al alza" },
-  { department: "Ciencia de Datos", high: 22, medium: 51, trend: "Estable" },
-  { department: "Infraestructura", high: 19, medium: 44, trend: "A la baja" },
-]
-
-export const influenceFactors: InfluenceFactor[] = [
-  { label: "Satisfacción laboral", value: 88 },
-  { label: "Horas extra", value: 74 },
-  { label: "Oportunidades de desarrollo", value: 69 },
-  { label: "Conciliación", value: 58 },
-  { label: "Antigüedad en el puesto", value: 46 },
-]
-
-export const modelStatus: ModelStatus = {
-  version: "1.2",
-  lastTraining: "12 de julio de 2026",
-  dataPeriod: "2021–2025",
-  status: "Operativo",
-}
+// Change only during development to exercise interface states.
+export const DASHBOARD_DEMO_STATE: DashboardState = "success"
