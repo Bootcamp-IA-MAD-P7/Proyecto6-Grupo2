@@ -1,122 +1,114 @@
 # API Design
 
-**Versión:** 1.0
-**Estado:** Draft
+**Version:** 1.0
+**Status:** Draft
 
 ---
 
-# 1. Descripción
+## Overview
 
-El backend expone una API REST desarrollada con FastAPI. Su única responsabilidad es recibir los datos del formulario, validarlos, invocar el modelo de ML y devolver la predicción con su explicación.
+The backend is a FastAPI application that serves the trained Random Forest binary classifier via a REST API. It loads the model once at startup, validates incoming requests with Pydantic, runs inference, and returns a structured prediction response. The frontend communicates with it exclusively through `POST /api/v1/predict`.
 
-No contiene lógica de entrenamiento. Actúa como puente entre el frontend y el modelo entrenado.
-
----
-
-# 2. Stack Tecnológico
-
-| Tecnología | Decisión |
-|---|---|
-| Framework | FastAPI |
-| Lenguaje | Python |
-| Validación | Pydantic (schemas) |
-| Servidor | Uvicorn |
-
----
-
-# 3. Endpoints
-
-## GET /health
-
-Comprueba que el servicio está activo.
-
-**Response:**
-```json
-{
-  "status": "ok"
-}
-```
-
----
-
-## POST /predict
-
-Recibe el perfil profesional del empleado y devuelve la predicción del modelo.
-
-**Request:**
-```json
-{
-  "years_code_pro": 5,
-  "ed_level": "Bachelor's degree",
-  "remote_work": "Hybrid",
-  "language_have_worked_with": "Python",
-  "converted_comp_yearly": 45000
-}
-```
-
-**Response:**
-```json
-{
-  "prediction": 1,
-  "label": "Satisfecho",
-  "probability": 0.82,
-  "top_factors": [
-    {"feature": "remote_work", "importance": 0.31},
-    {"feature": "converted_comp_yearly", "importance": 0.27},
-    {"feature": "years_code_pro", "importance": 0.19}
-  ]
-}
-```
-
----
-
-# 4. Validación de Datos
-
-La validación de los campos de entrada se realiza mediante schemas Pydantic definidos en `backend/app/schemas.py`.
-
-Si los datos de entrada son inválidos, la API devuelve un error `422 Unprocessable Entity` con el detalle del campo incorrecto. Esto cubre el UC4 y UC10 del SDD-00A.
-
----
-
-# 5. Integración con el Modelo
-
-El flujo interno de la API al recibir una petición es:
-
-```
-POST /predict
-      │
-      ▼
-Validación Pydantic (schemas.py)
-      │
-      ▼
-Carga del pipeline entrenado (inference.py → src/inference/load_pipeline.py)
-      │
-      ▼
-Preprocesado + Predicción (src/inference/predict.py)
-      │
-      ▼
-Respuesta JSON al frontend
-```
-
-El modelo se carga una sola vez al arrancar la aplicación para evitar latencia en cada petición.
-
----
-
-# 6. Estructura de Ficheros
+## Structure
 
 ```
 backend/
+├── Dockerfile
 └── app/
-    ├── main.py       — crea la app FastAPI
-    ├── routes.py     — define los endpoints
-    ├── schemas.py    — request/response con Pydantic
-    └── inference.py  — puente hacia src/inference/
+    ├── __init__.py
+    ├── main.py         — FastAPI app instantiation, CORS, router registration
+    ├── routes.py       — endpoint definitions
+    ├── schemas.py      — request and response Pydantic models
+    └── inference.py    — model loading and prediction bridge
 ```
 
----
+## Request / Response
 
-# 7. Decisiones Pendientes
+**Endpoint:** `POST /api/v1/predict`
 
-- Campos definitivos del request: se confirmarán tras el EDA y la selección de variables del modelo.
-- Formato exacto de `top_factors`: depende de la técnica de explicabilidad (XAI) seleccionada.
-- CORS: configurar los orígenes permitidos según el entorno de despliegue.
+**Request body** (`PredictionRequest`):
+
+| Field | Type | Description |
+|---|---|---|
+| `YearsCodeNum` | float | Years of coding experience (0–60) |
+| `ConvertedCompYearly` | float | Annual salary in USD |
+| `MainBranch` | string | Whether respondent is a developer by profession |
+| `Employment` | string | Employment status |
+| `EdLevel` | string | Highest education level |
+| `Age` | string | Age range |
+| `OrgSize` | string | Organisation size |
+| `Country` | string | Country of residence |
+
+**Response body** (`PredictionResponseBinary`):
+
+| Field | Type | Description |
+|---|---|---|
+| `prediction` | int | 0 = not satisfied, 1 = satisfied |
+| `label` | string | `"not_satisfied"` or `"satisfied"` |
+| `probability_not_satisfied` | float | Model confidence for class 0 |
+| `probability_satisfied` | float | Model confidence for class 1 |
+
+**Example response:**
+
+```json
+{
+  "prediction": 0,
+  "label": "not_satisfied",
+  "probability_not_satisfied": 0.5003,
+  "probability_satisfied": 0.4997
+}
+```
+
+## Model Selection
+
+The API serves the **binary classifier** (satisfied vs. not satisfied, threshold JobSat ≥ 7) rather than the 3-class variant for two reasons:
+
+- **Frontend UX:** The UI presents a binary outcome ("satisfied" / "not satisfied") with a confidence score. A 3-class output (low / medium / high) would require the frontend to map three labels into a binary decision anyway, adding unnecessary complexity.
+- **Reliability:** The binary model achieves a higher balanced accuracy (0.55 vs. 0.38 on test) and a tighter overfitting gap (1.9pp vs. 3.2pp), making it more trustworthy for production use. The 3-class model's systematic bias toward predicting "high" (driven by the small real sample of class 0) is mitigated in the binary formulation by the larger effective sample size per class.
+
+The 3-class model remains available as `random_forest_pipeline.joblib` and is documented in the modeling report (see `docs/SDD/05_modeling.md`).
+
+## Model Loading
+
+`inference.py` uses `@lru_cache(maxsize=1)` on `get_pipeline()` — the model is loaded from disk once on the first request and kept in memory for the lifetime of the process. Reloading a new model requires restarting the server. The binary pipeline is loaded by default (`load_rf_pipeline(binary=True)`), which reads `models/pipelines/random_forest_binary_pipeline.joblib`.
+
+## Inference Pipeline
+
+Requests flow through four layers:
+
+1. **Pydantic validation** — FastAPI rejects malformed or missing fields automatically with a 422 response before any model code runs.
+2. **`routes.py`** — receives the validated request, calls `predict_single()`, wraps the result in `PredictionResponseBinary`.
+3. **`inference.py`** — calls `predict_single()` from `src/inference/predict.py` with the validated input dict.
+4. **`src/inference/predict.py`** — builds a single-row DataFrame, passes it through the full sklearn/imblearn Pipeline (PolarsToPandas → preprocessor → RF), and returns probabilities and the predicted label.
+
+Note: SMOTENC only runs during `pipeline.fit()`, not during `pipeline.predict()` — imblearn Pipelines correctly skip resampling steps at inference time.
+
+## Error Handling
+
+| Scenario | HTTP status | Detail |
+|---|---|---|
+| Missing or wrong-type field | 422 | Pydantic validation error |
+| Missing feature in input dict | 422 | List of missing feature names |
+| Model file not found on disk | 503 | Path and instructions to retrain |
+
+## Running Locally
+
+```bash
+uv run python -m uvicorn backend.app.main:app --reload
+```
+
+Interactive API docs (auto-generated by FastAPI):
+
+http://localhost:8000/docs
+
+## CORS
+
+CORS is currently set to `allow_origins=["*"]` for development. Before deploying to production, restrict this to the frontend URL:
+
+```python
+allow_origins=["http://localhost:5173"]  # Vite dev server
+```
+
+## Docker
+
+The backend has its own `Dockerfile` in `backend/`. It is orchestrated alongside the frontend via `docker-compose.yml` at the project root. See `docs/SDD/06_deployment.md` for containerisation details.
