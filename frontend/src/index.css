@@ -136,6 +136,14 @@ a:focus-visible {
   animation: fade-up 360ms ease-out both;
 }
 
+.client-rise {
+  animation: fade-up 560ms ease-out both;
+}
+
+.client-rise-delayed {
+  animation: fade-up 620ms 100ms ease-out both;
+}
+
 .factor-bar {
   transform-origin: left;
   animation: grow-width 520ms ease-out both;

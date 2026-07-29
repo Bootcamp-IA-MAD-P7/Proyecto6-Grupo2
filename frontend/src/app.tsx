@@ -2,11 +2,16 @@ import { useEffect, useState } from "react"
 
 import { ExecutiveDashboard } from "@/components/dashboard/executive-dashboard"
 import { AssessmentPage } from "@/pages/assessment-page"
+import { EnsembleClientPage } from "@/pages/ensemble-client-page"
 import { LoginPage } from "@/pages/login-page"
 
-type AppView = "login" | "dashboard" | "assessment"
+type AppView = "login" | "dashboard" | "assessment" | "ensemble-client"
 
 function getCurrentView(): AppView {
+  if (window.location.hash === "#ensemble-client") {
+    return "ensemble-client"
+  }
+
   if (window.location.hash === "#assessment") {
     return "assessment"
   }
@@ -29,6 +34,10 @@ export default function App() {
 
   if (view === "login") {
     return <LoginPage onContinue={() => (window.location.hash = "home")} />
+  }
+
+  if (view === "ensemble-client") {
+    return <EnsembleClientPage />
   }
 
   return view === "assessment" ? <AssessmentPage /> : <ExecutiveDashboard />
