@@ -23,7 +23,6 @@ models/trained/*
 models/metrics/*
 !models/metrics/.gitkeep
 
-models/pipelines/*.joblib
 
 .env
 .env.*
