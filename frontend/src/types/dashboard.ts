@@ -94,6 +94,45 @@ export interface TranslationSection {
   subtitle: string
 }
 
+export interface LoginTranslations {
+  brand: {
+    name: string
+    descriptor: string
+    tagline: string
+    description: string
+    principles: readonly string[]
+    platformPrinciplesTitle: string
+    platformPrinciples: readonly string[]
+  }
+  form: {
+    title: string
+    description: string
+    emailLabel: string
+    emailPlaceholder: string
+    passwordLabel: string
+    passwordPlaceholder: string
+    rememberMe: string
+    forgotPassword: string
+    forgotPasswordUnavailable: string
+    showPassword: string
+    hidePassword: string
+    submit: string
+    submitting: string
+    demoAccess: string
+    newUserTitle: string
+    newUserDescription: string
+    futureAvailability: string
+    emailRequired: string
+    emailInvalid: string
+    passwordRequired: string
+  }
+  trust: {
+    title: string
+    demoNotice: string
+    dataUse: string
+  }
+}
+
 export interface DashboardTranslations {
   common: {
     retry: string
@@ -183,4 +222,5 @@ export interface DashboardTranslations {
     emptyDescription: string
   }
   assessment: AssessmentTranslations
+  login: LoginTranslations
 }
