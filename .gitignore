@@ -22,6 +22,10 @@ models/trained/*
 
 models/metrics/*
 !models/metrics/.gitkeep
+models/pipelines/**/oof_*.npy
+models/pipelines/**/test_preds_*.npy
+
+catboost_info/
 
 
 .env
