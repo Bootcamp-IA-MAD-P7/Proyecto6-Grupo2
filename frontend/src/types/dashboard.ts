@@ -1,3 +1,5 @@
+import type { AssessmentTranslations } from "@/types/prediction-form"
+
 export type LanguageCode = "en" | "es"
 
 export type DashboardState = "loading" | "error" | "empty" | "success"
@@ -102,6 +104,7 @@ export interface DashboardTranslations {
   navigation: {
     productCategory: string
     overview: string
+    assessment: string
     people: string
     insights: string
     methodology: string
@@ -179,4 +182,5 @@ export interface DashboardTranslations {
     empty: string
     emptyDescription: string
   }
+  assessment: AssessmentTranslations
 }
