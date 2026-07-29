@@ -3,11 +3,13 @@ FROM python:3.13-slim
 WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
+
 RUN pip install uv --no-cache-dir && \
     uv sync --frozen --no-dev
 
 COPY backend/ ./backend/
 COPY src/ ./src/
+COPY models/pipelines/random_forest_binary_pipeline.joblib models/pipelines/random_forest_binary_pipeline.joblib
 
 EXPOSE 8000
 
