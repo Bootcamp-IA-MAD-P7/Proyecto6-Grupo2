@@ -1,6 +1,7 @@
 import type {
   PredictionFieldError,
   PredictionFieldName,
+  PredictionLabel,
   PredictionRequest,
 } from "@/types/prediction"
 
@@ -41,11 +42,24 @@ export interface PredictionFormFieldTranslations {
 export interface PredictionFormTranslations {
   title: string
   description: string
+  intro: {
+    purpose: string
+    estimatedTime: string
+  }
   fields: Record<PredictionFieldName, PredictionFormFieldTranslations>
   validation: PredictionValidationMessages
   errorSummaryTitle: string
   submit: string
   submitting: string
+  responsibleUse: {
+    title: string
+    items: readonly string[]
+  }
+  privacy: {
+    title: string
+    noIdentifiers: string
+    assessmentUse: string
+  }
 }
 
 export interface PredictionFormProps {
@@ -55,5 +69,50 @@ export interface PredictionFormProps {
   translations: PredictionFormTranslations
   options?: PredictionFormOptions
   backendFieldErrors?: readonly PredictionFieldError[]
+}
+
+export interface PredictionResultTranslations {
+  eyebrow: string
+  labels: Record<
+    PredictionLabel,
+    {
+      badge: string
+      title: string
+      description: string
+      recommendation: string
+    }
+  >
+  summaryTitle: string
+  recommendationTitle: string
+  probabilityTitle: string
+  probabilityDescription: string
+  satisfiedProbability: string
+  notSatisfiedProbability: string
+  humanReviewTitle: string
+  humanReviewDescription: string
+  newAssessment: string
+}
+
+export interface PredictionErrorTranslations {
+  title: string
+  messages: {
+    validation: string
+    timeout: string
+    network: string
+    server: string
+    generic: string
+  }
+  retry: string
+}
+
+export interface AssessmentTranslations {
+  form: PredictionFormTranslations
+  options: PredictionFormOptions
+  loading: {
+    title: string
+    description: string
+  }
+  result: PredictionResultTranslations
+  error: PredictionErrorTranslations
 }
 

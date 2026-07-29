@@ -5,6 +5,7 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react"
+import { Clock3, LockKeyhole, ShieldCheck } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -201,10 +202,19 @@ export function PredictionForm({
         <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
           {translations.description}
         </p>
+        <div className="mt-5 flex max-w-3xl flex-col gap-3 rounded-lg bg-muted/70 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+          <p className="text-sm leading-6 text-foreground">
+            {translations.intro.purpose}
+          </p>
+          <p className="flex shrink-0 items-center gap-2 text-xs font-medium text-muted-foreground">
+            <Clock3 className="size-4 text-primary" aria-hidden="true" />
+            {translations.intro.estimatedTime}
+          </p>
+        </div>
       </CardHeader>
 
       <CardContent className="pt-6">
-        <form noValidate onSubmit={handleSubmit}>
+        <form noValidate onSubmit={handleSubmit} aria-busy={isSubmitting}>
           {hasSubmitted && errorsInOrder.length > 0 && (
             <div
               ref={errorSummaryRef}
@@ -261,6 +271,7 @@ export function PredictionForm({
                       max={isYearsField ? 80 : 10_000_000}
                       step={isYearsField ? 1 : 0.01}
                       inputMode="decimal"
+                      placeholder={copy.placeholder}
                       value={values[field]}
                       onChange={handleInputChange}
                       aria-invalid={Boolean(error)}
@@ -333,6 +344,60 @@ export function PredictionForm({
                 </div>
               )
             })}
+          </div>
+
+          <div className="mt-8 grid gap-4 lg:grid-cols-2">
+            <section
+              className="rounded-lg border border-border bg-muted/35 p-5"
+              aria-labelledby={`${formId}-responsible-use`}
+            >
+              <div className="flex items-center gap-2">
+                <ShieldCheck
+                  className="size-4.5 text-primary"
+                  aria-hidden="true"
+                />
+                <h2
+                  id={`${formId}-responsible-use`}
+                  className="text-sm font-semibold text-foreground"
+                >
+                  {translations.responsibleUse.title}
+                </h2>
+              </div>
+              <ul className="mt-3 space-y-2 text-xs leading-5 text-muted-foreground">
+                {translations.responsibleUse.items.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="text-primary" aria-hidden="true">
+                      •
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section
+              className="rounded-lg border border-border bg-muted/35 p-5"
+              aria-labelledby={`${formId}-privacy`}
+            >
+              <div className="flex items-center gap-2">
+                <LockKeyhole
+                  className="size-4.5 text-primary"
+                  aria-hidden="true"
+                />
+                <h2
+                  id={`${formId}-privacy`}
+                  className="text-sm font-semibold text-foreground"
+                >
+                  {translations.privacy.title}
+                </h2>
+              </div>
+              <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                {translations.privacy.noIdentifiers}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                {translations.privacy.assessmentUse}
+              </p>
+            </section>
           </div>
 
           <div className="mt-8 flex justify-end border-t border-border pt-6">
