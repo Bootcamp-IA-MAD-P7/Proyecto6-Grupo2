@@ -1,224 +1,165 @@
-## 1. Purpose
+# Deployment
 
-This document describes how the multiclass classification system is packaged, configured, executed, and deployed.
+**Version:** 1.0
+**Status:** Live
 
-It explains:
-- Deployment architecture
-- Containerization strategy
-- Environment configuration
-- Service communication
-- Local development setup
-- Production deployment considerations
+---
 
-This document focuses on operational aspects of the system.
+## 1. Live Instance
 
-## 2. Deployment Overview
+The backend API is deployed and publicly accessible:
 
-The application is deployed as a multi-service system composed of:
-- Frontend application
-- Backend API
-- Machine learning model artifacts
+| Service | URL |
+|---|---|
+| API | `https://talentcare-back.onrender.com` |
+| Predict endpoint | `https://talentcare-back.onrender.com/api/v1/predict` |
+| Interactive docs | `https://talentcare-back.onrender.com/docs` |
 
-The system uses containerization to ensure consistent execution across environments.
+No authentication is required. CORS is restricted to:
 
-Architecture:
+- `http://localhost:5173` (Vite dev server)
+- `https://talentcare-front.onrender.com` (production frontend)
 
+Only `POST` is allowed, with `Content-Type` and `Accept` headers.
+
+## 2. Architecture
+
+The application is deployed as a single-service system on Render:
+
+```
 User
- |
- v
-Frontend Container
- |
- HTTP API Requests
- |
- v
-Backend Container
- |
- ML Inference
- |
- v
-Model Artifacts
+  |
+  HTTPS POST /api/v1/predict
+  |
+  v
+Backend Container (Render)
+  |
+  ML Inference (scikit-learn Pipeline)
+  |
+  v
+Model Artifact (random_forest_binary_pipeline.joblib)
+```
 
-## 3. Deployment Components
+The frontend is not yet deployed — the API is fully functional and can be tested via the `/docs` Swagger UI or any HTTP client.
 
-### Frontend Service
+## 3. Backend Service
 
-Location:
-frontend/
+| Aspect | Detail |
+|---|---|
+| Platform | Render (Web Service) |
+| Runtime | Python 3.13 (slim) |
+| Framework | FastAPI + Uvicorn |
+| Model | Random Forest binary classifier |
+| Model file | `models/pipelines/random_forest_binary_pipeline.joblib` |
+| Start command | `uv run python -m uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT` |
 
-Purpose:
-Provides the user interface.
+### Dockerfile
 
-Technology:
-- React
-- TypeScript
-- Vite
+```dockerfile
+FROM python:3.13-slim
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+RUN pip install uv --no-cache-dir && uv sync --frozen --no-dev
+COPY backend/ ./backend/
+COPY src/ ./src/
+COPY models/pipelines/random_forest_binary_pipeline.joblib models/pipelines/random_forest_binary_pipeline.joblib
+EXPOSE 8000
+CMD ["uv", "run", "python", "-m", "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
 
-Responsibilities:
-- Build frontend application
-- Serve static files
-- Communicate with backend API
+The Dockerfile copies only the binary model (not the 3-class model or metrics) to keep the image small.
 
-### Backend Service
+## 4. Render Deployment
 
-Location:
-backend/
+The service was deployed via Render's GitHub integration:
 
-Purpose:
-Provides the prediction API.
+1. **Connect repo** — Render linked to the GitHub repository.
+2. **Select branch** — `main` (production).
+3. **Service type** — Web Service.
+4. **Build** — Render builds the Docker image from `backend/Dockerfile`.
+5. **Start command** — Render overrides the Dockerfile CMD with its own `$PORT` environment variable. The actual start command in the Render dashboard is:
 
-Responsibilities:
-- Start API server
-- Load ML pipeline
-- Receive prediction requests
-- Return predictions
+```
+uv run python -m uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+```
 
-### Machine Learning Artifacts
+6. **Health check** — Render monitors the service; FastAPI returns 200 on `/docs`.
 
-Location:
-models/
+Render automatically:
+- Assigns a public URL (`talentcare-back.onrender.com`).
+- Handles HTTPS termination.
+- Restarts the service on failure.
+- Scales the container vertically (plan-dependent).
 
-Contains:
-- Trained models
-- Pipelines
-- Metrics
+## 5. API Endpoint
 
-The backend uses these artifacts during inference.
+**`POST /api/v1/predict`**
 
-## 4. Container Architecture
+Request body:
 
-Docker containers isolate application services.
+```json
+{
+  "YearsCodeNum": 5,
+  "ConvertedCompYearly": 65000,
+  "MainBranch": "I am a developer by profession",
+  "Employment": "Employed, full-time",
+  "EdLevel": "Bachelor's degree",
+  "Age": "25-34 years old",
+  "OrgSize": "100 to 499 employees",
+  "Country": "Spain"
+}
+```
 
-Components:
-- Frontend container
-- Backend container
-- Model artifacts
+Response:
 
-## 5. Docker Configuration
+```json
+{
+  "prediction": 0,
+  "label": "not_satisfied",
+  "probability_not_satisfied": 0.5003,
+  "probability_satisfied": 0.4997
+}
+```
 
-docker-compose.yml manages:
-- Service definitions
-- Container networking
-- Environment variables
-- Application startup
+All 8 features are required. See the interactive docs at `/docs` for full schema details.
 
-## 6. Environment Configuration
+## 6. Local Development
 
-.env.example provides configuration templates.
+```bash
+# Train models
+uv run python scripts/train_random_forest.py
 
-Examples:
-- API URLs
-- Model paths
-- Environment settings
-- Ports
+# Start API
+uv run python -m uvicorn backend.app.main:app --reload
 
-Sensitive information should not be stored in the repository.
+# Test
+curl -X POST http://localhost:8000/api/v1/predict \
+  -H "Content-Type: application/json" \
+  -d '{"YearsCodeNum":5,"ConvertedCompYearly":65000,"MainBranch":"I am a developer by profession","Employment":"Employed, full-time","EdLevel":"Bachelor'\''s degree","Age":"25-34 years old","OrgSize":"100 to 499 employees","Country":"Spain"}'
+```
 
-## 7. Local Development Deployment
+## 7. Docker
 
-Requirements:
-- Docker
-- Docker Compose
-- Python
-- Node.js
-
-Steps:
-
-1. Clone repository
-
-2. Configure environment variables
-
-3. Build containers:
-docker compose build
-
-4. Start application:
+```bash
+# Build and run
 docker compose up
 
-## 8. Continuous Integration and Deployment
+# Build manually
+docker build -f backend/Dockerfile -t talentcare-back .
+docker run -p 8000:8000 talentcare-back
+```
 
-GitHub workflows automate:
-- Tests
-- Dependency checks
-- Container builds
-- Deployment validation
+## 8. Environment Variables
 
-Location:
-.github/workflows/
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | 8000 | Server port (Render sets this automatically) |
+| `PYTHONUNBUFFERED` | 1 | Disable Python stdout buffering |
 
-## 9. Deployment Environments
+## 9. Future Improvements
 
-Development:
-- Local development
-- Debug configuration
-
-Testing:
-- Automated validation
-- Test datasets
-
-Production:
-- Optimized containers
-- Production configuration
-- Monitoring
-
-## 10. Model Deployment Strategy
-
-Training environment
-        |
-        v
-Saved pipeline
-        |
-        v
-Model artifact
-        |
-        v
-Backend container
-        |
-        v
-Prediction API
-
-The deployed artifact must contain:
-- Preprocessing
-- Feature transformations
-- Classification model
-
-## 11. Logging and Monitoring
-
-Monitor:
-
-Backend:
-- Requests
-- Errors
-- Response times
-
-Machine Learning:
-- Prediction failures
-- Input changes
-- Performance degradation
-
-Frontend:
-- Client errors
-- API failures
-
-## 12. Security Considerations
-
-Practices:
-- Do not commit secrets
-- Validate API inputs
-- Update dependencies
-- Use environment variables
-
-## 13. Scalability Considerations
-
-Future improvements:
-- Multiple backend instances
-- Load balancing
-- Cloud deployment
-- Dedicated model serving
-- Automated retraining
-
-## 14. Future Improvements
-
-Possible additions:
-- CI/CD pipelines
-- Monitoring dashboards
-- Model registry
-- Production observability
+- Deploy frontend (Vite app) as a static site on Render or Vercel.
+- Add CI/CD pipeline with automated testing before deployment.
+- Restrict CORS to the frontend domain.
+- Add monitoring and logging aggregation.
+- Implement model versioning and rollback strategy.
