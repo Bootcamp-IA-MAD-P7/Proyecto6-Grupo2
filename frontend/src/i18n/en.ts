@@ -364,4 +364,57 @@ export const en: DashboardTranslations = {
       retry: "Try again",
     },
   },
+  login: {
+    brand: {
+      name: "TalentCare",
+      descriptor: "PEOPLE ANALYTICS PLATFORM",
+      tagline: "People Analytics for workforce retention.",
+      description:
+        "Use workforce insights to identify patterns, support HR teams and strengthen evidence-based decision-making.",
+      principles: [
+        "Human-centred workforce analytics.",
+        "Responsible use of organisational data.",
+        "Professional judgement remains essential.",
+      ],
+      platformPrinciplesTitle: "Platform principles",
+      platformPrinciples: [
+        "Evidence-based insights",
+        "Responsible analysis",
+        "Human oversight",
+      ],
+    },
+    form: {
+      title: "Sign in to TalentCare",
+      description:
+        "Already have an account? Access your TalentCare workspace.",
+      emailLabel: "Work email",
+      emailPlaceholder: "name@company.com",
+      passwordLabel: "Password",
+      passwordPlaceholder: "Enter your password",
+      rememberMe: "Remember me",
+      forgotPassword: "Forgot password?",
+      forgotPasswordUnavailable:
+        "Password recovery is not available in the demo environment.",
+      showPassword: "Show password",
+      hidePassword: "Hide password",
+      submit: "Sign in",
+      submitting: "Signing in…",
+      demoAccess: "Open demo workspace",
+      newUserTitle: "New to TalentCare?",
+      newUserDescription:
+        "Explore how TalentCare supports workforce retention and HR decision-making.",
+      futureAvailability:
+        "Demo requests and account creation will be available in a future version.",
+      emailRequired: "Enter your work email.",
+      emailInvalid: "Enter a valid email address.",
+      passwordRequired: "Enter your password.",
+    },
+    trust: {
+      title: "Demo environment",
+      demoNotice:
+        "Do not enter real credentials. This demonstration does not store login information.",
+      dataUse:
+        "TalentCare supports professional analysis and human decision-making.",
+    },
+  },
 }

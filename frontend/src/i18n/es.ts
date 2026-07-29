@@ -367,4 +367,57 @@ export const es: DashboardTranslations = {
       retry: "Intentar de nuevo",
     },
   },
+  login: {
+    brand: {
+      name: "TalentCare",
+      descriptor: "PLATAFORMA DE PEOPLE ANALYTICS",
+      tagline: "People Analytics para la retención de talento.",
+      description:
+        "Utiliza insights de la plantilla para identificar patrones, apoyar a los equipos de RR. HH. y reforzar la toma de decisiones basada en evidencias.",
+      principles: [
+        "Analítica de la plantilla centrada en las personas.",
+        "Uso responsable de los datos de la organización.",
+        "El criterio profesional sigue siendo esencial.",
+      ],
+      platformPrinciplesTitle: "Principios de la plataforma",
+      platformPrinciples: [
+        "Insights basados en evidencias",
+        "Análisis responsable",
+        "Supervisión humana",
+      ],
+    },
+    form: {
+      title: "Inicia sesión en TalentCare",
+      description:
+        "¿Ya tienes una cuenta? Accede a tu espacio de trabajo de TalentCare.",
+      emailLabel: "Correo profesional",
+      emailPlaceholder: "nombre@empresa.com",
+      passwordLabel: "Contraseña",
+      passwordPlaceholder: "Introduce tu contraseña",
+      rememberMe: "Recordarme",
+      forgotPassword: "¿Has olvidado tu contraseña?",
+      forgotPasswordUnavailable:
+        "La recuperación de contraseña no está disponible en el entorno de demostración.",
+      showPassword: "Mostrar contraseña",
+      hidePassword: "Ocultar contraseña",
+      submit: "Iniciar sesión",
+      submitting: "Iniciando sesión…",
+      demoAccess: "Abrir espacio de demostración",
+      newUserTitle: "¿Es tu primera vez en TalentCare?",
+      newUserDescription:
+        "Descubre cómo TalentCare apoya la retención del talento y la toma de decisiones de RR. HH.",
+      futureAvailability:
+        "La solicitud de demos y la creación de cuentas estarán disponibles en una versión futura.",
+      emailRequired: "Introduce tu correo profesional.",
+      emailInvalid: "Introduce una dirección de correo válida.",
+      passwordRequired: "Introduce tu contraseña.",
+    },
+    trust: {
+      title: "Entorno de demostración",
+      demoNotice:
+        "No introduzcas credenciales reales. Esta demostración no almacena información de acceso.",
+      dataUse:
+        "TalentCare apoya el análisis profesional y la toma de decisiones humanas.",
+    },
+  },
 }
