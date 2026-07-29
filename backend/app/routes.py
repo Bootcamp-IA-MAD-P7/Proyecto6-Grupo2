@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from backend.app.auth import get_current_user
 from backend.app.inference import get_pipeline
 from backend.app.schemas import PredictionResponseBinary
 from src.inference.predict import predict_single
@@ -19,8 +20,26 @@ class PredictionInput(BaseModel):
     Country: str
 
 
+@router.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@router.get("/auth/me")
+def auth_me(user: dict = Depends(get_current_user)):
+    return {"user_id": user.get("sub"), "email": user.get("email")}
+
+
+@router.get("/auth/logout")
+def auth_logout():
+    return {"message": "Logout by clearing the token on the client side"}
+
+
 @router.post("/predict", response_model=PredictionResponseBinary)
-def predict(input_data: PredictionInput) -> PredictionResponseBinary:
+def predict(
+    input_data: PredictionInput,
+    user: dict = Depends(get_current_user),
+) -> PredictionResponseBinary:
     try:
         pipeline = get_pipeline()
         result = predict_single(pipeline, input_data.model_dump(), binary=True)
