@@ -1,109 +1,120 @@
 import { useState } from "react"
 import {
+  Activity,
   ArrowRight,
   BarChart3,
+  Bell,
   BrainCircuit,
-  Check,
   ChevronRight,
   CircleGauge,
   Database,
   HeartHandshake,
+  Home,
   Info,
   Layers3,
+  Menu,
+  Search,
   ShieldCheck,
   Sparkles,
   Target,
+  TrendingUp,
   Users,
+  X,
 } from "lucide-react"
 
 type ModelId = "catboost" | "lightgbm" | "randomForest" | "ensemble"
 
-interface ModelEvidence {
+interface ModelMetric {
   id: ModelId
   name: string
-  shortName: string
   accuracy: number
   balancedAccuracy: number
   macroF1: number
-  summary: string
-  barClass: string
-  dotClass: string
+  insight: string
+  color: string
+  softColor: string
   recommended?: boolean
 }
 
-const MODEL_EVIDENCE: readonly ModelEvidence[] = [
+const MODELS: readonly ModelMetric[] = [
   {
     id: "catboost",
     name: "CatBoost",
-    shortName: "CAT",
     accuracy: 0.444,
     balancedAccuracy: 0.408,
     macroF1: 0.349,
-    summary:
-      "Buena sensibilidad a la clase minoritaria, con un coste en precisión global.",
-    barClass: "bg-[#88a694]",
-    dotClass: "bg-[#668474]",
+    insight:
+      "Detecta más perfiles minoritarios, pero genera demasiadas alertas poco precisas.",
+    color: "bg-[#71907c]",
+    softColor: "bg-[#edf4ef]",
   },
   {
     id: "lightgbm",
     name: "LightGBM",
-    shortName: "LGB",
     accuracy: 0.701,
     balancedAccuracy: 0.335,
     macroF1: 0.279,
-    summary:
-      "Alta exactitud aparente, pero demasiado condicionada por la clase mayoritaria.",
-    barClass: "bg-[#d2a66f]",
-    dotClass: "bg-[#a67b46]",
+    insight:
+      "Su accuracy es alta porque favorece la clase mayoritaria; pierde equilibrio.",
+    color: "bg-[#bd8e4b]",
+    softColor: "bg-[#f8f0e3]",
   },
   {
     id: "randomForest",
     name: "Random Forest",
-    shortName: "RF",
     accuracy: 0.591,
     balancedAccuracy: 0.384,
     macroF1: 0.384,
-    summary:
-      "El mejor equilibrio actual entre las tres clases; candidato recomendado para el piloto.",
-    barClass: "bg-[#c86f4f]",
-    dotClass: "bg-[#a84f31]",
+    insight:
+      "Ofrece el mejor equilibrio entre las tres clases y es el candidato al piloto.",
+    color: "bg-[#bd6547]",
+    softColor: "bg-[#faeee9]",
     recommended: true,
   },
   {
     id: "ensemble",
     name: "Ensemble",
-    shortName: "ENS",
     accuracy: 0.448,
     balancedAccuracy: 0.406,
     macroF1: 0.346,
-    summary:
-      "Combina los tres modelos, aunque todavía no supera al Random Forest en F1 macro.",
-    barClass: "bg-[#596c86]",
-    dotClass: "bg-[#40536d]",
+    insight:
+      "Mejora el recall de satisfacción baja, pero no supera el F1 de Random Forest.",
+    color: "bg-[#526780]",
+    softColor: "bg-[#ebeff4]",
   },
 ]
 
-const OUTCOMES = [
+const NAVIGATION = [
+  { href: "#resumen", label: "Resumen", icon: Home },
+  { href: "#insights", label: "Insights", icon: Sparkles },
+  { href: "#modelos", label: "Modelos", icon: BrainCircuit },
+  { href: "#acciones", label: "Acciones", icon: Target },
+] as const
+
+const DISTRIBUTION = [
   {
     label: "Satisfacción baja",
-    description:
-      "Perfiles históricos que requieren contexto humano y revisión prioritaria.",
-    tone: "border-[#d9a89a] bg-[#fff6f2] text-[#944c39]",
-    marker: "bg-[#b85f48]",
+    value: 7.23,
+    count: "597",
+    color: "bg-[#b95f49]",
+    text: "text-[#99503e]",
+    soft: "bg-[#fff3ef]",
   },
   {
     label: "Satisfacción media",
-    description:
-      "Señales mixtas que conviene observar antes de tomar cualquier decisión.",
-    tone: "border-[#dec9a4] bg-[#fffaf0] text-[#876831]",
-    marker: "bg-[#b58a43]",
+    value: 22.66,
+    count: "1.870",
+    color: "bg-[#bd914d]",
+    text: "text-[#8f6d35]",
+    soft: "bg-[#fff8ec]",
   },
   {
     label: "Satisfacción alta",
-    description:
-      "Patrones históricamente asociados a una experiencia laboral favorable.",
-    tone: "border-[#aec9b5] bg-[#f4faf5] text-[#4f7458]",
-    marker: "bg-[#648b6d]",
+    value: 70.11,
+    count: "5.785",
+    color: "bg-[#63856c]",
+    text: "text-[#52715b]",
+    soft: "bg-[#f0f7f2]",
   },
 ] as const
 
@@ -114,505 +125,612 @@ function formatMetric(value: number): string {
   })
 }
 
+function DashboardSidebar() {
+  return (
+    <aside className="sticky top-0 hidden h-screen flex-col bg-[#1f2e27] px-5 py-6 text-white lg:flex">
+      <a href="#resumen" className="flex items-center gap-3 px-2">
+        <span className="grid size-11 place-items-center rounded-xl bg-white/10">
+          <HeartHandshake className="size-5" aria-hidden="true" />
+        </span>
+        <span>
+          <span className="block text-lg font-semibold tracking-[-0.025em]">
+            TalentCare
+          </span>
+          <span className="block text-[0.62rem] font-semibold tracking-[0.14em] text-[#aebbb4] uppercase">
+            People intelligence
+          </span>
+        </span>
+      </a>
+
+      <nav className="mt-12 space-y-1" aria-label="Navegación principal">
+        {NAVIGATION.map(({ href, label, icon: Icon }, index) => (
+          <a
+            key={href}
+            href={href}
+            className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
+              index === 0
+                ? "bg-white/10 font-semibold text-white"
+                : "text-[#b4c0ba] hover:bg-white/6 hover:text-white"
+            }`}
+          >
+            <Icon className="size-4.5" aria-hidden="true" />
+            {label}
+          </a>
+        ))}
+      </nav>
+
+      <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#d2ddd7]">
+          <ShieldCheck className="size-4 text-[#d99275]" aria-hidden="true" />
+          Entorno experimental
+        </div>
+        <p className="mt-2 text-xs leading-5 text-[#9eada5]">
+          Los resultados orientan una revisión humana. No automatizan decisiones.
+        </p>
+      </div>
+
+      <div className="mt-auto border-t border-white/10 pt-5">
+        <div className="flex items-center gap-3 px-2">
+          <span className="grid size-9 place-items-center rounded-full bg-[#d5a38e] text-xs font-bold text-[#49342c]">
+            TC
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold">
+              Equipo de Personas
+            </span>
+            <span className="block truncate text-xs text-[#9eada5]">
+              Vista ejecutiva
+            </span>
+          </span>
+        </div>
+      </div>
+    </aside>
+  )
+}
+
 export function EnsembleClientPage() {
   const [selectedModelId, setSelectedModelId] =
     useState<ModelId>("randomForest")
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const selectedModel =
-    MODEL_EVIDENCE.find((model) => model.id === selectedModelId) ??
-    MODEL_EVIDENCE[2]
+    MODELS.find((model) => model.id === selectedModelId) ?? MODELS[2]
 
   return (
-    <main className="min-h-screen bg-[#f7f4ef] text-[#17211c]">
-      <header className="border-b border-[#24372d]/10 bg-[#f7f4ef]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-6 px-5 py-5 sm:px-8 lg:px-12">
-          <a
-            href="#ensemble-client"
-            className="flex items-center gap-3"
-            aria-label="TalentCare, inicio de la propuesta ensemble"
-          >
-            <span className="grid size-10 place-items-center rounded-xl bg-[#21372d] text-white shadow-sm">
-              <HeartHandshake className="size-5" aria-hidden="true" />
-            </span>
-            <span>
-              <span className="block text-base font-semibold tracking-[-0.02em]">
-                TalentCare
-              </span>
-              <span className="block text-[0.66rem] font-semibold tracking-[0.13em] text-[#68736d] uppercase">
-                Modelo experimental
-              </span>
-            </span>
-          </a>
+    <div className="min-h-screen bg-[#f6f5f2] text-[#17211c] lg:grid lg:grid-cols-[250px_1fr]">
+      <DashboardSidebar />
 
-          <nav className="hidden items-center gap-7 text-sm text-[#536159] md:flex">
-            <a href="#modelo" className="transition-colors hover:text-[#17211c]">
-              El modelo
-            </a>
-            <a
-              href="#evidencia"
-              className="transition-colors hover:text-[#17211c]"
-            >
-              Evidencia
-            </a>
-            <a
-              href="#siguiente-paso"
-              className="transition-colors hover:text-[#17211c]"
-            >
-              Siguiente paso
-            </a>
-          </nav>
-
-          <a
-            href="#assessment"
-            className="inline-flex items-center gap-2 rounded-full border border-[#263b30]/15 bg-white px-4 py-2 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            Ver versión actual
-            <ChevronRight className="size-4" aria-hidden="true" />
-          </a>
-        </div>
-      </header>
-
-      <section className="relative overflow-hidden">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-70"
-          aria-hidden="true"
-        >
-          <div className="absolute -top-36 right-[-7rem] size-[32rem] rounded-full bg-[#d9ad91]/25 blur-3xl" />
-          <div className="absolute bottom-[-15rem] left-[-9rem] size-[30rem] rounded-full bg-[#9cb4a2]/25 blur-3xl" />
-        </div>
-
-        <div className="relative mx-auto grid max-w-[1240px] gap-14 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.04fr_0.96fr] lg:items-center lg:px-12 lg:py-24">
-          <div className="client-rise">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#a9583b]/20 bg-[#fff9f5] px-3 py-1.5 text-xs font-semibold text-[#974c31]">
-              <Sparkles className="size-3.5" aria-hidden="true" />
-              Nueva propuesta para evaluación
-            </div>
-
-            <h1 className="font-editorial mt-7 max-w-3xl text-5xl leading-[0.98] tracking-[-0.045em] text-[#16261e] sm:text-6xl lg:text-[4.55rem]">
-              Entender mejor las señales antes de actuar.
-            </h1>
-            <p className="mt-7 max-w-2xl text-base leading-8 text-[#58635d] sm:text-lg">
-              Una lectura multiclase de la satisfacción laboral que distingue
-              entre señales bajas, medias y altas. Diseñada para orientar
-              conversaciones, no para automatizar decisiones sobre personas.
-            </p>
-
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <a
-                href="#evidencia"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#bd6547] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(136,68,43,0.2)] transition hover:-translate-y-0.5 hover:bg-[#aa573c]"
+      <div className="min-w-0">
+        <header className="sticky top-0 z-30 border-b border-[#22352b]/8 bg-[#f6f5f2]/92 backdrop-blur">
+          <div className="flex h-17 items-center justify-between gap-4 px-5 sm:px-8 xl:px-10">
+            <div className="flex items-center gap-3 lg:hidden">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen((open) => !open)}
+                className="grid size-10 place-items-center rounded-xl border border-[#22352b]/10 bg-white"
+                aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+                aria-expanded={mobileMenuOpen}
               >
-                Explorar la evidencia
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </a>
-              <a
-                href="#siguiente-paso"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-[#263b30]/15 bg-white/75 px-6 py-3.5 text-sm font-semibold transition hover:bg-white"
-              >
-                Revisar recomendación
-              </a>
+                {mobileMenuOpen ? (
+                  <X className="size-5" aria-hidden="true" />
+                ) : (
+                  <Menu className="size-5" aria-hidden="true" />
+                )}
+              </button>
+              <span className="font-semibold">TalentCare</span>
             </div>
 
-            <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-xs font-medium text-[#657069]">
-              <span className="inline-flex items-center gap-2">
-                <Check className="size-4 text-[#5d8067]" aria-hidden="true" />
-                55.008 perfiles históricos
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <Check className="size-4 text-[#5d8067]" aria-hidden="true" />
-                Validación estratificada
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <Check className="size-4 text-[#5d8067]" aria-hidden="true" />
-                Supervisión humana
+            <div className="hidden items-center gap-2 lg:flex">
+              <CircleGauge className="size-4 text-[#a75a3e]" aria-hidden="true" />
+              <span className="text-xs font-semibold tracking-[0.08em] text-[#68746d] uppercase">
+                Dashboard ejecutivo
               </span>
             </div>
-          </div>
 
-          <div className="client-rise-delayed relative mx-auto w-full max-w-xl">
-            <div className="absolute -inset-3 rounded-[2rem] border border-white/80 bg-white/25" />
-            <div className="relative overflow-hidden rounded-[1.6rem] border border-[#24372d]/10 bg-[#20372c] p-6 text-white shadow-[0_28px_80px_rgba(31,50,41,0.22)] sm:p-8">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[0.67rem] font-semibold tracking-[0.14em] text-[#b8c8bf] uppercase">
-                    Candidato recomendado
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold tracking-[-0.025em]">
-                    Random Forest
-                  </h2>
-                </div>
-                <span className="grid size-11 place-items-center rounded-2xl bg-white/10">
-                  <BrainCircuit className="size-5" aria-hidden="true" />
-                </span>
-              </div>
-
-              <div className="mt-10 grid grid-cols-2 gap-4">
-                <div className="rounded-2xl border border-white/10 bg-white/7 p-4">
-                  <p className="text-xs text-[#b8c8bf]">F1 macro en test</p>
-                  <p className="mt-2 text-4xl font-semibold tracking-[-0.04em]">
-                    0,384
-                  </p>
-                  <p className="mt-2 text-xs leading-5 text-[#aebfb5]">
-                    Mejor equilibrio entre clases
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/7 p-4">
-                  <p className="text-xs text-[#b8c8bf]">Accuracy en test</p>
-                  <p className="mt-2 text-4xl font-semibold tracking-[-0.04em]">
-                    59,1%
-                  </p>
-                  <p className="mt-2 text-xs leading-5 text-[#aebfb5]">
-                    Sobre 8.252 perfiles
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-7">
-                <div className="flex items-center justify-between text-xs text-[#b8c8bf]">
-                  <span>Distribución real de test</span>
-                  <span>8.252 perfiles</span>
-                </div>
-                <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-white/10">
-                  <span
-                    className="h-full bg-[#c56d55]"
-                    style={{ width: "7.23%" }}
-                    title="Satisfacción baja: 7,23%"
-                  />
-                  <span
-                    className="h-full bg-[#c9a05d]"
-                    style={{ width: "22.66%" }}
-                    title="Satisfacción media: 22,66%"
-                  />
-                  <span
-                    className="h-full bg-[#7fa089]"
-                    style={{ width: "70.11%" }}
-                    title="Satisfacción alta: 70,11%"
-                  />
-                </div>
-                <div className="mt-3 flex flex-wrap gap-4 text-[0.68rem] text-[#b8c8bf]">
-                  <span className="flex items-center gap-1.5">
-                    <span className="size-2 rounded-full bg-[#c56d55]" />
-                    Baja
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="size-2 rounded-full bg-[#c9a05d]" />
-                    Media
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="size-2 rounded-full bg-[#7fa089]" />
-                    Alta
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-8 flex items-start gap-3 border-t border-white/10 pt-5 text-xs leading-5 text-[#b8c8bf]">
-                <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                <p>
-                  El rendimiento aún es experimental. La propuesta recomienda
-                  un piloto controlado antes de cualquier uso operativo.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="modelo" className="border-y border-[#24372d]/10 bg-white">
-        <div className="mx-auto max-w-[1240px] px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
-          <div className="grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
-            <div>
-              <p className="text-xs font-semibold tracking-[0.14em] text-[#a75236] uppercase">
-                Una lectura más matizada
-              </p>
-              <h2 className="font-editorial mt-4 text-4xl leading-tight tracking-[-0.035em] sm:text-5xl">
-                Tres señales. Una conversación más útil.
-              </h2>
-            </div>
-            <p className="max-w-2xl text-base leading-7 text-[#637068] lg:justify-self-end">
-              El modelo no diagnostica satisfacción real. Reconoce patrones
-              históricos y los agrupa para ayudar a priorizar dónde puede
-              aportar valor una revisión cualitativa.
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {OUTCOMES.map((outcome, index) => (
-              <article
-                key={outcome.label}
-                className={`rounded-2xl border p-6 ${outcome.tone}`}
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`size-2.5 rounded-full ${outcome.marker}`}
-                    aria-hidden="true"
-                  />
-                  <span className="text-[0.65rem] font-bold tracking-[0.14em] opacity-65">
-                    0{index + 1}
-                  </span>
-                </div>
-                <h3 className="mt-8 text-lg font-semibold">{outcome.label}</h3>
-                <p className="mt-3 text-sm leading-6 opacity-80">
-                  {outcome.description}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="evidencia">
-        <div className="mx-auto max-w-[1240px] px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
-          <div className="max-w-3xl">
-            <p className="text-xs font-semibold tracking-[0.14em] text-[#a75236] uppercase">
-              Evidencia comparada
-            </p>
-            <h2 className="font-editorial mt-4 text-4xl tracking-[-0.035em] sm:text-5xl">
-              Elegimos equilibrio, no solo una cifra grande.
-            </h2>
-            <p className="mt-5 text-base leading-7 text-[#637068]">
-              La accuracy de LightGBM parece superior, pero cae al comparar las
-              tres clases de forma equilibrada. Por eso priorizamos F1 macro
-              para decidir qué modelo merece avanzar.
-            </p>
-          </div>
-
-          <div className="mt-11 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="rounded-[1.5rem] border border-[#24372d]/10 bg-white p-5 shadow-[0_18px_60px_rgba(39,58,48,0.07)] sm:p-7">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold">F1 macro en test</p>
-                  <p className="mt-1 text-xs text-[#738078]">
-                    Haz clic en un modelo para explorar sus resultados
-                  </p>
-                </div>
-                <BarChart3
-                  className="size-5 text-[#9f5a41]"
+            <div className="flex items-center gap-2">
+              <label className="relative hidden sm:block">
+                <span className="sr-only">Buscar en el dashboard</span>
+                <Search
+                  className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#7d8881]"
                   aria-hidden="true"
                 />
+                <input
+                  type="search"
+                  placeholder="Buscar"
+                  className="h-10 w-40 rounded-xl border border-[#22352b]/10 bg-white pr-3 pl-9 text-sm outline-none placeholder:text-[#8b958f] focus:border-[#a75a3e]/40 xl:w-52"
+                />
+              </label>
+              <button
+                type="button"
+                className="relative grid size-10 place-items-center rounded-xl border border-[#22352b]/10 bg-white"
+                aria-label="Notificaciones"
+              >
+                <Bell className="size-4.5" aria-hidden="true" />
+                <span className="absolute top-2.5 right-2.5 size-1.5 rounded-full bg-[#bd6547]" />
+              </button>
+              <a
+                href="#assessment"
+                className="hidden rounded-xl bg-[#24382e] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#18271f] sm:inline-flex"
+              >
+                Flujo actual
+              </a>
+            </div>
+          </div>
+
+          {mobileMenuOpen && (
+            <nav
+              className="border-t border-[#22352b]/8 bg-white px-5 py-3 lg:hidden"
+              aria-label="Navegación móvil"
+            >
+              <div className="grid grid-cols-2 gap-2">
+                {NAVIGATION.map(({ href, label, icon: Icon }) => (
+                  <a
+                    key={href}
+                    href={href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-lg bg-[#f5f3ef] px-3 py-2.5 text-sm font-medium"
+                  >
+                    <Icon className="size-4" aria-hidden="true" />
+                    {label}
+                  </a>
+                ))}
+              </div>
+            </nav>
+          )}
+        </header>
+
+        <main className="px-5 py-8 sm:px-8 xl:px-10 xl:py-9">
+          <div id="resumen" className="mx-auto max-w-[1440px]">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-sm font-medium text-[#69746e]">
+                  Miércoles, 30 de julio
+                </p>
+                <h1 className="mt-1 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
+                  Buenos días, equipo.
+                </h1>
+                <p className="mt-2 text-sm leading-6 text-[#69746e]">
+                  Esta es la lectura prioritaria del modelo de satisfacción.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 self-start rounded-full border border-[#bd6547]/20 bg-[#fff8f4] px-3 py-1.5 text-xs font-semibold text-[#9c4f35]">
+                <span className="size-2 animate-pulse rounded-full bg-[#bd6547]" />
+                Modelo experimental · Test 2024–2025
+              </div>
+            </div>
+
+            <section className="client-rise mt-8 grid gap-5 xl:grid-cols-[1.45fr_0.55fr]">
+              <article className="relative overflow-hidden rounded-[1.5rem] bg-[#20352b] p-6 text-white shadow-[0_20px_55px_rgba(31,52,42,0.14)] sm:p-8">
+                <div
+                  className="pointer-events-none absolute -top-28 -right-24 size-72 rounded-full border border-white/8 bg-white/4"
+                  aria-hidden="true"
+                />
+                <div className="relative">
+                  <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.1em] text-[#c1cec7] uppercase">
+                    <Sparkles className="size-4 text-[#dc9679]" aria-hidden="true" />
+                    Insight principal
+                  </div>
+                  <div className="mt-7 grid gap-8 lg:grid-cols-[1fr_0.8fr] lg:items-end">
+                    <div>
+                      <p className="font-editorial max-w-2xl text-3xl leading-tight tracking-[-0.035em] sm:text-4xl">
+                        3 de cada 10 perfiles históricos muestran señales bajas
+                        o medias de satisfacción.
+                      </p>
+                      <p className="mt-5 max-w-xl text-sm leading-6 text-[#b8c6bf]">
+                        No es una medida de la plantilla actual. Es una señal
+                        para decidir dónde conviene escuchar con más atención.
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-white/6 p-5">
+                      <div className="flex items-end justify-between gap-3">
+                        <div>
+                          <p className="text-xs text-[#b8c6bf]">
+                            Perfiles para revisión contextual
+                          </p>
+                          <p className="mt-1 text-4xl font-semibold tracking-[-0.04em]">
+                            29,9%
+                          </p>
+                        </div>
+                        <TrendingUp
+                          className="mb-1 size-5 text-[#dc9679]"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <div className="mt-5 flex h-2.5 overflow-hidden rounded-full bg-white/10">
+                        {DISTRIBUTION.map((item) => (
+                          <span
+                            key={item.label}
+                            className={`h-full ${item.color}`}
+                            style={{ width: `${item.value}%` }}
+                          />
+                        ))}
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[0.66rem] text-[#b8c6bf]">
+                        {DISTRIBUTION.map((item) => (
+                          <span key={item.label} className="flex items-center gap-1.5">
+                            <span className={`size-2 rounded-full ${item.color}`} />
+                            {item.label.replace("Satisfacción ", "")}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <aside className="client-rise-delayed flex flex-col rounded-[1.5rem] border border-[#22352b]/9 bg-white p-6 shadow-[0_14px_45px_rgba(38,57,47,0.06)]">
+                <div className="flex items-center justify-between">
+                  <span className="grid size-11 place-items-center rounded-2xl bg-[#faeee9] text-[#a7563a]">
+                    <Info className="size-5" aria-hidden="true" />
+                  </span>
+                  <span className="text-[0.65rem] font-semibold tracking-[0.1em] text-[#758078] uppercase">
+                    Lectura ejecutiva
+                  </span>
+                </div>
+                <h2 className="mt-6 text-xl font-semibold tracking-[-0.025em]">
+                  Qué significa
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-[#68746d]">
+                  La distribución está muy concentrada en satisfacción alta.
+                  Por eso la accuracy, por sí sola, puede dar una falsa sensación
+                  de rendimiento.
+                </p>
+                <div className="mt-auto border-t border-[#22352b]/9 pt-5">
+                  <p className="text-xs font-semibold text-[#263a30]">
+                    Decisión recomendada
+                  </p>
+                  <p className="mt-1.5 text-xs leading-5 text-[#68746d]">
+                    Priorizar F1 macro y supervisión humana durante el piloto.
+                  </p>
+                </div>
+              </aside>
+            </section>
+
+            <section
+              aria-label="Métricas principales"
+              className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-4"
+            >
+              {[
+                {
+                  label: "Perfiles analizados",
+                  value: "55.008",
+                  note: "Train, validación y test",
+                  icon: Database,
+                  tone: "bg-[#edf4ef] text-[#5d7b66]",
+                },
+                {
+                  label: "Señal baja + media",
+                  value: "29,9%",
+                  note: "Sobre el conjunto de test",
+                  icon: Activity,
+                  tone: "bg-[#fff3ef] text-[#aa5840]",
+                },
+                {
+                  label: "Mejor F1 macro",
+                  value: "0,384",
+                  note: "Random Forest",
+                  icon: CircleGauge,
+                  tone: "bg-[#f8f0e3] text-[#9b733b]",
+                },
+                {
+                  label: "Recall clase baja",
+                  value: "46%",
+                  note: "Ensemble · test",
+                  icon: Target,
+                  tone: "bg-[#ebeff4] text-[#526780]",
+                },
+              ].map(({ label, value, note, icon: Icon, tone }) => (
+                <article
+                  key={label}
+                  className="rounded-2xl border border-[#22352b]/9 bg-white p-5 shadow-[0_10px_35px_rgba(38,57,47,0.045)]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-medium text-[#748078]">{label}</p>
+                      <p className="mt-2 text-3xl font-semibold tracking-[-0.04em]">
+                        {value}
+                      </p>
+                    </div>
+                    <span className={`grid size-10 place-items-center rounded-xl ${tone}`}>
+                      <Icon className="size-4.5" aria-hidden="true" />
+                    </span>
+                  </div>
+                  <p className="mt-4 border-t border-[#22352b]/8 pt-3 text-xs text-[#748078]">
+                    {note}
+                  </p>
+                </article>
+              ))}
+            </section>
+
+            <section id="insights" className="scroll-mt-24 pt-14">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold tracking-[0.12em] text-[#a7563a] uppercase">
+                    Narrativa de datos
+                  </p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
+                    De la señal a la decisión
+                  </h2>
+                </div>
+                <p className="max-w-xl text-sm leading-6 text-[#69746e]">
+                  Tres lecturas conectadas para evitar conclusiones aisladas.
+                </p>
               </div>
 
-              <div className="mt-8 space-y-4">
-                {MODEL_EVIDENCE.map((model) => {
-                  const isSelected = selectedModelId === model.id
+              <div className="mt-6 grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+                <article className="rounded-[1.4rem] border border-[#22352b]/9 bg-white p-6 sm:p-7">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold">
+                        Distribución de satisfacción
+                      </p>
+                      <p className="mt-1 text-xs text-[#748078]">
+                        Conjunto de test · 8.252 perfiles
+                      </p>
+                    </div>
+                    <BarChart3 className="size-5 text-[#a7563a]" aria-hidden="true" />
+                  </div>
 
-                  return (
-                    <button
-                      key={model.id}
-                      type="button"
-                      onClick={() => setSelectedModelId(model.id)}
-                      aria-pressed={isSelected}
-                      className={`w-full rounded-xl border p-4 text-left transition ${
-                        isSelected
-                          ? "border-[#9f5a41]/35 bg-[#fff9f5] shadow-sm"
-                          : "border-transparent hover:border-[#24372d]/10 hover:bg-[#faf9f6]"
-                      }`}
-                    >
-                      <span className="flex items-center gap-4">
-                        <span className="w-28 shrink-0">
-                          <span className="block text-sm font-semibold">
-                            {model.name}
+                  <div className="mt-8 space-y-6">
+                    {DISTRIBUTION.map((item) => (
+                      <div key={item.label}>
+                        <div className="flex items-center justify-between gap-4 text-sm">
+                          <span className="font-medium">{item.label}</span>
+                          <span className="font-mono text-xs text-[#69746e]">
+                            {item.count} · {item.value.toLocaleString("es-ES")}%
                           </span>
-                          {model.recommended && (
-                            <span className="mt-1 block text-[0.62rem] font-bold tracking-[0.1em] text-[#a75236] uppercase">
-                              Recomendado
-                            </span>
-                          )}
+                        </div>
+                        <div className="mt-2.5 h-3 overflow-hidden rounded-full bg-[#efede8]">
+                          <div
+                            className={`h-full rounded-full ${item.color}`}
+                            style={{ width: `${item.value}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-8 rounded-xl bg-[#f5f3ee] p-4">
+                    <p className="text-xs leading-5 text-[#5f6b64]">
+                      <strong className="text-[#263a30]">Insight:</strong> siete
+                      de cada diez perfiles pertenecen a la clase alta. Una
+                      métrica global puede ocultar fallos en los grupos menos
+                      frecuentes.
+                    </p>
+                  </div>
+                </article>
+
+                <div className="space-y-4">
+                  {[
+                    {
+                      number: "01",
+                      eyebrow: "Qué vemos",
+                      title: "La clase alta domina el conjunto.",
+                      body: "LightGBM alcanza 70,1% de accuracy, pero su F1 macro cae a 0,279.",
+                      tone: "border-[#d7bf91] bg-[#fffaf0]",
+                    },
+                    {
+                      number: "02",
+                      eyebrow: "Qué significa",
+                      title: "Acertar la mayoría no basta.",
+                      body: "El modelo debe mantener utilidad también para las señales bajas y medias.",
+                      tone: "border-[#d8a797] bg-[#fff6f2]",
+                    },
+                    {
+                      number: "03",
+                      eyebrow: "Qué hacemos",
+                      title: "Pilotar Random Forest con contexto humano.",
+                      body: "Es el candidato con mejor F1 macro y una complejidad operativa razonable.",
+                      tone: "border-[#aac4b1] bg-[#f3f8f4]",
+                    },
+                  ].map((item) => (
+                    <article
+                      key={item.number}
+                      className={`rounded-2xl border p-5 ${item.tone}`}
+                    >
+                      <div className="flex gap-4">
+                        <span className="font-mono text-xs font-bold text-[#8a5d49]">
+                          {item.number}
                         </span>
-                        <span className="flex-1">
-                          <span className="block h-2.5 overflow-hidden rounded-full bg-[#edeae4]">
-                            <span
-                              className={`block h-full rounded-full transition-all duration-500 ${model.barClass}`}
-                              style={{ width: `${model.macroF1 * 100}%` }}
+                        <div>
+                          <p className="text-[0.64rem] font-bold tracking-[0.12em] text-[#737e77] uppercase">
+                            {item.eyebrow}
+                          </p>
+                          <h3 className="mt-1.5 text-base font-semibold">
+                            {item.title}
+                          </h3>
+                          <p className="mt-2 text-xs leading-5 text-[#657169]">
+                            {item.body}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section id="modelos" className="scroll-mt-24 pt-14">
+              <div className="rounded-[1.5rem] border border-[#22352b]/9 bg-white p-6 sm:p-8">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold tracking-[0.12em] text-[#a7563a] uppercase">
+                      Comparativa de modelos
+                    </p>
+                    <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
+                      El equilibrio cambia la decisión.
+                    </h2>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-full bg-[#f4f2ed] px-3 py-1.5 text-xs text-[#66726a]">
+                    <Info className="size-3.5" aria-hidden="true" />
+                    Métricas sobre test
+                  </div>
+                </div>
+
+                <div className="mt-8 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+                  <div className="space-y-3">
+                    {MODELS.map((model) => {
+                      const selected = model.id === selectedModelId
+
+                      return (
+                        <button
+                          key={model.id}
+                          type="button"
+                          onClick={() => setSelectedModelId(model.id)}
+                          aria-pressed={selected}
+                          className={`w-full rounded-xl border p-4 text-left transition ${
+                            selected
+                              ? "border-[#bd6547]/30 bg-[#fff9f6] shadow-sm"
+                              : "border-[#22352b]/7 hover:bg-[#f8f7f4]"
+                          }`}
+                        >
+                          <span className="flex items-center gap-4">
+                            <span className="w-30 shrink-0 text-sm font-semibold">
+                              {model.name}
+                              {model.recommended && (
+                                <span className="mt-1 block text-[0.58rem] font-bold tracking-[0.1em] text-[#aa583e] uppercase">
+                                  Recomendado
+                                </span>
+                              )}
+                            </span>
+                            <span className="flex-1">
+                              <span className="block h-2.5 overflow-hidden rounded-full bg-[#eceae5]">
+                                <span
+                                  className={`block h-full rounded-full ${model.color}`}
+                                  style={{ width: `${model.macroF1 * 100}%` }}
+                                />
+                              </span>
+                            </span>
+                            <span className="w-13 text-right font-mono text-sm font-semibold">
+                              {formatMetric(model.macroF1)}
+                            </span>
+                            <ChevronRight
+                              className={`size-4 transition ${selected ? "text-[#aa583e]" : "text-[#a1aaa4]"}`}
+                              aria-hidden="true"
                             />
                           </span>
-                        </span>
-                        <span className="w-12 text-right font-mono text-sm font-semibold">
-                          {formatMetric(model.macroF1)}
-                        </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <aside className={`rounded-2xl p-6 ${selectedModel.softColor}`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`grid size-11 place-items-center rounded-xl text-white ${selectedModel.color}`}>
+                        <BrainCircuit className="size-5" aria-hidden="true" />
                       </span>
-                    </button>
-                  )
-                })}
+                      <span className="text-[0.62rem] font-bold tracking-[0.1em] text-[#66726a] uppercase">
+                        Modelo seleccionado
+                      </span>
+                    </div>
+                    <h3 className="mt-6 text-xl font-semibold">
+                      {selectedModel.name}
+                    </h3>
+                    <p className="mt-3 min-h-16 text-sm leading-6 text-[#5f6b64]">
+                      {selectedModel.insight}
+                    </p>
+                    <dl className="mt-6 grid grid-cols-3 gap-3 border-t border-[#22352b]/10 pt-5">
+                      <div>
+                        <dt className="text-[0.6rem] font-semibold text-[#748078] uppercase">
+                          Accuracy
+                        </dt>
+                        <dd className="mt-1.5 text-lg font-semibold">
+                          {formatMetric(selectedModel.accuracy)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-[0.6rem] font-semibold text-[#748078] uppercase">
+                          Balanced
+                        </dt>
+                        <dd className="mt-1.5 text-lg font-semibold">
+                          {formatMetric(selectedModel.balancedAccuracy)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-[0.6rem] font-semibold text-[#748078] uppercase">
+                          F1 macro
+                        </dt>
+                        <dd className="mt-1.5 text-lg font-semibold">
+                          {formatMetric(selectedModel.macroF1)}
+                        </dd>
+                      </div>
+                    </dl>
+                  </aside>
+                </div>
               </div>
-            </div>
+            </section>
 
-            <aside className="rounded-[1.5rem] border border-[#24372d]/10 bg-[#efeae2] p-6 sm:p-8">
-              <div className="flex items-center justify-between">
-                <span
-                  className={`grid size-12 place-items-center rounded-2xl text-white ${selectedModel.dotClass}`}
-                >
-                  <CircleGauge className="size-5" aria-hidden="true" />
-                </span>
-                <span className="rounded-full border border-[#24372d]/10 bg-white/70 px-3 py-1 text-[0.67rem] font-bold tracking-[0.1em] uppercase">
-                  {selectedModel.shortName}
-                </span>
-              </div>
-
-              <h3 className="mt-8 text-2xl font-semibold tracking-[-0.025em]">
-                {selectedModel.name}
-              </h3>
-              <p className="mt-3 min-h-18 text-sm leading-6 text-[#606c65]">
-                {selectedModel.summary}
-              </p>
-
-              <dl className="mt-8 grid grid-cols-3 gap-3 border-t border-[#24372d]/10 pt-6">
-                <div>
-                  <dt className="text-[0.65rem] font-semibold tracking-[0.08em] text-[#6f7b74] uppercase">
-                    Accuracy
-                  </dt>
-                  <dd className="mt-2 text-xl font-semibold">
-                    {formatMetric(selectedModel.accuracy)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[0.65rem] font-semibold tracking-[0.08em] text-[#6f7b74] uppercase">
-                    Balanced
-                  </dt>
-                  <dd className="mt-2 text-xl font-semibold">
-                    {formatMetric(selectedModel.balancedAccuracy)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[0.65rem] font-semibold tracking-[0.08em] text-[#6f7b74] uppercase">
-                    F1 macro
-                  </dt>
-                  <dd className="mt-2 text-xl font-semibold">
-                    {formatMetric(selectedModel.macroF1)}
-                  </dd>
-                </div>
-              </dl>
-            </aside>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-[#20372c] text-white">
-        <div className="mx-auto grid max-w-[1240px] gap-10 px-5 py-16 sm:px-8 lg:grid-cols-3 lg:px-12 lg:py-20">
-          {[
-            {
-              icon: Database,
-              title: "Base histórica",
-              body: "Encuestas de Stack Overflow 2024–2025, tratadas como contexto de investigación.",
-            },
-            {
-              icon: ShieldCheck,
-              title: "Uso responsable",
-              body: "Nunca sustituye entrevistas, escucha activa ni criterio profesional de RR. HH.",
-            },
-            {
-              icon: Users,
-              title: "Piloto humano",
-              body: "La siguiente fase debe validar utilidad, sesgos y comprensión con equipos reales.",
-            },
-          ].map(({ icon: Icon, title, body }) => (
-            <article key={title} className="border-t border-white/15 pt-6">
-              <Icon className="size-5 text-[#d59072]" aria-hidden="true" />
-              <h3 className="mt-5 text-lg font-semibold">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-[#b7c5bd]">{body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section id="siguiente-paso" className="bg-white">
-        <div className="mx-auto max-w-[1240px] px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
-          <div className="overflow-hidden rounded-[1.75rem] border border-[#24372d]/10 bg-[#f1ede7]">
-            <div className="grid lg:grid-cols-[1.08fr_0.92fr]">
-              <div className="p-7 sm:p-10 lg:p-12">
-                <p className="text-xs font-semibold tracking-[0.14em] text-[#a75236] uppercase">
-                  Recomendación
+            <section id="acciones" className="scroll-mt-24 pt-14">
+              <div>
+                <p className="text-xs font-semibold tracking-[0.12em] text-[#a7563a] uppercase">
+                  Acciones recomendadas
                 </p>
-                <h2 className="font-editorial mt-4 max-w-2xl text-4xl leading-tight tracking-[-0.035em] sm:text-5xl">
-                  Avanzar con un piloto pequeño y medible.
+                <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
+                  Qué conviene hacer ahora
                 </h2>
-                <p className="mt-6 max-w-2xl text-base leading-7 text-[#637068]">
-                  Random Forest es el mejor candidato actual por F1 macro. Antes
-                  de conectarlo al flujo del cliente, proponemos validar tres
-                  aspectos con un grupo controlado.
-                </p>
-
-                <ol className="mt-8 space-y-4">
-                  {[
-                    "Revisar las variables disponibles y su calidad.",
-                    "Contrastar resultados con contexto cualitativo.",
-                    "Definir umbrales, responsables y criterios de parada.",
-                  ].map((item, index) => (
-                    <li key={item} className="flex items-start gap-3">
-                      <span className="grid size-7 shrink-0 place-items-center rounded-full bg-white text-xs font-bold text-[#9f5a41] shadow-sm">
-                        {index + 1}
-                      </span>
-                      <span className="pt-1 text-sm font-medium">{item}</span>
-                    </li>
-                  ))}
-                </ol>
-
-                <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href="#assessment"
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#bd6547] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#aa573c]"
-                  >
-                    Comparar con el flujo actual
-                    <ArrowRight className="size-4" aria-hidden="true" />
-                  </a>
-                  <a
-                    href="#modelo"
-                    className="inline-flex items-center justify-center rounded-full border border-[#24372d]/15 bg-white px-6 py-3.5 text-sm font-semibold transition hover:bg-[#faf9f6]"
-                  >
-                    Volver al modelo
-                  </a>
-                </div>
               </div>
 
-              <div className="flex min-h-80 items-center justify-center bg-[#dbc4b5] p-8 sm:p-12">
-                <div className="w-full max-w-sm rounded-[1.5rem] border border-white/70 bg-white/80 p-6 shadow-[0_20px_60px_rgba(75,54,42,0.12)] backdrop-blur sm:p-8">
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-11 place-items-center rounded-2xl bg-[#20372c] text-white">
-                      <Target className="size-5" aria-hidden="true" />
-                    </span>
-                    <div>
-                      <p className="text-xs text-[#6d756f]">Decisión sugerida</p>
-                      <p className="font-semibold">Piloto controlado</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-7 space-y-4">
-                    <div className="flex items-center justify-between border-b border-[#24372d]/10 pb-3 text-sm">
-                      <span className="text-[#69746d]">Modelo inicial</span>
-                      <span className="font-semibold">Random Forest</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-[#24372d]/10 pb-3 text-sm">
-                      <span className="text-[#69746d]">Uso</span>
-                      <span className="font-semibold">Orientativo</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-[#69746d]">Supervisión</span>
-                      <span className="font-semibold text-[#52715c]">
-                        Obligatoria
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                {[
+                  {
+                    priority: "Prioridad 1",
+                    title: "Validar con contexto real",
+                    body: "Contrastar las señales con entrevistas, escucha activa y conocimiento del equipo.",
+                    icon: Users,
+                  },
+                  {
+                    priority: "Prioridad 2",
+                    title: "Medir errores por clase",
+                    body: "Seguir precision, recall y F1 de cada grupo; no solo la accuracy global.",
+                    icon: Activity,
+                  },
+                  {
+                    priority: "Prioridad 3",
+                    title: "Definir límites de uso",
+                    body: "Acordar responsables, umbrales y situaciones en las que el modelo no debe intervenir.",
+                    icon: ShieldCheck,
+                  },
+                ].map(({ priority, title, body, icon: Icon }) => (
+                  <article
+                    key={priority}
+                    className="group rounded-2xl border border-[#22352b]/9 bg-white p-6 transition hover:-translate-y-0.5 hover:shadow-[0_14px_40px_rgba(38,57,47,0.07)]"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="grid size-11 place-items-center rounded-xl bg-[#f4eee8] text-[#a7563a]">
+                        <Icon className="size-5" aria-hidden="true" />
+                      </span>
+                      <span className="text-[0.62rem] font-bold tracking-[0.1em] text-[#78827c] uppercase">
+                        {priority}
                       </span>
                     </div>
-                  </div>
-
-                  <div className="mt-7 flex items-center gap-2 rounded-xl bg-[#eff5f0] px-4 py-3 text-xs font-medium text-[#4f6e58]">
-                    <ShieldCheck className="size-4" aria-hidden="true" />
-                    Sin decisiones automatizadas
-                  </div>
-                </div>
+                    <h3 className="mt-6 text-lg font-semibold">{title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-[#68746d]">{body}</p>
+                    <a
+                      href="#modelos"
+                      className="mt-6 inline-flex items-center gap-2 text-xs font-semibold text-[#9f5339]"
+                    >
+                      Revisar evidencia
+                      <ArrowRight
+                        className="size-3.5 transition group-hover:translate-x-0.5"
+                        aria-hidden="true"
+                      />
+                    </a>
+                  </article>
+                ))}
               </div>
-            </div>
+            </section>
+
+            <footer className="mt-14 flex flex-col gap-3 border-t border-[#22352b]/9 py-7 text-xs text-[#748078] sm:flex-row sm:items-center sm:justify-between">
+              <span className="flex items-center gap-2 font-semibold text-[#35453d]">
+                <Layers3 className="size-4" aria-hidden="true" />
+                TalentCare · Dashboard experimental
+              </span>
+              <span>
+                Fuente: Stack Overflow Developer Survey 2024–2025
+              </span>
+            </footer>
           </div>
-        </div>
-      </section>
-
-      <footer className="border-t border-[#24372d]/10 bg-[#f7f4ef]">
-        <div className="mx-auto flex max-w-[1240px] flex-col gap-4 px-5 py-7 text-xs text-[#69746e] sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12">
-          <span className="flex items-center gap-2 font-semibold text-[#314039]">
-            <Layers3 className="size-4" aria-hidden="true" />
-            TalentCare · Propuesta experimental
-          </span>
-          <span>
-            Evidencia histórica para apoyar conversaciones responsables.
-          </span>
-        </div>
-      </footer>
-    </main>
+        </main>
+      </div>
+    </div>
   )
 }
