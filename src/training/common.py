@@ -1,8 +1,10 @@
 from pathlib import Path
 
 import polars as pl
+from sklearn.base import BaseEstimator, TransformerMixin
 
 SPLITS_DIR = Path("data/processed/splits")
+TARGET = "JobSat"
 
 NUMERIC_FEATURES = [
     "YearsCodeNum",
@@ -19,24 +21,29 @@ CATEGORICAL_FEATURES = [
 ]
 
 FEATURES = NUMERIC_FEATURES + CATEGORICAL_FEATURES
-TARGET = "JobSat"
-JOBSAT_THRESHOLD = 7
 
 
-def load_splits() -> tuple[pl.DataFrame, pl.DataFrame, pl.DataFrame]:
-    train = pl.read_parquet(SPLITS_DIR / "train.parquet")
-    dev = pl.read_parquet(SPLITS_DIR / "dev.parquet")
-    test = pl.read_parquet(SPLITS_DIR / "test.parquet")
-    return train, dev, test
+class PolarsToPandas(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        if isinstance(X, pl.DataFrame):
+            return X.to_pandas()
+        return X
 
 
-def binarize_target(df: pl.DataFrame) -> pl.DataFrame:
-    return df.with_columns(
-        (pl.col(TARGET) >= JOBSAT_THRESHOLD).cast(pl.Int8).alias(TARGET)
+def bin_jobsat(frame: pl.DataFrame) -> pl.DataFrame:
+    return frame.with_columns(
+        pl.when(pl.col(TARGET) <= 3).then(0)
+        .when(pl.col(TARGET) <= 6).then(1)
+        .otherwise(2)
+        .cast(pl.Int8)
+        .alias(TARGET)
     )
 
 
-def split_xy(df: pl.DataFrame) -> tuple[pl.DataFrame, pl.Series]:
-    X = df.select(FEATURES)
-    y = df[TARGET]
-    return X, y
+def bin_jobsat_binary(frame: pl.DataFrame) -> pl.DataFrame:
+    return frame.with_columns(
+        (pl.col(TARGET) >= 7).cast(pl.Int8).alias(TARGET)
+    )

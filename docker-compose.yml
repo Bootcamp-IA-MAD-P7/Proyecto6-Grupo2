@@ -1,6 +1,17 @@
 version: '3'
 
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models/pipelines:/app/models/pipelines
+    environment:
+      - PYTHONUNBUFFERED=1
+
   db-postgres:
     image: postgres
     restart: always
@@ -13,7 +24,3 @@ services:
       - 5432:5432
     volumes:
       - ./db-volume:/var/lib/postgresql
-
-
-
-      
