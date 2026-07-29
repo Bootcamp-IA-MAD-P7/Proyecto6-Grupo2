@@ -1,26 +1,34 @@
-version: '3'
-
 services:
   backend:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8000:8080"
     volumes:
       - ./models/pipelines:/app/models/pipelines
     environment:
       - PYTHONUNBUFFERED=1
 
-  db-postgres:
-    image: postgres
+  db_talentcare:
+    image: postgres:17
     restart: always
+    # set shared memory limit when using docker compose
+    # or set limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: [REDACTED] # 128*2^20 bytes = 128Mb
+    shm_size: 128mb
     environment:
       POSTGRES_PASSWORD: 1234
       POSTGRES_USER: app
-
-    container_name: my-postgres-db
+    container_name: db_talentcare
     ports:
-      - 5432:5432
+      - 8080:5432
     volumes:
-      - ./db-volume:/var/lib/postgresql
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
