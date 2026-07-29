@@ -37,32 +37,32 @@
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   color-scheme: light;
-  --background: oklch(0.972 0.008 245);
-  --foreground: oklch(0.245 0.035 252);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.245 0.035 252);
-  --primary: oklch(0.43 0.12 251);
-  --primary-foreground: oklch(0.985 0.002 247);
-  --secondary: oklch(0.94 0.018 245);
-  --secondary-foreground: oklch(0.37 0.065 250);
-  --muted: oklch(0.955 0.008 245);
-  --muted-foreground: oklch(0.52 0.03 252);
-  --accent: oklch(0.93 0.025 248);
-  --accent-foreground: oklch(0.36 0.09 251);
-  --border: oklch(0.9 0.014 247);
-  --ring: oklch(0.55 0.12 251);
-  --risk-low: oklch(0.52 0.105 154);
-  --risk-low-soft: oklch(0.95 0.035 151);
-  --risk-medium: oklch(0.64 0.13 76);
-  --risk-medium-soft: oklch(0.96 0.045 83);
-  --risk-high: oklch(0.59 0.16 27);
-  --risk-high-soft: oklch(0.955 0.035 28);
-  --analytics: oklch(0.53 0.13 285);
-  --analytics-soft: oklch(0.95 0.025 285);
-  --sidebar: oklch(0.255 0.045 254);
-  --sidebar-foreground: oklch(0.96 0.006 247);
-  --sidebar-muted: oklch(0.72 0.025 247);
-  --radius: 0.875rem;
+  --background: #fafaf8;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --primary: #b56a4a;
+  --primary-foreground: #ffffff;
+  --secondary: #f3efeb;
+  --secondary-foreground: #4d372e;
+  --muted: #f6f4f1;
+  --muted-foreground: #5e5e5e;
+  --accent: #f1e8e2;
+  --accent-foreground: #7f4933;
+  --border: #e8e5e1;
+  --ring: #b56a4a;
+  --risk-low: #55745f;
+  --risk-low-soft: #edf3ee;
+  --risk-medium: #9a7440;
+  --risk-medium-soft: #f7f0e5;
+  --risk-high: #9a5142;
+  --risk-high-soft: #f7ece9;
+  --analytics: #b56a4a;
+  --analytics-soft: #f4ebe6;
+  --sidebar: #242321;
+  --sidebar-foreground: #fafaf8;
+  --sidebar-muted: #aaa6a1;
+  --radius: 0.75rem;
 }
 
 * {
@@ -72,6 +72,7 @@
 
 html {
   background: var(--background);
+  scroll-behavior: smooth;
 }
 
 body {
@@ -93,4 +94,141 @@ button:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+.font-editorial {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.hero-enter {
+  animation: fade-up 450ms ease-out both;
+}
+
+.insight-enter {
+  animation: fade-up 420ms 80ms ease-out both;
+}
+
+.insight-enter::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  content: "";
+  background: var(--primary);
+  transform-origin: top;
+  animation: grow-line 500ms 120ms ease-out both;
+}
+
+.evidence-enter {
+  animation: fade-up 420ms 120ms ease-out both;
+}
+
+.evidence-bar {
+  animation: grow-height 520ms ease-out both;
+}
+
+.evidence-value {
+  animation: fade-in 260ms ease-out both;
+}
+
+.metric-enter {
+  animation: fade-up 360ms ease-out both;
+}
+
+.factor-bar {
+  transform-origin: left;
+  animation: grow-width 520ms ease-out both;
+}
+
+.segment-chart-enter,
+.tooltip-enter {
+  animation: fade-in 180ms ease-out both;
+}
+
+.segment-bar {
+  transition:
+    width 220ms ease,
+    background-color 180ms ease;
+}
+
+.reveal-once {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 420ms ease,
+    transform 420ms ease;
+}
+
+.reveal-once.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes grow-line {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes grow-height {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes grow-width {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal-once {
+    opacity: 1;
+    transform: none;
+  }
 }

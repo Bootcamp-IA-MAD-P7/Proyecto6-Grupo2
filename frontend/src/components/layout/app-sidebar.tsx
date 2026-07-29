@@ -1,92 +1,148 @@
 import {
-  FileText,
+  BarChart3,
+  BookOpen,
   HeartHandshake,
   LayoutDashboard,
   UsersRound,
   X,
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
+import { LanguageSelector } from "@/components/layout/language-selector"
+import { UserProfileSummary } from "@/components/layout/user-profile-summary"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import type {
+  DashboardTranslations,
+  LanguageCode,
+  UserProfile,
+} from "@/types/dashboard"
 
 interface AppSidebarProps {
   open: boolean
   onClose: () => void
+  language: LanguageCode
+  onLanguageChange: (language: LanguageCode) => void
+  profile: UserProfile
+  translations: DashboardTranslations
 }
 
-const navigation = [
-  { label: "Resumen", icon: LayoutDashboard, active: true },
-  { label: "Empleados", icon: UsersRound, active: false },
-  { label: "Informes", icon: FileText, active: false },
-]
+export function AppSidebar({
+  open,
+  onClose,
+  language,
+  onLanguageChange,
+  profile,
+  translations,
+}: AppSidebarProps) {
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
+    onClose()
+  }
 
-export function AppSidebar({ open, onClose }: AppSidebarProps) {
+  const navigation = [
+    {
+      id: "overview",
+      label: translations.navigation.overview,
+      icon: LayoutDashboard,
+      active: true,
+      available: true,
+    },
+    {
+      id: "people",
+      label: translations.navigation.people,
+      icon: UsersRound,
+      active: false,
+      available: false,
+    },
+    {
+      id: "insights",
+      label: translations.navigation.insights,
+      icon: BarChart3,
+      active: false,
+      available: false,
+    },
+    {
+      id: "methodology",
+      label: translations.navigation.methodology,
+      icon: BookOpen,
+      active: false,
+      available: true,
+    },
+  ]
+
   return (
     <>
       {open && (
         <button
           type="button"
-          aria-label="Cerrar navegación"
-          className="fixed inset-0 z-40 bg-slate-950/30 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/35 lg:hidden"
+          aria-label={translations.navigation.closeMenu}
           onClick={onClose}
         />
       )}
-
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sidebar text-sidebar-foreground transition-transform duration-200 lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-sidebar text-sidebar-foreground transition-transform duration-200 lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
         )}
-        aria-label="Navegación principal"
       >
-        <div className="flex h-18 items-center justify-between border-b border-white/10 px-5">
+        <div className="flex h-24 items-center justify-between border-b border-white/10 px-6">
           <div className="flex items-center gap-3">
-            <span className="grid size-9 place-items-center rounded-lg bg-white/10">
+            <span className="grid size-10 place-items-center rounded-xl bg-white/10">
               <HeartHandshake className="size-4.5" aria-hidden="true" />
             </span>
             <div>
               <p className="text-base font-semibold tracking-tight">TalentCare</p>
-              <p className="text-xs text-sidebar-muted">People Analytics</p>
+              <p className="mt-0.5 text-[0.625rem] font-semibold tracking-[0.14em] text-sidebar-muted">
+                {translations.navigation.productCategory}
+              </p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
             className="text-sidebar-muted hover:bg-white/10 hover:text-white lg:hidden"
+            aria-label={translations.navigation.closeMenu}
             onClick={onClose}
-            aria-label="Cerrar menú"
           >
             <X className="size-5" />
           </Button>
         </div>
 
-        <nav className="flex-1 px-3 py-6">
-          <p className="mb-3 px-3 text-[0.6875rem] font-semibold tracking-[0.14em] text-sidebar-muted uppercase">
-            Navegación
-          </p>
+        <nav
+          className="flex-1 px-4 py-8"
+          aria-label={translations.navigation.mainLabel}
+        >
           <ul className="space-y-1.5">
             {navigation.map((item) => {
               const Icon = item.icon
               return (
-                <li key={item.label}>
+                <li key={item.id}>
                   <button
                     type="button"
-                    disabled={!item.active}
+                    disabled={!item.available}
                     aria-current={item.active ? "page" : undefined}
+                    title={
+                      item.available ? undefined : translations.common.comingSoon
+                    }
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium",
+                      "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm",
                       item.active
-                        ? "bg-white/12 text-white"
-                        : "cursor-not-allowed text-sidebar-muted",
+                        ? "bg-white/10 font-medium text-white"
+                        : item.available
+                          ? "text-sidebar-muted hover:bg-white/6 hover:text-white"
+                          : "cursor-not-allowed text-sidebar-muted/55",
                     )}
+                    onClick={() =>
+                      scrollTo(item.id === "overview" ? "home" : item.id)
+                    }
                   >
                     <Icon className="size-4.5" aria-hidden="true" />
                     <span>{item.label}</span>
-                    {!item.active && (
-                      <Badge className="ml-auto bg-white/8 px-2 py-0.5 text-[0.625rem] text-sidebar-muted">
-                        Próximo
-                      </Badge>
+                    {!item.available && (
+                      <span className="ml-auto text-[0.625rem] uppercase">
+                        {translations.common.comingSoon}
+                      </span>
                     )}
                   </button>
                 </li>
@@ -95,9 +151,20 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
           </ul>
         </nav>
 
-        <div className="border-t border-white/10 p-5">
-          <p className="text-xs leading-5 text-sidebar-muted">
-            Información de apoyo para decisiones responsables de RR. HH.
+        <div className="space-y-6 border-t border-white/10 p-6">
+          <LanguageSelector
+            language={language}
+            onChange={onLanguageChange}
+            translations={translations}
+          />
+          <UserProfileSummary
+            profile={profile}
+            translations={translations}
+          />
+          <p className="text-[0.6875rem] leading-5 text-sidebar-muted">
+            {translations.legal.copyright}
+            <br />
+            {translations.legal.rights}
           </p>
         </div>
       </aside>
