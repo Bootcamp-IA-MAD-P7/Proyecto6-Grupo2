@@ -5,7 +5,7 @@ from backend.app.inference import get_pipeline
 from backend.app.schemas import PredictionResponseBinary
 from src.inference.predict import predict_single
 
-router = APIRouter()
+router = APIRouter(prefix="/api/v1")
 
 
 class PredictionInput(BaseModel):
