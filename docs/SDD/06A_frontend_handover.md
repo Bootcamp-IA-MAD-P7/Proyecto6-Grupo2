@@ -410,3 +410,51 @@ Estas decisiones están abiertas en el SDD-00A y afectan directamente al fronten
 | OD-07 | Presentación de probabilidades o confianza | El campo `probability` puede eliminarse o reformatearse |
 | OD-09 | Idiomas disponibles | Actualmente ES/EN — puede ampliarse en `i18n/` |
 | — | Conexión de `MainPage.tsx` al `AppShell` | Pendiente de decisión de navegación del equipo |
+
+---
+
+## 15. Validación frontend — pre-integración
+
+**Fecha:** 2025-07  
+**Resultado:** ✅ Aprobado
+
+### Responsive
+
+| Resolución | Resultado |
+|---|---|
+| 375px (iPhone SE) | ✅ Correcto |
+| 768px (iPad) | ✅ Correcto |
+| 1280px (Desktop) | ✅ Correcto |
+
+Sidebar, secciones y texto se adaptan correctamente en todas las resoluciones.
+
+### Accesibilidad (Lighthouse)
+
+- Puntuación final: **100/100**
+- Issue detectado y corregido: contraste insuficiente en el eyebrow del `HomeHero`
+  - Archivo: `components/dashboard/home-hero.tsx`
+  - Cambio: `text-primary` → `text-muted-foreground`
+  - Motivo: `#b56a4a` sobre `#fafaf8` tenía ratio ~3.2:1, por debajo del mínimo WCAG AA (4.5:1). `#5e5e5e` alcanza ratio ~7.4:1.
+
+### Rendimiento (Lighthouse — modo dev)
+
+| Navegador | Rendimiento | CLS |
+|---|---|---|
+| Chrome (incógnito) | 64/100 | 0 ✅ |
+| Edge | 66/100 | 0 ✅ |
+
+Valores esperados en modo desarrollo. CLS 0 confirma estabilidad de layout. En build de producción (`npm run build`) se espera 85-95.
+
+### Defectos visuales
+
+- Ningún defecto crítico detectado.
+- Botones "People" e "Insights" deshabilitados en sidebar — comportamiento intencional (`available: false`), pendientes de implementación.
+
+### Cross-browser
+
+- Chrome y Edge: layout y comportamiento consistentes ✅
+- Sin diferencias visuales entre navegadores.
+
+### Conclusión
+
+El frontend está listo para la demo y para la integración con el backend.
