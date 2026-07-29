@@ -1,6 +1,17 @@
 from pydantic import BaseModel
 
 
+class PredictionInput(BaseModel):
+    YearsCodeNum: float
+    ConvertedCompYearly: float
+    MainBranch: str
+    Employment: str
+    EdLevel: str
+    Age: str
+    OrgSize: str
+    Country: str
+
+
 class PredictionResponseBinary(BaseModel):
     prediction: int
     label: str

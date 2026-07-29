@@ -1,22 +1,10 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 
 from backend.app.inference import get_pipeline
-from backend.app.schemas import PredictionResponseBinary
+from backend.app.schemas import PredictionInput, PredictionResponseBinary
 from src.inference.predict import predict_single
 
 router = APIRouter(prefix="/api/v1")
-
-
-class PredictionInput(BaseModel):
-    YearsCodeNum: float
-    ConvertedCompYearly: float
-    MainBranch: str
-    Employment: str
-    EdLevel: str
-    Age: str
-    OrgSize: str
-    Country: str
 
 
 @router.post("/predict", response_model=PredictionResponseBinary)
