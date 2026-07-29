@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  db-postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_USER: app
+
+    container_name: my-postgres-db
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db-volume:/var/lib/postgresql
+
+
+
+      
