@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-import pandas as pd
 import polars as pl
 import pytest
 from sklearn.ensemble import RandomForestClassifier
@@ -24,7 +23,6 @@ CATEGORICAL_FEATURES = [
 
 @pytest.fixture(autouse=True)
 def shared_features(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Provide the shared feature contract until the XGBoost PR is merged."""
     monkeypatch.setattr(common, "NUMERIC_FEATURES", NUMERIC_FEATURES, raising=False)
     monkeypatch.setattr(
         common,
@@ -35,36 +33,31 @@ def shared_features(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
-def sample_data() -> tuple[pd.DataFrame, pd.Series]:
-    """Return a small binary-classification dataset."""
-    X = pd.DataFrame(
+def sample_data() -> tuple[pl.DataFrame, pl.Series]:
+    X = pl.DataFrame(
         {
-            "YearsCodeNum": [1, 3, 5, 8, 13, 21, 2, 10],
+            "YearsCodeNum": [1, 3, 5, 8, 13, 21, 2, 10, 4, 6, 7, 9, 11, 15, 18, 20, 12, 14],
             "ConvertedCompYearly": [
-                30_000,
-                38_000,
-                45_000,
-                60_000,
-                78_000,
-                95_000,
-                34_000,
-                70_000,
+                30_000, 38_000, 45_000, 60_000, 78_000, 95_000,
+                34_000, 70_000, 40_000, 50_000, 55_000, 65_000,
+                72_000, 80_000, 88_000, 92_000, 42_000, 58_000,
             ],
-            "MainBranch": ["Developer"] * 8,
-            "Employment": ["Full-time", "Part-time"] * 4,
-            "EdLevel": ["Bachelor", "Master"] * 4,
-            "Age": ["25-34", "35-44"] * 4,
-            "OrgSize": ["20-99", "100-499"] * 4,
-            "Country": ["Spain", "Portugal"] * 4,
+            "MainBranch": ["Developer"] * 18,
+            "Employment": ["Full-time", "Part-time"] * 9,
+            "EdLevel": ["Bachelor", "Master"] * 9,
+            "Age": ["25-34", "35-44"] * 9,
+            "OrgSize": ["20-99", "100-499"] * 9,
+            "Country": ["Spain", "Portugal"] * 9,
         }
     )
-    y = pd.Series([0, 0, 0, 1, 1, 1, 0, 1], name="JobSat")
+    y = pl.Series("JobSat", [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2])
     return X, y
 
 
 def test_build_pipeline_uses_random_forest_and_does_not_mutate_defaults() -> None:
     defaults_before = random_forest.DEFAULT_PARAMS.copy()
-    default_classifier = random_forest.build_pipeline().named_steps["classifier"]
+    default_pipeline = random_forest.build_pipeline()
+    default_classifier = default_pipeline.named_steps["classifier"]
 
     pipeline = random_forest.build_pipeline(
         {
@@ -92,6 +85,8 @@ def test_build_pipeline_uses_random_forest_and_does_not_mutate_defaults() -> Non
     assert default_classifier.random_state == 42
     assert default_classifier.n_jobs == -1
     assert random_forest.DEFAULT_PARAMS == defaults_before
+    assert "to_pandas" in pipeline.named_steps
+    assert "smote" in pipeline.named_steps
 
 
 def test_preprocessor_uses_one_hot_encoding() -> None:
@@ -110,7 +105,7 @@ def test_preprocessor_uses_one_hot_encoding() -> None:
 
 
 def test_train_predict_and_save(
-    sample_data: tuple[pd.DataFrame, pd.Series],
+    sample_data: tuple[pl.DataFrame, pl.Series],
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -126,7 +121,7 @@ def test_train_predict_and_save(
     output_path = random_forest.save(pipeline)
 
     assert predictions.shape == (len(X),)
-    assert set(predictions).issubset({0, 1})
+    assert set(predictions).issubset({0, 1, 2})
     assert output_path == tmp_path / "random_forest_pipeline.joblib"
     assert output_path.exists()
 
@@ -134,10 +129,7 @@ def test_train_predict_and_save(
 def test_prepare_split_uses_project_target_threshold() -> None:
     frame = pl.DataFrame(
         {
-            **{
-                feature: [1.0, 2.0]
-                for feature in NUMERIC_FEATURES
-            },
+            **{feature: [1.0, 2.0] for feature in NUMERIC_FEATURES},
             **{
                 feature: ["category-a", "category-b"]
                 for feature in CATEGORICAL_FEATURES
@@ -149,11 +141,11 @@ def test_prepare_split_uses_project_target_threshold() -> None:
     X, y = prepare_split(frame)
 
     assert list(X.columns) == NUMERIC_FEATURES + CATEGORICAL_FEATURES
-    assert y.tolist() == [0, 1]
+    assert y.to_list() == [1, 2]
 
 
 def test_calculate_metrics_returns_all_required_metrics(
-    sample_data: tuple[pd.DataFrame, pd.Series],
+    sample_data: tuple[pl.DataFrame, pl.Series],
 ) -> None:
     X, y = sample_data
     pipeline = random_forest.train(
@@ -169,10 +161,9 @@ def test_calculate_metrics_returns_all_required_metrics(
         "balanced_accuracy",
         "precision",
         "recall",
-        "f1",
         "f1_macro",
         "roc_auc",
     }
     assert all(0.0 <= value <= 1.0 for value in metrics.values())
-    assert matrix.shape == (2, 2)
+    assert matrix.shape == (3, 3)
     assert matrix.sum() == len(y)
