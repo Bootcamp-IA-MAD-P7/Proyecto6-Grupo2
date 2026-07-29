@@ -9,3 +9,19 @@ services:
       - ./models/pipelines:/app/models/pipelines
     environment:
       - PYTHONUNBUFFERED=1
+
+  db_talentcare:
+    image: postgres:17
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_USER: app
+    container_name: db_talentcare
+    ports:
+      - 8080:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
