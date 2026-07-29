@@ -1,6 +1,7 @@
 import {
   BarChart3,
   BookOpen,
+  ClipboardCheck,
   HeartHandshake,
   LayoutDashboard,
   UsersRound,
@@ -39,12 +40,21 @@ export function AppSidebar({
     onClose()
   }
 
+  const assessmentActive = window.location.hash === "#assessment"
+
   const navigation = [
     {
       id: "overview",
       label: translations.navigation.overview,
       icon: LayoutDashboard,
-      active: true,
+      active: !assessmentActive,
+      available: true,
+    },
+    {
+      id: "assessment",
+      label: translations.navigation.assessment,
+      icon: ClipboardCheck,
+      active: assessmentActive,
       available: true,
     },
     {
@@ -133,9 +143,22 @@ export function AppSidebar({
                           ? "text-sidebar-muted hover:bg-white/6 hover:text-white"
                           : "cursor-not-allowed text-sidebar-muted/55",
                     )}
-                    onClick={() =>
+                    onClick={() => {
+                      if (item.id === "assessment") {
+                        window.location.hash = "assessment"
+                        onClose()
+                        return
+                      }
+
+                      if (assessmentActive) {
+                        window.location.hash =
+                          item.id === "overview" ? "home" : item.id
+                        onClose()
+                        return
+                      }
+
                       scrollTo(item.id === "overview" ? "home" : item.id)
-                    }
+                    }}
                   >
                     <Icon className="size-4.5" aria-hidden="true" />
                     <span>{item.label}</span>

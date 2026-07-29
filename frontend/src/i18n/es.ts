@@ -10,6 +10,7 @@ export const es: DashboardTranslations = {
   navigation: {
     productCategory: "PEOPLE ANALYTICS",
     overview: "Resumen",
+    assessment: "Nueva evaluación",
     people: "Personas",
     insights: "Insights",
     methodology: "Metodología",
@@ -206,5 +207,217 @@ export const es: DashboardTranslations = {
     empty: "Todavía no hay un análisis disponible",
     emptyDescription:
       "Conecta una fuente de datos validada para mostrar insights de la plantilla.",
+  },
+  assessment: {
+    form: {
+      title: "Evaluación de la plantilla",
+      description:
+        "Revisa cómo se relaciona un perfil profesional con patrones históricos de satisfacción laboral.",
+      intro: {
+        purpose:
+          "Utiliza esta evaluación para identificar dónde puede aportar valor un contexto adicional de RR. HH.",
+        estimatedTime: "Menos de 1 minuto",
+      },
+      fields: {
+        YearsCodeNum: {
+          label: "Experiencia profesional programando",
+          description: "Años totales de experiencia programando.",
+          placeholder: "p. ej., 5",
+        },
+        ConvertedCompYearly: {
+          label: "Salario anual (USD)",
+          description:
+            "Compensación anual antes de deducciones, en dólares estadounidenses.",
+          placeholder: "p. ej., 75000",
+        },
+        MainBranch: {
+          label: "Rol profesional",
+          placeholder: "Selecciona un rol profesional",
+        },
+        Employment: {
+          label: "Situación laboral",
+          placeholder: "Selecciona una situación laboral",
+        },
+        EdLevel: {
+          label: "Nivel educativo",
+          placeholder: "Selecciona un nivel educativo",
+        },
+        Age: {
+          label: "Rango de edad",
+          placeholder: "Selecciona un rango de edad",
+        },
+        OrgSize: {
+          label: "Tamaño de la organización",
+          placeholder: "Selecciona un tamaño de organización",
+        },
+        Country: {
+          label: "País de empleo",
+          placeholder: "Selecciona un país de empleo",
+        },
+      },
+      validation: {
+        required: "Este campo es obligatorio.",
+        invalidNumber: "Introduce un número válido.",
+        minimum: (minimum) => `Introduce un valor igual o superior a ${minimum}.`,
+        maximum: (maximum) =>
+          `Introduce un valor no superior a ${maximum.toLocaleString("es-ES")}.`,
+      },
+      errorSummaryTitle: "Revisa los campos destacados",
+      submit: "Realizar evaluación",
+      submitting: "Realizando evaluación…",
+      responsibleUse: {
+        title: "Uso responsable",
+        items: [
+          "Apoya a profesionales de RR. HH.",
+          "La revisión humana siempre es necesaria.",
+          "Los patrones históricos no sustituyen el criterio profesional.",
+        ],
+      },
+      privacy: {
+        title: "Aviso de privacidad",
+        noIdentifiers: "No se recopilan identificadores personales.",
+        assessmentUse:
+          "La información introducida se utiliza únicamente para generar esta evaluación.",
+      },
+    },
+    options: {
+      MainBranch: [
+        {
+          value: "I am a developer by profession",
+          label: "Profesional del desarrollo",
+        },
+      ],
+      Employment: [
+        {
+          value: "Employed, full-time",
+          label: "Empleado a jornada completa",
+        },
+      ],
+      EdLevel: [
+        {
+          value: "Bachelor's degree",
+          label: "Grado universitario",
+        },
+      ],
+      Age: [
+        {
+          value: "25-34 years old",
+          label: "Entre 25 y 34 años",
+        },
+      ],
+      OrgSize: [
+        {
+          value: "100 to 499 employees",
+          label: "Entre 100 y 499 empleados",
+        },
+      ],
+      Country: [{ value: "Spain", label: "España" }],
+    },
+    loading: {
+      title: "Realizando evaluación…",
+      description:
+        "Analizando patrones de la plantilla y preparando una evaluación concisa.",
+    },
+    result: {
+      eyebrow: "EVALUACIÓN DE LA PLANTILLA",
+      labels: {
+        satisfied: {
+          badge: "Sin señal elevada identificada",
+          title: "El análisis indica un patrón más favorable",
+          description:
+            "La información facilitada se aproxima más a perfiles históricos que declararon una satisfacción laboral favorable. Este insight describe un patrón y no determina la experiencia actual de una persona.",
+          recommendation:
+            "Utiliza este resultado como contexto de apoyo. Revisa el feedback actual y las evidencias de la organización antes de decidir si es necesaria alguna acción.",
+        },
+        not_satisfied: {
+          badge: "Revisión recomendada",
+          title: "El análisis indica que conviene una revisión adicional",
+          description:
+            "La información facilitada se aproxima más a perfiles históricos que declararon menor satisfacción laboral. Este insight invita a revisar el contexto y no constituye una conclusión sobre una persona.",
+          recommendation:
+            "Contrasta este resultado con feedback actual, condiciones de trabajo y contexto relevante de la organización antes de considerar cualquier respuesta.",
+        },
+      },
+      summaryTitle: "Resumen ejecutivo",
+      recommendationTitle: "Recomendación",
+      probabilityTitle: "Relación con patrones históricos",
+      probabilityDescription:
+        "Estos porcentajes muestran la relación relativa con cada patrón histórico. Indican confianza analítica, no certeza ni el sentimiento actual de una persona.",
+      satisfiedProbability: "Patrón de satisfacción favorable",
+      notSatisfiedProbability: "Patrón de menor satisfacción",
+      humanReviewTitle: "Se requiere revisión humana",
+      humanReviewDescription:
+        "TalentCare apoya el criterio profesional de RR. HH. Esta evaluación no debe utilizarse como única base para decisiones que afecten a una persona.",
+      newAssessment: "Iniciar una nueva evaluación",
+    },
+    error: {
+      title: "No hemos podido completar la evaluación",
+      messages: {
+        validation:
+          "Hay información que requiere tu atención. Revisa los campos destacados y vuelve a realizar la evaluación.",
+        timeout:
+          "La evaluación está tardando más de lo esperado. Tu información sigue disponible. Inténtalo de nuevo en unos instantes.",
+        network:
+          "No hemos podido contactar con el servicio de evaluación. Comprueba tu conexión e inténtalo de nuevo en unos instantes.",
+        server:
+          "El servicio de evaluación no está disponible temporalmente. Tu información sigue disponible. Inténtalo de nuevo en unos instantes.",
+        generic:
+          "Ha ocurrido algo inesperado al preparar la evaluación. Tu información sigue disponible. Inténtalo de nuevo.",
+      },
+      retry: "Intentar de nuevo",
+    },
+  },
+  login: {
+    brand: {
+      name: "TalentCare",
+      descriptor: "PLATAFORMA DE PEOPLE ANALYTICS",
+      tagline: "People Analytics para la retención de talento.",
+      description:
+        "Utiliza insights de la plantilla para identificar patrones, apoyar a los equipos de RR. HH. y reforzar la toma de decisiones basada en evidencias.",
+      principles: [
+        "Analítica de la plantilla centrada en las personas.",
+        "Uso responsable de los datos de la organización.",
+        "El criterio profesional sigue siendo esencial.",
+      ],
+      platformPrinciplesTitle: "Principios de la plataforma",
+      platformPrinciples: [
+        "Insights basados en evidencias",
+        "Análisis responsable",
+        "Supervisión humana",
+      ],
+    },
+    form: {
+      title: "Inicia sesión en TalentCare",
+      description:
+        "¿Ya tienes una cuenta? Accede a tu espacio de trabajo de TalentCare.",
+      emailLabel: "Correo profesional",
+      emailPlaceholder: "nombre@empresa.com",
+      passwordLabel: "Contraseña",
+      passwordPlaceholder: "Introduce tu contraseña",
+      rememberMe: "Recordarme",
+      forgotPassword: "¿Has olvidado tu contraseña?",
+      forgotPasswordUnavailable:
+        "La recuperación de contraseña no está disponible en el entorno de demostración.",
+      showPassword: "Mostrar contraseña",
+      hidePassword: "Ocultar contraseña",
+      submit: "Iniciar sesión",
+      submitting: "Iniciando sesión…",
+      demoAccess: "Abrir espacio de demostración",
+      newUserTitle: "¿Es tu primera vez en TalentCare?",
+      newUserDescription:
+        "Descubre cómo TalentCare apoya la retención del talento y la toma de decisiones de RR. HH.",
+      futureAvailability:
+        "La solicitud de demos y la creación de cuentas estarán disponibles en una versión futura.",
+      emailRequired: "Introduce tu correo profesional.",
+      emailInvalid: "Introduce una dirección de correo válida.",
+      passwordRequired: "Introduce tu contraseña.",
+    },
+    trust: {
+      title: "Entorno de demostración",
+      demoNotice:
+        "No introduzcas credenciales reales. Esta demostración no almacena información de acceso.",
+      dataUse:
+        "TalentCare apoya el análisis profesional y la toma de decisiones humanas.",
+    },
   },
 }
