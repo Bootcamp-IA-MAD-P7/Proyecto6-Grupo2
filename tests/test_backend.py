@@ -3,6 +3,7 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
+from backend.app.auth import get_current_user
 from backend.app.main import app
 
 VALID_INPUT = {
@@ -26,10 +27,11 @@ MOCK_RESULT = {
 
 @pytest.fixture
 def client():
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "test-user"}
     with patch("backend.app.routes.get_pipeline"), \
-         patch("backend.app.routes.predict_single", return_value=MOCK_RESULT), \
-         patch("backend.app.auth.get_current_user", return_value={"sub": "test-user"}):
+         patch("backend.app.routes.predict_single", return_value=MOCK_RESULT):
         yield TestClient(app)
+    app.dependency_overrides.clear()
 
 
 def test_predict_valid_input(client):
