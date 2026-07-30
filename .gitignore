@@ -20,8 +20,6 @@ htmlcov/
 models/trained/*
 !models/trained/.gitkeep
 
-models/metrics/*
-!models/metrics/.gitkeep
 models/pipelines/**/oof_*.npy
 models/pipelines/**/test_preds_*.npy
 
