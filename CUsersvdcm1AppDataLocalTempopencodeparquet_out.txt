@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import polars as pl; df = pl.read_parquet('data/processed/merged_survey_2024_2025_clean.parquet'); print(df.columns); print(df.shape); print(df['JobSat'].value_counts().sort('JobSat'))
+                                                                                                                                           ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vdcm1\AppData\Roaming\uv\python\cpython-3.13.5-windows-x86_64-none\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 16-33: character maps to <undefined>
+['MainBranch', 'Employment', 'Country', 'EdLevel', 'Age', 'DevType', 'OrgSize', 'ConvertedCompYearly', 'LanguageHaveWorkedWith', 'DatabaseHaveWorkedWith', 'PlatformHaveWorkedWith', 'WebframeHaveWorkedWith', 'LearnCode', 'JobSat', 'YearsCodeNum']
+(55008, 15)

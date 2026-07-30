@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -7,9 +8,18 @@ from backend.app.analysis import compute_overview_metrics, compute_segment_rates
 from backend.app.inference import get_pipeline
 from backend.app.routes import router
 
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if DATABASE_URL:
+        try:
+            from backend.app.analysis import _load_data
+            _load_data()
+            print(f"[DB] Connected to database")
+        except Exception as e:
+            print(f"[DB] Warning: could not connect to database: {e}")
     get_pipeline()
     compute_overview_metrics()
     compute_segment_rates()
@@ -26,6 +36,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "https://talentcare-front.onrender.com",
+        "https://talentcare.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["POST", "GET", "OPTIONS"],

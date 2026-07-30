@@ -1,3 +1,4 @@
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -8,9 +9,21 @@ CLEAN_PARQUET = (
     / "data/processed/merged_survey_2024_2025_clean.parquet"
 )
 
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+TABLE_NAME = "survey_responses"
+
 
 @lru_cache(maxsize=1)
 def _load_data() -> pl.DataFrame:
+    if DATABASE_URL:
+        try:
+            from sqlalchemy import create_engine
+
+            engine = create_engine(DATABASE_URL)
+            return pl.read_database(f"SELECT * FROM {TABLE_NAME}", engine)
+        except Exception as e:
+            print(f"[DB] Failed to read from database, falling back to parquet: {e}")
+
     if not CLEAN_PARQUET.exists():
         raise FileNotFoundError(f"Dataset not found at {CLEAN_PARQUET}.")
     return pl.read_parquet(CLEAN_PARQUET)

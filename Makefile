@@ -42,7 +42,7 @@ test:
 train:
 	@echo "TARGET train: pendiente (hoy solo estamos preparando Makefile)."
 
-DOCKER_BUILD_CMD ?= echo "Definid DOCKER_BUILD_CMD con el comando real para docker-build."
+DOCKER_BUILD_CMD ?= docker compose build
 docker-build:
 	@echo "Ejecutando target docker-build..."
 	@$(DOCKER_BUILD_CMD)
@@ -53,7 +53,7 @@ train-smote:
 
 .PHONY: train
 
-TRAIN_CMD ?= echo "Definid TRAIN_CMD con el comando real para entrenar/ensamblar."
+TRAIN_CMD ?= uv run python scripts/train_random_forest.py
 train:
 	@echo "Ejecutando target train..."
 	@$(TRAIN_CMD)
@@ -61,7 +61,7 @@ train:
 .PHONY: explain shap smote train-smote
 
 SHAP_CMD ?= echo "Definid SHAP_CMD cuando tengáis script de interpretabilidad."
-SMOTE_CMD ?= echo "Definid SMOTE_CMD o decidid cómo se activa SMOTE en vuestro pipeline."
+SMOTE_CMD ?= uv run python scripts/train_random_forest_smote.py
 
 shap:
 	@echo "Ejecutando target shap..."
@@ -72,7 +72,7 @@ smote:
 	@$(SMOTE_CMD)
 
 train-smote:
-	@echo "Ejecutando target train-smote (pendiente de definir)."
+	@echo "Ejecutando target train-smote..."
 	@$(SMOTE_CMD)
 
 #RESUMEN DE USO
