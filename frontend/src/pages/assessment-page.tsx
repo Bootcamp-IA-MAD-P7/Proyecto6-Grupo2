@@ -92,9 +92,7 @@ export function AssessmentPage() {
     setState({ status: "loading" })
 
     try {
-      const result = await predictProfile(request, {
-        signal: requestControllerRef.current.signal,
-      })
+      const result = await predictProfile(request)
       setState({ status: "success", result })
     } catch (error: unknown) {
       setState({ status: "error", error: normalizeUnexpectedError(error) })
