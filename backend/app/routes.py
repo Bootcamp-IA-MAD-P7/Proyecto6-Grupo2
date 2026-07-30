@@ -55,10 +55,10 @@ def dashboard_overview(user: dict = Depends(get_current_user)) -> DashboardOverv
 @router.post("/predict", response_model=PredictionResponseBinary)
 def predict(
     input_data: PredictionInput,
+    pipeline=Depends(get_pipeline),
     user: dict = Depends(get_current_user),
 ) -> PredictionResponseBinary:
     try:
-        pipeline = get_pipeline()
         result = predict_single(pipeline, input_data.model_dump(), binary=True)
         return PredictionResponseBinary(**result)
     except ValueError as e:
