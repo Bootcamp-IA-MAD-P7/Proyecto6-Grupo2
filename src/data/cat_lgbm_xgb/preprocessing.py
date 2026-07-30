@@ -28,6 +28,10 @@ PIPELINE_DIR = Path("models/pipelines/cat_lgbm_xgb")
 
 
 def bin_target(y: np.ndarray) -> np.ndarray:
+    y = np.asarray(y)
+    if set(np.unique(y)).issubset({0, 1, 2}):
+        return y.astype(np.int8, copy=True)
+
     result = np.zeros(len(y), dtype=np.int8)
     result[(y >= 4) & (y <= 6)] = 1
     result[y >= 7] = 2

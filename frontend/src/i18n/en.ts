@@ -10,10 +10,11 @@ export const en: DashboardTranslations = {
   navigation: {
     productCategory: "PEOPLE ANALYTICS",
     overview: "Overview",
-    assessment: "New assessment",
-    people: "People",
-    insights: "Insights",
-    methodology: "Methodology",
+    assessment: "Profile comparison",
+    people: "Workforce Profile",
+    insights: "Attention Areas",
+    actions: "Preventive Actions",
+    methodology: "Methodology & Data",
     mainLabel: "Main navigation",
     openMenu: "Open navigation",
     closeMenu: "Close navigation",
@@ -368,9 +369,9 @@ export const en: DashboardTranslations = {
     brand: {
       name: "TalentCare",
       descriptor: "PEOPLE ANALYTICS PLATFORM",
-      tagline: "People Analytics for workforce retention.",
+      tagline: "Workforce Intelligence for preventive decisions.",
       description:
-        "Use workforce insights to identify patterns, support HR teams and strengthen evidence-based decision-making.",
+        "Understand historical job-satisfaction patterns and prepare evidence-based People decisions.",
       principles: [
         "Human-centred workforce analytics.",
         "Responsible use of organisational data.",
@@ -402,7 +403,7 @@ export const en: DashboardTranslations = {
       demoAccess: "Open demo workspace",
       newUserTitle: "New to TalentCare?",
       newUserDescription:
-        "Explore how TalentCare supports workforce retention and HR decision-making.",
+        "Explore how TalentCare helps teams examine satisfaction patterns and prepare responsible investigations.",
       futureAvailability:
         "Demo requests and account creation will be available in a future version.",
       emailRequired: "Enter your work email.",

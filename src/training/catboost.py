@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import polars as pl
 import optuna
@@ -17,20 +18,27 @@ RANDOM_SEED = 42
 
 CLASS_WEIGHTS = [4.41, 1.45, 0.48]
 
+CATBOOST_TASK_TYPE = os.getenv("CATBOOST_TASK_TYPE", "CPU").upper()
+
 BASE_PARAMS = {
     "random_seed": RANDOM_SEED,
     "verbose": 0,
-    "task_type": "GPU",
-    "devices": "0",
+    "task_type": CATBOOST_TASK_TYPE,
     "od_type": "Iter",
     "od_wait": 30,
     "loss_function": "MultiClass",
     "eval_metric": "TotalF1:average=Macro",
     "class_weights": CLASS_WEIGHTS,
 }
+if CATBOOST_TASK_TYPE == "GPU":
+    BASE_PARAMS["devices"] = os.getenv("CATBOOST_DEVICES", "0")
 
 
 def bin_target(y: np.ndarray) -> np.ndarray:
+    y = np.asarray(y)
+    if set(np.unique(y)).issubset({0, 1, 2}):
+        return y.astype(np.int8, copy=True)
+
     result = np.zeros(len(y), dtype=np.int8)
     result[(y >= 4) & (y <= 6)] = 1
     result[y >= 7] = 2
@@ -93,6 +101,7 @@ def train_catboost_oof(
     X_test: pl.DataFrame,
     pipeline_dir: Path = PIPELINE_DIR,
     trained_dir: Path = TRAINED_DIR,
+    tuning_trials: int = 50,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     trained_dir.mkdir(parents=True, exist_ok=True)
 
@@ -101,7 +110,12 @@ def train_catboost_oof(
     cat_indices = _get_cat_indices(X_train_pd)
 
     print("Tuning CatBoost hyperparameters with Optuna...")
-    best_params = tune_catboost(X_train_pd.to_numpy(), y_train, cat_indices)
+    best_params = tune_catboost(
+        X_train_pd.to_numpy(),
+        y_train,
+        cat_indices,
+        n_trials=tuning_trials,
+    )
     tuned_params = {**BASE_PARAMS, "bootstrap_type": "Bernoulli", **best_params}
 
     kf = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=RANDOM_SEED)
@@ -159,6 +173,8 @@ def train_catboost_oof(
 def run_catboost(
     pipeline_dir: Path = PIPELINE_DIR,
     trained_dir: Path = TRAINED_DIR,
+    *,
+    tuning_trials: int = 50,
 ) -> None:
     print("Loading pipeline...")
     data = load_pipeline(pipeline_dir)
@@ -172,6 +188,7 @@ def run_catboost(
         X_test=data["X_test"],
         pipeline_dir=pipeline_dir,
         trained_dir=trained_dir,
+        tuning_trials=tuning_trials,
     )
 
     print("\nDev Classification Report:")
