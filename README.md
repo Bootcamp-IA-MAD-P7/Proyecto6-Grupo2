@@ -73,9 +73,77 @@ Los datos procesados están disponibles en formato Parquet en `data/processed/`.
 | **ML** | scikit-learn, imbalanced-learn, joblib | — |
 | **Datos** | Polars, Pandas, PyArrow | — |
 | **Base de datos** | PostgreSQL 17 | — |
-| **Infraestructura** | Docker, Railway | — |
+| **Infraestructura** | Docker, Railway, Render | — |
+| **Proxy** | Nginx | — |
 | **Testing** | pytest | — |
 | **Gestión de dependencias** | uv (Python), npm (Node) | — |
+
+### Automatización con Makefile
+
+El proyecto incluye un `Makefile` que orquesta las tareas principales del ciclo de desarrollo:
+
+| Target | Comando | Descripción |
+|--------|---------|-------------|
+| `notebook` | `jupytext --to ipynb` | Convierte los scripts EDA (`.py` → `.ipynb`) para su visualización en Jupyter |
+| `test` | `pytest -q tests/` | Ejecuta la suite de tests del proyecto |
+| `train` | `uv run python scripts/train_random_forest.py` | Entrena el modelo Random Forest con los datos procesados |
+| `train-smote` | `uv run python scripts/train_random_forest_smote.py` | Entrena el modelo aplicando SMOTE para balanceo de clases |
+| `docker-build` | `docker compose build` | Construye las imágenes Docker para frontend y backend |
+| `shap` | *pendiente de definir* | Ejecuta análisis de interpretabilidad SHAP sobre el modelo |
+| `smote` | `uv run python scripts/train_random_forest_smote.py` | Ejecuta el pipeline de entrenamiento con SMOTE |
+
+---
+
+## Estructura del proyecto
+
+```
+.
+├── backend/
+│   └── app/
+│       ├── main.py          # Punto de entrada de la API
+│       ├── routes.py        # Endpoints REST
+│       ├── schemas.py       # Modelos Pydantic
+│       ├── inference.py     # Inferencia del modelo
+│       ├── auth.py          # Autenticación JWT / Clerk
+│       └── analysis.py      # Lógica de análisis y métricas
+├── data/
+│   ├── raw/                 # Datos fuente en Parquet
+│   └── processed/           # Datos limpios y splits
+├── docs/
+│   ├── SDD/                 # Documentación técnica SDD
+│   └── experiments/         # Experimentos de modelado
+├── frontend/
+│   ├── src/
+│   │   ├── components/      # Componentes React (dashboard, UI, layout, predicción)
+│   │   ├── pages/           # Páginas de la aplicación
+│   │   ├── services/        # Clientes API
+│   │   ├── i18n/            # Internacionalización ES/EN
+│   │   ├── types/           # Tipos TypeScript
+│   │   └── data/            # Datos de referencia y dashboard
+│   ├── nginx.conf           # Configuración de Nginx para producción
+│   └── Dockerfile
+├── models/
+│   ├── pipelines/           # Pipelines entrenados (.joblib)
+│   ├── metrics/             # Métricas de evaluación
+│   └── trained/             # Modelos serializados
+├── notebooks/               # EDA en formato .py (convertibles a .ipynb)
+├── scripts/                 # Scripts de entrenamiento, limpieza y migración
+├── src/
+│   ├── data/                # Carga, preprocesamiento y splitting
+│   ├── features/            # Ingeniería y selección de características
+│   ├── training/            # Modelos (RF, KNN, XGBoost, CatBoost, ensemble)
+│   └── inference/           # Carga de pipeline y predicción
+├── tests/                   # Tests unitarios y de integración
+├── utils/                   # Utilidades de carga de datos
+├── postgres-project/
+│   └── init-db/
+│       └── init.sql         # Inicialización de la base de datos
+├── main.py                  # Entry point del backend
+├── Dockerfile               # Dockerfile del backend
+├── docker-compose.yml       # Orquestación de servicios
+├── Makefile                 # Automatización de tareas
+└── pyproject.toml           # Dependencias y configuración de Python
+```
 
 ---
 
@@ -118,7 +186,25 @@ Los datos procesados están disponibles en formato Parquet en `data/processed/`.
 
 ---
 
-## Despliegue en Railway
+## Versiones de despliegue
+
+El proyecto cuenta con dos versiones de despliegue que reflejan su evolución:
+
+### v1.0.0 — MVP inicial en Render
+
+Primera versión del producto mínimo viable, desarrollada por el equipo con una estructura funcional completa pero **sin base de datos conectada**. Desplegada en Render.
+
+- **Frontend:** [https://talentcare-front.onrender.com](https://talentcare-front.onrender.com)
+- **Backend:** [https://talentcare-back.onrender.com](https://talentcare-back.onrender.com)
+- **Release:** [v1.0.0](https://github.com/Bootcamp-IA-MAD-P7/Proyecto6-Grupo2/releases/tag/v1.0.0)
+
+### v2.0 — Versión actual con base de datos
+
+Evolución del MVP que incorpora la **base de datos PostgreSQL conectada**, migrando la infraestructura a Railway para una gestión integrada de servicios y base de datos.
+
+---
+
+## Despliegue actual en Railway
 
 El proyecto está desplegado en Railway con dos servicios independientes:
 
@@ -193,7 +279,7 @@ El proyecto sigue una metodología **Specification-Driven Development (SDD)**. T
 - Gestión de múltiples modelos predictivos simultáneos.
 - Automatización progresiva del ciclo MLOps.
 - Nuevos casos de uso laborales relacionados con retención y People Analytics.
-- Desarrollo de una aplicación orientada al **usuario final** que, basándose en la sensibilización, explique datos y métricas para fomentar la equidad de género en el ámbito STEM.
+- Desarrollo de una aplicación orientada a la **persona usuaria final** que, basándose en la sensibilización, explique datos y métricas para fomentar la equidad de género en el ámbito STEM.
 
 El proyecto sienta las bases para una **plataforma escalable de IA aplicada a People Analytics**, con supervisión humana y compromiso con el uso responsable de la tecnología.
 
@@ -201,4 +287,6 @@ El proyecto sienta las bases para una **plataforma escalable de IA aplicada a Pe
 
 ## Licencia
 
-Proyecto académico desarrollado en el contexto del bootcamp de Inteligencia Artificial y Machine Learning.
+Proyecto de código abierto que apoya la filosofía del software libre, con el ánimo de que sea reutilizable por cualquier organización o persona interesada en la retención del talento femenino en el sector STEM.
+
+Desarrollado como proyecto académico en el contexto del bootcamp de Inteligencia Artificial y Machine Learning.
