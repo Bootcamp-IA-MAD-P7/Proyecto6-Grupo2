@@ -12,6 +12,7 @@ RUN pip install uv --no-cache-dir && \
 COPY backend/ ./backend/
 COPY src/ ./src/
 COPY models/pipelines/random_forest_binary_pipeline.joblib models/pipelines/random_forest_binary_pipeline.joblib
+COPY --chown=app:app data/processed/merged_survey_2024_2025_clean.parquet data/processed/merged_survey_2024_2025_clean.parquet
 
 RUN useradd app
 USER app

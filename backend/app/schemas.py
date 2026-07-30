@@ -8,9 +8,20 @@ class PredictionResponseBinary(BaseModel):
     probability_satisfied: float
 
 
-class PredictionResponseMulticlass(BaseModel):
-    prediction: int
-    label: str
-    probability_low: float
-    probability_medium: float
-    probability_high: float
+class SegmentItem(BaseModel):
+    id: str
+    rate: float
+    count: int
+
+
+class OverviewMetrics(BaseModel):
+    total_profiles: int
+    lower_satisfaction_profiles: int
+    lower_satisfaction_rate: float
+    median_salary_usd: float
+    median_years_code: float
+
+
+class DashboardOverviewResponse(BaseModel):
+    metrics: OverviewMetrics
+    segments: dict[str, list[SegmentItem]]

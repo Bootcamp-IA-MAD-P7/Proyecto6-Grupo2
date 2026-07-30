@@ -1,9 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from backend.app.analysis import compute_overview_metrics, compute_segment_rates
 from backend.app.auth import get_current_user
 from backend.app.inference import get_pipeline
-from backend.app.schemas import PredictionResponseBinary
+from backend.app.schemas import (
+    DashboardOverviewResponse,
+    OverviewMetrics,
+    PredictionResponseBinary,
+    SegmentItem,
+)
 from src.inference.predict import predict_single
 
 router = APIRouter(prefix="/api/v1")
@@ -33,6 +39,17 @@ def auth_me(user: dict = Depends(get_current_user)):
 @router.get("/auth/logout")
 def auth_logout():
     return {"message": "Logout by clearing the token on the client side"}
+
+
+@router.get("/dashboard/overview", response_model=DashboardOverviewResponse)
+def dashboard_overview(user: dict = Depends(get_current_user)) -> DashboardOverviewResponse:
+    return DashboardOverviewResponse(
+        metrics=OverviewMetrics(**compute_overview_metrics()),
+        segments={
+            key: [SegmentItem(**item) for item in items]
+            for key, items in compute_segment_rates().items()
+        },
+    )
 
 
 @router.post("/predict", response_model=PredictionResponseBinary)

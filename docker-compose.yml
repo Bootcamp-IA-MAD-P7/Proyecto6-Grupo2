@@ -7,6 +7,7 @@ services:
       - "8000:8000"
     volumes:
       - ./models/pipelines:/app/models/pipelines
+      - ./data:/app/data
     environment:
       - PYTHONUNBUFFERED=1
 
