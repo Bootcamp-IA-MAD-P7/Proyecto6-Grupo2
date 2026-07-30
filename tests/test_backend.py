@@ -27,7 +27,8 @@ MOCK_RESULT = {
 @pytest.fixture
 def client():
     with patch("backend.app.routes.get_pipeline"), \
-         patch("backend.app.routes.predict_single", return_value=MOCK_RESULT):
+         patch("backend.app.routes.predict_single", return_value=MOCK_RESULT), \
+         patch("backend.app.auth.get_current_user", return_value={"sub": "test-user"}):
         yield TestClient(app)
 
 
