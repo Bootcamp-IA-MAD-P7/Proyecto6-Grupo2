@@ -13,8 +13,8 @@ def predict_single(pipeline: Pipeline, input_data: dict, binary: bool = True) ->
         raise ValueError(f"Missing features: {missing}")
 
     X = pl.DataFrame({f: [input_data[f]] for f in FEATURES}).to_pandas()
-    prediction = int(pipeline.predict(X)[0])
     probabilities = pipeline.predict_proba(X)[0]
+    prediction = int(probabilities.argmax())
 
     if binary:
         return {
