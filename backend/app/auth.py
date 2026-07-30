@@ -1,14 +1,14 @@
 import os
 from typing import Annotated
 
-from clerk_backend_api import Clerk
-from clerk_backend_api.jwks_utils import verify_token
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 security_scheme = HTTPBearer(auto_error=False)
 
-clerk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY", ""))
+CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY", "")
+CLERK_JWKS_URL = os.getenv("CLERK_JWKS_URL", "")
 
 
 def get_current_user(
@@ -20,10 +20,15 @@ def get_current_user(
             detail="Missing or invalid authentication token",
         )
     try:
-        return verify_token(
-            jwt=credentials.credentials,
-            sk=os.getenv("CLERK_SECRET_KEY", ""),
+        jwks_client = jwt.PyJWKClient(CLERK_JWKS_URL)
+        signing_key = jwks_client.get_signing_key_from_jwt(credentials.credentials)
+        data = jwt.decode(
+            credentials.credentials,
+            signing_key.key,
+            algorithms=["RS256"],
+            options={"verify_audience": False},
         )
+        return data
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
