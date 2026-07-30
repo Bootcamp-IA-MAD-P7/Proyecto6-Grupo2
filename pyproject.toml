@@ -12,12 +12,11 @@ dependencies = [
     "altair>=5.4.0",
     "vegafusion>=2.0.0",
     "pyarrow>=17.0.0",
-    "imbalanced-learn>=0.14.2",
     "uvicorn>=0.51.0",
     "fastapi>=0.140.13",
     "scikit-learn>=1.5.0",
     "pytest>=8.0.0",
-    "imbalanced-learn>=0.12.0",
+    "imbalanced-learn>=0.14.2",
     "pyjwt>=2.13.0",
     "cryptography>=49.0.0",
 ]
