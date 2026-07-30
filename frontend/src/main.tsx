@@ -5,7 +5,7 @@ import { ClerkProvider } from "@clerk/clerk-react"
 import App from "./app"
 import "./index.css"
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string
+const PUBLISHABLE_KEY = (window as any).__CLERK_PUBLISHABLE_KEY as string
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY")
