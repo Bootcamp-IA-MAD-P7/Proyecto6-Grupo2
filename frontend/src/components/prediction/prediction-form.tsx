@@ -279,7 +279,7 @@ export function PredictionForm({
                         field,
                         Boolean(copy.description),
                       )}
-                      className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/20"
+                      className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:bg-primary/5 focus:ring-2 focus:ring-ring/20"
                     />
                     {error && (
                       <p
@@ -324,7 +324,7 @@ export function PredictionForm({
                       field,
                       Boolean(copy.description),
                     )}
-                    className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/20"
+                    className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary focus:bg-primary/5 focus:ring-2 focus:ring-ring/20"
                   >
                     <option value="">{copy.placeholder}</option>
                     {options[field].map((option) => (
@@ -348,7 +348,7 @@ export function PredictionForm({
 
           <div className="mt-8 grid gap-4 lg:grid-cols-2">
             <section
-              className="rounded-lg border border-border bg-muted/35 p-5"
+              className="rounded-lg border border-primary/20 bg-primary/5 p-5"
               aria-labelledby={`${formId}-responsible-use`}
             >
               <div className="flex items-center gap-2">
@@ -376,7 +376,7 @@ export function PredictionForm({
             </section>
 
             <section
-              className="rounded-lg border border-border bg-muted/35 p-5"
+              className="rounded-lg border border-primary/20 bg-primary/5 p-5"
               aria-labelledby={`${formId}-privacy`}
             >
               <div className="flex items-center gap-2">
@@ -401,7 +401,11 @@ export function PredictionForm({
           </div>
 
           <div className="mt-8 flex justify-end border-t border-border pt-6">
-            <Button type="submit" disabled={isSubmitting} className="min-w-40">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="min-w-40 shadow-sm shadow-primary/20"
+            >
               {isSubmitting ? translations.submitting : translations.submit}
             </Button>
           </div>

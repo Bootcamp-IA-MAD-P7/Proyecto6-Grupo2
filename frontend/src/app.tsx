@@ -61,9 +61,13 @@ export default function App() {
   }, [authenticated])
 
   const handleLogin = (rememberSession: boolean) => {
+    window.localStorage.removeItem(AUTH_STORAGE_KEY)
+    window.sessionStorage.removeItem(AUTH_STORAGE_KEY)
+
     const storage = rememberSession
       ? window.localStorage
       : window.sessionStorage
+
     storage.setItem(AUTH_STORAGE_KEY, "true")
     setAuthenticated(true)
     setView("dashboard")

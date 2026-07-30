@@ -108,7 +108,7 @@ export function AppSidebar({
       >
         <div className="flex h-24 items-center justify-between border-b border-white/10 px-6">
           <div className="flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-xl bg-white/10">
+            <span className="grid size-10 place-items-center rounded-xl border border-primary/30 bg-primary/20 text-primary">
               <HeartHandshake className="size-4.5" aria-hidden="true" />
             </span>
             <div>
@@ -144,7 +144,7 @@ export function AppSidebar({
                     className={cn(
                       "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm",
                       item.active
-                        ? "bg-white/10 font-medium text-white"
+                        ? "border-l-2 border-primary bg-primary/15 font-medium text-white"
                         : "text-sidebar-muted hover:bg-white/6 hover:text-white",
                     )}
                     onClick={() => {
@@ -164,7 +164,13 @@ export function AppSidebar({
                       scrollTo(item.id === "overview" ? "home" : item.id)
                     }}
                   >
-                    <Icon className="size-4.5" aria-hidden="true" />
+                    <Icon
+                      className={cn(
+                        "size-4.5",
+                        item.active && "text-primary",
+                      )}
+                      aria-hidden="true"
+                    />
                     <span>{item.label}</span>
                   </button>
                 </li>

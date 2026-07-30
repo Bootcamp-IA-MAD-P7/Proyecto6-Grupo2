@@ -31,7 +31,7 @@ export function LanguageSelector({
             className={cn(
               "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
               language === code
-                ? "bg-white text-sidebar"
+                ? "bg-primary text-primary-foreground shadow-sm"
                 : "text-sidebar-muted hover:text-white",
             )}
             onClick={() => onChange(code)}

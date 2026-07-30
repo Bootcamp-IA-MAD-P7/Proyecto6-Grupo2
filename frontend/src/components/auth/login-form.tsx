@@ -149,9 +149,9 @@ export function LoginForm({ translations, onSuccess }: LoginFormProps) {
             >
               {translations.form.emailLabel}
             </label>
-            <div className="relative mt-2">
+            <div className="group relative mt-2">
               <Mail
-                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary"
                 aria-hidden="true"
               />
               <input
@@ -190,9 +190,9 @@ export function LoginForm({ translations, onSuccess }: LoginFormProps) {
             >
               {translations.form.passwordLabel}
             </label>
-            <div className="relative mt-2">
+            <div className="group relative mt-2">
               <LockKeyhole
-                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary"
                 aria-hidden="true"
               />
               <input
@@ -222,7 +222,7 @@ export function LoginForm({ translations, onSuccess }: LoginFormProps) {
                 aria-pressed={passwordVisible}
                 disabled={isSubmitting}
                 onClick={() => setPasswordVisible((visible) => !visible)}
-                className="absolute top-1/2 right-0.5 grid size-10 -translate-y-1/2 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+                className="absolute top-1/2 right-0.5 grid size-10 -translate-y-1/2 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:pointer-events-none disabled:opacity-50"
               >
                 {passwordVisible ? (
                   <EyeOff className="size-4" aria-hidden="true" />
@@ -281,7 +281,7 @@ export function LoginForm({ translations, onSuccess }: LoginFormProps) {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-12 w-full"
+              className="h-12 w-full shadow-sm shadow-primary/20"
             >
               {isSubmitting
                 ? translations.form.submitting

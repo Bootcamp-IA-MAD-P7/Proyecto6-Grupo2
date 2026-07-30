@@ -432,7 +432,6 @@ export function ExecutiveDashboard({ onLogout }: ExecutiveDashboardProps) {
             </div>
             <div className="flex gap-3">
               <Button
-                variant="outline"
                 onClick={() => scrollTo("workforce-overview")}
               >
                 {copy.exploreProfile}
@@ -578,7 +577,7 @@ export function ExecutiveDashboard({ onLogout }: ExecutiveDashboardProps) {
                         </div>
                         <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-muted">
                           <div
-                            className="h-full rounded-full bg-[#789181]"
+                            className="h-full rounded-full bg-primary/65"
                             style={{ width: `${share}%` }}
                           />
                         </div>
@@ -655,7 +654,7 @@ export function ExecutiveDashboard({ onLogout }: ExecutiveDashboardProps) {
                     onClick={() => setActiveDimension(item.id)}
                     className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors ${
                       item.id === activeDimension
-                        ? "bg-[#24382e] text-white"
+                        ? "border border-primary bg-primary text-primary-foreground shadow-sm"
                         : "border border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
                     }`}
                   >

@@ -31,7 +31,7 @@ export function LoginPage({ onContinue }: LoginPageProps) {
         <div className="mx-auto flex w-full max-w-2xl flex-col">
           <div className="flex items-start justify-between gap-5">
             <div className="flex items-center gap-3">
-              <span className="grid size-14 place-items-center rounded-2xl bg-white/10">
+              <span className="grid size-14 place-items-center rounded-2xl border border-primary/30 bg-primary/20 text-primary">
                 <HeartHandshake className="size-6" aria-hidden="true" />
               </span>
               <p className="text-xl font-semibold tracking-tight">
@@ -92,7 +92,7 @@ export function LoginPage({ onContinue }: LoginPageProps) {
       <section className="flex items-start justify-center px-5 py-8 sm:px-10 lg:px-12 lg:pt-10 xl:pt-12">
         <div className="w-full max-w-md">
           <LoginForm translations={copy.login} onSuccess={onContinue} />
-          <aside className="mt-4 rounded-xl border border-border bg-secondary/55 p-4">
+          <aside className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4">
             <p className="text-xs font-semibold text-foreground">
               {copy.login.trust.title}
             </p>
