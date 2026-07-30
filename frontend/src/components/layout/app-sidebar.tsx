@@ -1,9 +1,10 @@
 import {
-  BarChart3,
+  Activity,
   BookOpen,
   ClipboardCheck,
   HeartHandshake,
   LayoutDashboard,
+  ListChecks,
   UsersRound,
   X,
 } from "lucide-react"
@@ -51,25 +52,32 @@ export function AppSidebar({
       available: true,
     },
     {
+      id: "workforce-overview",
+      label: translations.navigation.people,
+      icon: UsersRound,
+      active: false,
+      available: true,
+    },
+    {
+      id: "attention-areas",
+      label: translations.navigation.insights,
+      icon: Activity,
+      active: false,
+      available: true,
+    },
+    {
+      id: "preventive-actions",
+      label: translations.navigation.actions,
+      icon: ListChecks,
+      active: false,
+      available: true,
+    },
+    {
       id: "assessment",
       label: translations.navigation.assessment,
       icon: ClipboardCheck,
       active: assessmentActive,
       available: true,
-    },
-    {
-      id: "people",
-      label: translations.navigation.people,
-      icon: UsersRound,
-      active: false,
-      available: false,
-    },
-    {
-      id: "insights",
-      label: translations.navigation.insights,
-      icon: BarChart3,
-      active: false,
-      available: false,
     },
     {
       id: "methodology",
@@ -130,18 +138,12 @@ export function AppSidebar({
                 <li key={item.id}>
                   <button
                     type="button"
-                    disabled={!item.available}
                     aria-current={item.active ? "page" : undefined}
-                    title={
-                      item.available ? undefined : translations.common.comingSoon
-                    }
                     className={cn(
                       "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm",
                       item.active
                         ? "bg-white/10 font-medium text-white"
-                        : item.available
-                          ? "text-sidebar-muted hover:bg-white/6 hover:text-white"
-                          : "cursor-not-allowed text-sidebar-muted/55",
+                        : "text-sidebar-muted hover:bg-white/6 hover:text-white",
                     )}
                     onClick={() => {
                       if (item.id === "assessment") {
@@ -162,11 +164,6 @@ export function AppSidebar({
                   >
                     <Icon className="size-4.5" aria-hidden="true" />
                     <span>{item.label}</span>
-                    {!item.available && (
-                      <span className="ml-auto text-[0.625rem] uppercase">
-                        {translations.common.comingSoon}
-                      </span>
-                    )}
                   </button>
                 </li>
               )

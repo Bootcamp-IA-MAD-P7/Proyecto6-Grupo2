@@ -146,6 +146,7 @@ export interface DashboardTranslations {
     assessment: string
     people: string
     insights: string
+    actions: string
     methodology: string
     mainLabel: string
     openMenu: string

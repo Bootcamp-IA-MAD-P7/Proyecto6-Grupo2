@@ -37,20 +37,20 @@
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   color-scheme: light;
-  --background: #fafaf8;
-  --foreground: #111111;
+  --background: #f7f6f2;
+  --foreground: #17211c;
   --card: #ffffff;
-  --card-foreground: #111111;
-  --primary: #b56a4a;
+  --card-foreground: #17211c;
+  --primary: #ad6347;
   --primary-foreground: #ffffff;
-  --secondary: #f3efeb;
+  --secondary: #f1eee8;
   --secondary-foreground: #4d372e;
-  --muted: #f6f4f1;
-  --muted-foreground: #5e5e5e;
-  --accent: #f1e8e2;
+  --muted: #efede8;
+  --muted-foreground: #667069;
+  --accent: #f4e9e3;
   --accent-foreground: #7f4933;
-  --border: #e8e5e1;
-  --ring: #b56a4a;
+  --border: #e2dfd8;
+  --ring: #ad6347;
   --risk-low: #55745f;
   --risk-low-soft: #edf3ee;
   --risk-medium: #9a7440;
@@ -59,9 +59,9 @@
   --risk-high-soft: #f7ece9;
   --analytics: #b56a4a;
   --analytics-soft: #f4ebe6;
-  --sidebar: #242321;
-  --sidebar-foreground: #fafaf8;
-  --sidebar-muted: #aaa6a1;
+  --sidebar: #1f3028;
+  --sidebar-foreground: #f8faf8;
+  --sidebar-muted: #aebbb4;
   --radius: 0.75rem;
 }
 
