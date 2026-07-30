@@ -24,7 +24,11 @@ export const es: DashboardTranslations = {
     english: "English",
     spanish: "Español",
   },
-  profile: { label: "Usuario autenticado", role: "Director de RR. HH." },
+  profile: {
+    label: "Usuario autenticado",
+    role: "Director de RR. HH.",
+    logout: "Cerrar sesión",
+  },
   legal: {
     copyright: "© 2026 TalentCare",
     rights: "Todos los derechos reservados.",

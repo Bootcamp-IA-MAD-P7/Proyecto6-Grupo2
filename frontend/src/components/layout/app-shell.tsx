@@ -15,6 +15,7 @@ interface AppShellProps {
   onLanguageChange: (language: LanguageCode) => void
   profile: UserProfile
   translations: DashboardTranslations
+  onLogout: () => void
 }
 
 export function AppShell({
@@ -23,6 +24,7 @@ export function AppShell({
   onLanguageChange,
   profile,
   translations,
+  onLogout,
 }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -35,6 +37,7 @@ export function AppShell({
         onLanguageChange={onLanguageChange}
         profile={profile}
         translations={translations}
+        onLogout={onLogout}
       />
       <div className="min-h-screen lg:pl-72">
         <div className="flex h-16 items-center border-b border-border px-4 lg:hidden">

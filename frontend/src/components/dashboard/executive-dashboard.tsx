@@ -341,7 +341,11 @@ function SectionHeading({
   )
 }
 
-export function ExecutiveDashboard() {
+interface ExecutiveDashboardProps {
+  onLogout: () => void
+}
+
+export function ExecutiveDashboard({ onLogout }: ExecutiveDashboardProps) {
   const [language, setLanguage] = useState<LanguageCode>(getInitialLanguage)
   const [activeDimension, setActiveDimension] =
     useState<ReferenceDimension>("experience")
@@ -393,6 +397,7 @@ export function ExecutiveDashboard() {
       onLanguageChange={changeLanguage}
       profile={dashboardMock.profile}
       translations={sharedCopy}
+      onLogout={onLogout}
     >
       <main id="home" className="px-5 py-7 sm:px-8 lg:px-10 xl:px-12">
         <div className="mx-auto max-w-[1280px]">

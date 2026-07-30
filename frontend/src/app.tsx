@@ -6,30 +6,85 @@ import { LoginPage } from "@/pages/login-page"
 
 type AppView = "login" | "dashboard" | "assessment"
 
-function getCurrentView(): AppView {
-  if (window.location.hash === "#assessment") {
-    return "assessment"
-  }
+const AUTH_STORAGE_KEY = "talentcare-demo-authenticated"
+const DASHBOARD_HASHES = new Set([
+  "#home",
+  "#workforce-overview",
+  "#attention-areas",
+  "#preventive-actions",
+  "#methodology",
+])
 
-  if (!window.location.hash || window.location.hash === "#login") {
-    return "login"
-  }
+function hasDemoSession(): boolean {
+  return (
+    window.localStorage.getItem(AUTH_STORAGE_KEY) === "true" ||
+    window.sessionStorage.getItem(AUTH_STORAGE_KEY) === "true"
+  )
+}
 
-  return "dashboard"
+function getProtectedView(): Exclude<AppView, "login"> {
+  return window.location.hash === "#assessment" ? "assessment" : "dashboard"
 }
 
 export default function App() {
-  const [view, setView] = useState<AppView>(getCurrentView)
+  const [authenticated, setAuthenticated] = useState(hasDemoSession)
+  const [view, setView] = useState<AppView>(() =>
+    hasDemoSession() ? getProtectedView() : "login",
+  )
 
   useEffect(() => {
-    const handleHashChange = () => setView(getCurrentView())
+    const handleHashChange = () => {
+      const hash = window.location.hash
+
+      if (!authenticated) {
+        if (hash !== "#login") {
+          window.location.replace("#login")
+        }
+        setView("login")
+        return
+      }
+
+      if (hash === "#assessment") {
+        setView("assessment")
+        return
+      }
+
+      if (!DASHBOARD_HASHES.has(hash)) {
+        window.location.replace("#home")
+      }
+      setView("dashboard")
+    }
+
+    handleHashChange()
     window.addEventListener("hashchange", handleHashChange)
     return () => window.removeEventListener("hashchange", handleHashChange)
-  }, [])
+  }, [authenticated])
 
-  if (view === "login") {
-    return <LoginPage onContinue={() => (window.location.hash = "home")} />
+  const handleLogin = (rememberSession: boolean) => {
+    const storage = rememberSession
+      ? window.localStorage
+      : window.sessionStorage
+    storage.setItem(AUTH_STORAGE_KEY, "true")
+    setAuthenticated(true)
+    setView("dashboard")
+    window.location.replace("#home")
   }
 
-  return view === "assessment" ? <AssessmentPage /> : <ExecutiveDashboard />
+  const handleLogout = () => {
+    window.localStorage.removeItem(AUTH_STORAGE_KEY)
+    window.sessionStorage.removeItem(AUTH_STORAGE_KEY)
+    setAuthenticated(false)
+    setView("login")
+    window.location.replace("#login")
+  }
+
+  if (view === "login") {
+    return <LoginPage onContinue={handleLogin} />
+  }
+
+  return view === "assessment" ? (
+    <AssessmentPage onLogout={handleLogout} />
+  ) : (
+    <ExecutiveDashboard onLogout={handleLogout} />
+  )
 }

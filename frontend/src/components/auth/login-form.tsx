@@ -14,7 +14,7 @@ import type { LoginTranslations } from "@/types/dashboard"
 
 interface LoginFormProps {
   translations: LoginTranslations
-  onSuccess: () => void
+  onSuccess: (rememberSession: boolean) => void
 }
 
 interface LoginFormErrors {
@@ -105,8 +105,7 @@ export function LoginForm({ translations, onSuccess }: LoginFormProps) {
       signInTimerRef.current = null
       setEmail("")
       setPassword("")
-      setRememberMe(false)
-      onSuccess()
+      onSuccess(rememberMe)
     }, SIGN_IN_DELAY_MS)
   }
 
@@ -117,7 +116,7 @@ export function LoginForm({ translations, onSuccess }: LoginFormProps) {
     setPasswordVisible(false)
     setErrors({})
     setFormNotice(null)
-    onSuccess()
+    onSuccess(false)
   }
 
   const emailErrorId = errors.email ? "login-email-error" : undefined

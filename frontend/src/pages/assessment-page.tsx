@@ -43,7 +43,11 @@ function normalizeUnexpectedError(error: unknown): NormalizedPredictionError {
   }
 }
 
-export function AssessmentPage() {
+interface AssessmentPageProps {
+  onLogout: () => void
+}
+
+export function AssessmentPage({ onLogout }: AssessmentPageProps) {
   const [language, setLanguage] =
     useState<LanguageCode>(getInitialLanguage)
   const [state, setState] = useState<AssessmentState>({ status: "idle" })
@@ -121,6 +125,7 @@ export function AssessmentPage() {
         onLanguageChange={changeLanguage}
         profile={dashboardMock.profile}
         translations={copy}
+        onLogout={onLogout}
       >
         <main
           id="assessment"
@@ -147,6 +152,7 @@ export function AssessmentPage() {
       onLanguageChange={changeLanguage}
       profile={dashboardMock.profile}
       translations={copy}
+      onLogout={onLogout}
     >
       <main
         id="assessment"

@@ -7,11 +7,13 @@ import { translations } from "@/i18n"
 import type { LanguageCode } from "@/types/dashboard"
 
 interface LoginPageProps {
-  onContinue: () => void
+  onContinue: (rememberSession: boolean) => void
 }
 
 export function LoginPage({ onContinue }: LoginPageProps) {
-  const [language, setLanguage] = useState<LanguageCode>("en")
+  const [language, setLanguage] = useState<LanguageCode>(() =>
+    window.localStorage.getItem("talentcare-language") === "es" ? "es" : "en",
+  )
   const copy = translations[language]
 
   useEffect(() => {
@@ -20,6 +22,7 @@ export function LoginPage({ onContinue }: LoginPageProps) {
 
   const changeLanguage = (nextLanguage: LanguageCode) => {
     setLanguage(nextLanguage)
+    window.localStorage.setItem("talentcare-language", nextLanguage)
   }
 
   return (

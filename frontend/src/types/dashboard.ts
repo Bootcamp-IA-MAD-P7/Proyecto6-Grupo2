@@ -160,6 +160,7 @@ export interface DashboardTranslations {
   profile: {
     label: string
     role: string
+    logout: string
   }
   legal: {
     copyright: string

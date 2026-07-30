@@ -26,6 +26,7 @@ interface AppSidebarProps {
   onLanguageChange: (language: LanguageCode) => void
   profile: UserProfile
   translations: DashboardTranslations
+  onLogout: () => void
 }
 
 export function AppSidebar({
@@ -35,6 +36,7 @@ export function AppSidebar({
   onLanguageChange,
   profile,
   translations,
+  onLogout,
 }: AppSidebarProps) {
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
@@ -180,6 +182,7 @@ export function AppSidebar({
           <UserProfileSummary
             profile={profile}
             translations={translations}
+            onLogout={onLogout}
           />
           <p className="text-[0.6875rem] leading-5 text-sidebar-muted">
             {translations.legal.copyright}
