@@ -8,7 +8,7 @@ import { dashboardMock } from "@/data/dashboard"
 import { translations } from "@/i18n"
 import {
   PredictionServiceError,
-  predictProfile,
+  usePredictionService,
 } from "@/services/prediction-service"
 import type {
   NormalizedPredictionError,
@@ -47,6 +47,7 @@ export function AssessmentPage() {
   const [language, setLanguage] =
     useState<LanguageCode>(getInitialLanguage)
   const [state, setState] = useState<AssessmentState>({ status: "idle" })
+  const { predictProfile } = usePredictionService()
   const requestInFlightRef = useRef(false)
   const lastRequestRef = useRef<PredictionRequest | null>(null)
   const requestControllerRef = useRef<AbortController | null>(null)
@@ -104,6 +105,7 @@ export function AssessmentPage() {
   }
 
   const retryAssessment = () => {
+    requestInFlightRef.current = false
     if (lastRequestRef.current) {
       void runAssessment(lastRequestRef.current)
     }
