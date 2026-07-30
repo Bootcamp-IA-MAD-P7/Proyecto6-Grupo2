@@ -37,6 +37,7 @@ app.add_middleware(
         "http://localhost:5173",
         "https://talentcare-front.onrender.com",
         "https://talentcare.vercel.app",
+        "https://frontend-production.up.railway.app",
     ],
     allow_credentials=True,
     allow_methods=["POST", "GET", "OPTIONS"],
