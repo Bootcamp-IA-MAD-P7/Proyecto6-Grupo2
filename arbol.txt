@@ -1,37 +1,33 @@
-﻿
+
 +---.github
 |   \---workflows
 |           ci.yml
 |           proyecto6-grupo2.yml
-|                   
+|
 +---backend
-|   |   Dockerfile
-|   |   
 |   \---app
+|           analysis.py
+|           auth.py
 |           inference.py
 |           main.py
 |           routes.py
 |           schemas.py
-|           __init__.py
-|           
+|
 +---data
 |   +---processed
-|   |   |   merged_survey_2024_2025_clean.parquet
-|   |   |   
 |   |   +---auxiliary
 |   |   |       merged_survey_2021_2025_clean.parquet
-|   |   |       
 |   |   \---splits
 |   |           dev.parquet
 |   |           test.parquet
 |   |           train.parquet
-|   |           
 |   \---raw
-|           .gitkeep
 |           merged_survey_2021_2025.parquet
 |           merged_survey_2024_2025.parquet
-|           
+|
 +---docs
+|   +---experiments
+|   |       ensemble-cat-lgbm-rf.md
 |   \---SDD
 |           00A_use_cases.md
 |           00_scope.md
@@ -45,163 +41,179 @@
 |           08_testing.md
 |           09_deployment.md
 |           10_release_plan.md
-|           
+|
 +---frontend
-|   |   components.json
 |   |   Dockerfile
+|   |   components.json
 |   |   index.html
+|   |   nginx.conf
 |   |   package-lock.json
 |   |   package.json
+|   |   start.sh
 |   |   tsconfig.app.json
 |   |   tsconfig.json
 |   |   tsconfig.node.json
 |   |   vite.config.ts
-|   |   
+|   |
 |   +---docs
 |   |       Product_Design_Guide.md
-|   |       
+|   |
+|   +---public
+|   |       _redirects
+|   |
 |   \---src
+|       |   MainPage.tsx
 |       |   app.tsx
 |       |   index.css
 |       |   main.tsx
-|       |   MainPage.tsx
-|       |   
+|       |   vite-env.d.ts
+|       |
 |       +---components
+|       |   +---auth
+|       |   |       login-form.tsx
+|       |   |
 |       |   +---dashboard
-|       |   |       chart-card.tsx
-|       |   |       department-risk-table.tsx
+|       |   |       associated-factors-section.tsx
+|       |   |       dashboard-state-view.tsx
+|       |   |       evidence-panel.tsx
 |       |   |       executive-dashboard.tsx
-|       |   |       influence-factors-card.tsx
-|       |   |       insight-card.tsx
-|       |   |       kpi-card.tsx
-|       |   |       model-status-card.tsx
-|       |   |       page-header.tsx
-|       |   |       responsible-use-notice.tsx
-|       |   |       risk-distribution.tsx
-|       |   |       risk-trend-chart.tsx
-|       |   |       
+|       |   |       executive-insight-section.tsx
+|       |   |       home-hero.tsx
+|       |   |       methodology-section.tsx
+|       |   |       metric-item.tsx
+|       |   |       recommended-actions-section.tsx
+|       |   |       section-heading.tsx
+|       |   |       segment-exploration-section.tsx
+|       |   |       workforce-outlook-section.tsx
+|       |   |
 |       |   +---layout
 |       |   |       app-shell.tsx
 |       |   |       app-sidebar.tsx
-|       |   |       topbar.tsx
-|       |   |       
+|       |   |       language-selector.tsx
+|       |   |       user-profile-summary.tsx
+|       |   |
+|       |   +---prediction
+|       |   |       prediction-error.tsx
+|       |   |       prediction-form.tsx
+|       |   |       prediction-result.tsx
+|       |   |
 |       |   \---ui
 |       |           badge.tsx
 |       |           button.tsx
 |       |           card.tsx
+|       |           contextual-help.tsx
+|       |           cta.tsx
+|       |           reveal.tsx
 |       |           separator.tsx
-|       |           
+|       |
 |       +---data
 |       |       dashboard.ts
-|       |       
+|       |       workforce-reference.ts
+|       |
+|       +---hooks
+|       |       use-reduced-motion.ts
+|       |
+|       +---i18n
+|       |       en.ts
+|       |       es.ts
+|       |       index.ts
+|       |
 |       +---lib
+|       |       prediction-validation.ts
 |       |       utils.ts
-|       |       
+|       |
+|       +---pages
+|       |       assessment-page.tsx
+|       |       login-page.tsx
+|       |
+|       +---services
+|       |       api-client.ts
+|       |       dashboard-service.ts
+|       |       prediction-service.ts
+|       |
 |       \---types
 |               dashboard.ts
-|               
+|               prediction-form.ts
+|               prediction.ts
+|
 +---models
 |   +---metrics
-|   |       .gitkeep
-|   |       
-|   +---pipelines
-|   |       .gitkeep
-|   |       
-|   \---trained
-|           .gitkeep
-|           
+|   |       rf_binary_metrics.json
+|   |       rf_binary_smote_metrics.json
+|   |       rf_multiclass_metrics.json
+|   |
+|   \---pipelines
+|           random_forest_binary_pipeline.joblib
+|           random_forest_binary_smote_pipeline.joblib
+|           random_forest_pipeline.joblib
+|
 +---notebooks
-|   |   01.eda-2021.ipynb
-|   |   01.eda-2021.py
-|   |   02.eda_2022.ipynb
-|   |   02.eda_2022.py
-|   |   03.eda-2023.ipynb
-|   |   03.eda-2023.py
-|   |   04.eda-2024.ipynb
-|   |   04.eda-2024.py
-|   |   05.eda-2025.ipynb
-|   |   05.eda-2025.py
-|   |   boot.ipynb
-|   |   boot.py
-|   |   __init__.ipynb
-|   |   __init__.py
-|   |   
-|   \---__pycache__
-|           boot.cpython-313.pyc
-|           __init__.cpython-313.pyc
-|           
-+---reports
+|       01.eda-2021.ipynb
+|       01.eda-2021.py
+|       02.eda_2022.ipynb
+|       02.eda_2022.py
+|       03.eda-2023.ipynb
+|       03.eda-2023.py
+|       04.eda-2024.ipynb
+|       04.eda-2024.py
+|       05.eda-2025.ipynb
+|       05.eda-2025.py
+|       boot.ipynb
+|       boot.py
+|       __init__.ipynb
+|       __init__.py
+|
++---postgres-project
+|   \---init-db
+|           init.sql
+|
 +---scripts
 |       clean_merged_datasets.py
 |       clean_merged_datasets_2024_2025.py
 |       create_splits.py
-|       evaluate.py
-|       predict.py
-|       preprocess.py
-|       train.py
+|       merge_all_years.py
+|       migrate_parquet_to_postgres.py
+|       train_random_forest.py
+|       train_random_forest_smote.py
 |       upload_to_hf.py
-|       
+|
 +---src
-|   |   __init__.py
-|   |   
 |   +---data
 |   |       loader.py
 |   |       preprocessing.py
-|   |       split.py
-|   |       validation.py
-|   |       __init__.py
-|   |       
-|   +---evaluation
-|   |       compare.py
-|   |       evaluate.py
-|   |       metrics.py
-|   |       plots.py
-|   |       
+|   |
 |   +---features
 |   |       engineering.py
 |   |       selection.py
-|   |       
+|   |
 |   +---inference
 |   |       load_pipeline.py
 |   |       predict.py
-|   |       
-|   +---training
-|   |       baseline.py
-|   |       common.py
-|   |       ensemble.py
-|   |       knn.py
-|   |       random_forest.py
-|   |       train.py
-|   |       tuning.py
-|   |       xgboost.py
-|   |       
-|   \---__pycache__
-|           __init__.cpython-313.pyc
-|           __init__.cpython-314.pyc
-|           
+|   |
+|   \---training
+|           baseline.py
+|           catboost.py
+|           common.py
+|           ensemble.py
+|           ensemble_cat_lgbm_rf.py
+|           ensemble_cat_lgbm_xgb.py
+|           knn.py
+|           knn_version2.py
+|           lgbm_random_forest.py
+|           lgbm_xgb.py
+|           random_forest.py
+|           train.py
+|           tuning.py
+|           xgboost.py
+|
 +---tests
-|   |   test_backend.py
-|   |   test_data.py
-|   |   test_evaluation.py
-|   |   test_inference.py
-|   |   test_training.py
-|   |   
-|   \---__pycache__
-|           test_backend.cpython-313-pytest-9.1.1.pyc
-|           test_data.cpython-313-pytest-9.1.1.pyc
-|           test_evaluation.cpython-313-pytest-9.1.1.pyc
-|           test_inference.cpython-313-pytest-9.1.1.pyc
-|           test_training.cpython-313-pytest-9.1.1.pyc
-|           
+|       test_backend.py
+|       test_data.py
+|       test_ensemble_cat_lgbm_rf.py
+|       test_evaluation.py
+|       test_inference.py
+|       test_random_forest.py
+|       test_training.py
+|
 \---utils
-    |   load_raw_data.py
-    |   __init__.py
-    |   
-    \---__pycache__
-            load_raw_data.cpython-312.pyc
-            load_raw_data.cpython-313.pyc
-            load_raw_data.cpython-314.pyc
-            __init__.cpython-312.pyc
-            __init__.cpython-313.pyc
-            __init__.cpython-314.pyc
-            
+        load_raw_data.py
