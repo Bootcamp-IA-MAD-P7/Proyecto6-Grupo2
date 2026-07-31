@@ -12,7 +12,7 @@ RUN uv sync --frozen
 
 COPY src ./src
 COPY backend ./backend
-COPY models/pipelines/random_forest_binary_pipeline.joblib models/pipelines/random_forest_binary_pipeline.joblib
+COPY models/pipelines/ ./models/pipelines/
 COPY data/processed/merged_survey_2024_2025_clean.parquet data/processed/merged_survey_2024_2025_clean.parquet
 
 RUN useradd app
