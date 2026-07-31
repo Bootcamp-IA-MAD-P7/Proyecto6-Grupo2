@@ -1,6 +1,6 @@
 # TalentCare 
 
-**Plataforma de Inteligencia Artificial Responsable para la retención del talento femenino en el sector STEM**
+**Plataforma de Inteligencia Artificial Responsable para la retención del talento en el sector TECH**
 
 ---
 
