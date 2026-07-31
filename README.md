@@ -6,7 +6,7 @@
 
 ## Descripción
 
-TalentCare AI es una plataforma SaaS de inteligencia de talento que utiliza modelos de **Ensemble Machine Learning** para analizar y predecir patrones relacionados con la satisfacción laboral y el riesgo de rotación en el sector tecnológico. Mediante el análisis de miles de perfiles de desarrolladores de la **Stack Overflow Annual Developer Survey**, la plataforma identifica diferencias en representación, progresión de carrera y bienestar, proporcionando a las organizaciones información basada en datos para impulsar estrategias de retención e inclusión más efectivas.
+TalentCare es una plataforma SaaS de inteligencia de talento que utiliza modelos de **Ensemble Machine Learning** para analizar y predecir patrones relacionados con la satisfacción laboral y el riesgo de rotación en el sector tecnológico. Mediante el análisis de miles de perfiles de desarrolladores de la **Stack Overflow Annual Developer Survey**, la plataforma identifica diferencias en representación, progresión de carrera y bienestar, proporcionando a las organizaciones información basada en datos para impulsar estrategias de retención e inclusión más efectivas.
 
 TalentCare no automatiza decisiones laborales: es una **herramienta de apoyo a la decisión** diseñada bajo principios de **Inteligencia Artificial Responsable**, con explicabilidad, supervisión humana y prevención de usos discriminatorios.
 
